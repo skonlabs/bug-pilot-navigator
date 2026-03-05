@@ -382,10 +382,9 @@ export default function InvestigationPage() {
             return (
               <div key={phase} className="flex items-center gap-0 shrink-0">
                 <div className={cn(
-                  'px-2 py-1 label-overline transition-all',
-                  isDone ? 'text-success' :
-                  isCurrent ? 'text-primary border-b-2 border-primary' :
-                  'text-muted-foreground/35',
+                  'px-2 py-1 text-ui-2xs font-semibold tracking-[0.12em] text-success transition-all',
+                  isCurrent && 'border-b-2 border-success',
+                  !isDone && !isCurrent && 'opacity-35',
                 )}>
                   {PHASE_LABELS[phase]}
                 </div>
