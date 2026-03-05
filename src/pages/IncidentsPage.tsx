@@ -199,8 +199,7 @@ export default function IncidentsPage() {
         <motion.div
           initial={{ opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}
-          className="relative overflow-hidden flex items-center gap-4 px-5 py-3.5 rounded-xl border border-severity-p0/40 bg-severity-p0/8"
-          style={{ backgroundColor: 'rgba(239,68,68,0.07)' }}
+          className="relative overflow-hidden flex items-center gap-4 px-5 py-3.5 rounded-xl border border-severity-p0/40 bg-severity-p0/10"
         >
           {/* Animated left accent bar */}
           <div className="absolute left-0 inset-y-0 w-1 bg-severity-p0 rounded-l-xl" />
@@ -209,17 +208,17 @@ export default function IncidentsPage() {
               <div className="h-3 w-3 rounded-full bg-severity-p0" />
               <div className="absolute inset-0 rounded-full bg-severity-p0 animate-ping opacity-60" />
             </div>
-            <span className="text-[11px] font-bold uppercase tracking-[0.1em] text-severity-p0">P0 Active</span>
+            <span className="label-overline text-severity-p0">P0 Active</span>
           </div>
           <div className="h-4 w-px bg-severity-p0/30" />
           <div className="flex-1 min-w-0">
             <span className="text-sm text-foreground font-medium">
               {p0Incident.title}
             </span>
-            <span className="ml-2 font-mono text-[11px] text-severity-p0/70">{p0Incident.short_id}</span>
+            <span className="ml-2 font-mono text-ui-2xs text-severity-p0/70">{p0Incident.short_id}</span>
           </div>
           {p0Incident.customer_impact && (
-            <span className="hidden md:block text-[11px] text-muted-foreground italic truncate max-w-[200px]">
+            <span className="hidden md:block text-ui-2xs text-muted-foreground italic truncate max-w-[200px]">
               {p0Incident.customer_impact}
             </span>
           )}
@@ -317,15 +316,14 @@ export default function IncidentsPage() {
           className={cn(
             'flex items-center gap-1.5 px-3 h-9 rounded-lg border text-xs font-medium transition-colors',
             advancedOpen || hasAdvancedFilters
-              ? 'border-primary/50 bg-primary/8 text-primary'
+              ? 'border-primary/50 bg-primary/10 text-primary'
               : 'border-border bg-secondary/50 text-muted-foreground hover:text-foreground',
           )}
-          style={advancedOpen || hasAdvancedFilters ? { backgroundColor: 'rgba(6,182,212,0.08)' } : {}}
         >
           <SlidersHorizontal className="h-3.5 w-3.5" />
           Filters
           {hasAdvancedFilters && (
-            <span className="ml-0.5 h-4 w-4 rounded-full bg-primary text-primary-foreground text-[10px] flex items-center justify-center font-bold">
+            <span className="ml-0.5 h-4 w-4 rounded-full bg-primary text-primary-foreground text-ui-2xs flex items-center justify-center font-bold">
               {[envFilter !== 'all', serviceFilter !== 'all', icFilter !== 'all'].filter(Boolean).length}
             </span>
           )}
@@ -353,11 +351,11 @@ export default function IncidentsPage() {
             className="overflow-hidden"
           >
             <div className="rounded-xl border border-border bg-card p-4">
-              <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground mb-3">Advanced Filters</p>
+              <p className="label-overline mb-3">Advanced Filters</p>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                 {/* Environment */}
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
+                  <label className="label-overline">
                     Environment
                   </label>
                   <select
@@ -374,7 +372,7 @@ export default function IncidentsPage() {
 
                 {/* Affected Service */}
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
+                  <label className="label-overline">
                     Affected Service
                   </label>
                   <select
@@ -391,7 +389,7 @@ export default function IncidentsPage() {
 
                 {/* Incident Commander */}
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
+                  <label className="label-overline">
                     Incident Commander
                   </label>
                   <select
@@ -408,7 +406,7 @@ export default function IncidentsPage() {
 
                 {/* Sort By */}
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
+                  <label className="label-overline">
                     Sort By
                   </label>
                   <select
@@ -457,7 +455,7 @@ export default function IncidentsPage() {
               <Icon className={cn('h-3.5 w-3.5', isActive ? 'text-primary' : 'text-muted-foreground/60')} />
               {tab.label}
               <span className={cn(
-                'text-[11px] font-mono tabular-nums px-1.5 py-0.5 rounded-md ml-0.5',
+                'text-ui-2xs font-mono tabular-nums px-1.5 py-0.5 rounded-md ml-0.5',
                 isActive ? 'bg-primary/15 text-primary' : 'bg-secondary/60 text-muted-foreground',
               )}>
                 {tab.count}
@@ -473,14 +471,14 @@ export default function IncidentsPage() {
           <table className="w-full min-w-[740px] xl:min-w-[900px]">
             <thead>
               <tr className="border-b border-border bg-secondary/20">
-                <th className="text-left text-[10px] font-bold text-muted-foreground px-3 py-2.5 uppercase tracking-[0.12em]">Sev</th>
-                <th className="text-left text-[10px] font-bold text-muted-foreground px-3 py-2.5 uppercase tracking-[0.12em]">Incident</th>
-                <th className="text-left text-[10px] font-bold text-muted-foreground px-3 py-2.5 uppercase tracking-[0.12em]">Status</th>
-                <th className="text-left text-[10px] font-bold text-muted-foreground px-3 py-2.5 uppercase tracking-[0.12em] hidden xl:table-cell">Env</th>
-                <th className="text-left text-[10px] font-bold text-muted-foreground px-3 py-2.5 uppercase tracking-[0.12em]">Services</th>
-                <th className="text-left text-[10px] font-bold text-muted-foreground px-3 py-2.5 uppercase tracking-[0.12em] hidden xl:table-cell">IC</th>
-                <th className="text-left text-[10px] font-bold text-muted-foreground px-3 py-2.5 uppercase tracking-[0.12em]">Detected</th>
-                <th className="text-left text-[10px] font-bold text-muted-foreground px-3 py-2.5 uppercase tracking-[0.12em]">Duration</th>
+                <th className="text-left label-overline px-3 py-2.5">Sev</th>
+                <th className="text-left label-overline px-3 py-2.5">Incident</th>
+                <th className="text-left label-overline px-3 py-2.5">Status</th>
+                <th className="text-left label-overline px-3 py-2.5 hidden xl:table-cell">Env</th>
+                <th className="text-left label-overline px-3 py-2.5">Services</th>
+                <th className="text-left label-overline px-3 py-2.5 hidden xl:table-cell">IC</th>
+                <th className="text-left label-overline px-3 py-2.5">Detected</th>
+                <th className="text-left label-overline px-3 py-2.5">Duration</th>
               </tr>
             </thead>
             <tbody>
@@ -510,15 +508,15 @@ export default function IncidentsPage() {
                             {inc.title}
                           </span>
                           {inc.slo_violated && (
-                            <span className="shrink-0 text-[9px] px-1.5 py-0.5 rounded bg-severity-p0/15 text-severity-p0 font-bold tracking-wide border border-severity-p0/20">
+                            <span className="shrink-0 text-ui-3xs px-1.5 py-0.5 rounded bg-severity-p0/15 text-severity-p0 font-bold tracking-wide border border-severity-p0/20">
                               SLO
                             </span>
                           )}
                         </div>
                         <div className="flex items-center gap-2">
-                          <span className="font-mono text-[10px] text-muted-foreground/60">{inc.short_id}</span>
+                          <span className="font-mono text-ui-2xs text-muted-foreground/60">{inc.short_id}</span>
                           {inc.customer_impact && (
-                            <span className="text-[10px] text-muted-foreground/60 italic truncate max-w-[200px]" title={inc.customer_impact}>
+                            <span className="text-ui-2xs text-muted-foreground/60 italic truncate max-w-[200px]" title={inc.customer_impact}>
                               {inc.customer_impact}
                             </span>
                           )}
@@ -528,7 +526,7 @@ export default function IncidentsPage() {
                             {inc.tags.slice(0, 3).map(tag => (
                               <span
                                 key={tag}
-                                className={cn('text-[10px] px-1.5 py-0.5 rounded border font-medium', tagColor(tag))}
+                                className={cn('text-ui-2xs px-1.5 py-0.5 rounded border font-medium', tagColor(tag))}
                               >
                                 {tag}
                               </span>
@@ -555,7 +553,7 @@ export default function IncidentsPage() {
                     <td className="px-3 py-2.5 hidden xl:table-cell">
                       <span
                         className={cn(
-                          'text-[10px] px-1.5 py-0.5 rounded border font-medium',
+                          'text-ui-2xs px-1.5 py-0.5 rounded border font-medium',
                           envBadgeClass(inc.environment),
                         )}
                       >
@@ -567,12 +565,12 @@ export default function IncidentsPage() {
                     <td className="px-3 py-2.5">
                       <div className="flex gap-1 flex-wrap">
                         {inc.affected_services.slice(0, 2).map(s => (
-                          <span key={s} className="text-[10px] px-1.5 py-0.5 rounded-md bg-secondary text-secondary-foreground font-mono">
+                          <span key={s} className="text-ui-2xs px-1.5 py-0.5 rounded-md bg-secondary text-secondary-foreground font-mono">
                             {s}
                           </span>
                         ))}
                         {inc.affected_services.length > 2 && (
-                          <span className="text-[10px] text-muted-foreground/60">+{inc.affected_services.length - 2}</span>
+                          <span className="text-ui-2xs text-muted-foreground/60">+{inc.affected_services.length - 2}</span>
                         )}
                       </div>
                     </td>
@@ -582,7 +580,7 @@ export default function IncidentsPage() {
                       {inc.ic ? (
                         <div className="flex items-center gap-2">
                           <div className="h-6 w-6 rounded-full bg-primary/15 border border-primary/20 flex items-center justify-center shrink-0">
-                            <span className="text-[9px] font-bold text-primary">
+                            <span className="text-ui-3xs font-bold text-primary">
                               {inc.ic.name.split(' ').map(n => n[0]).join('')}
                             </span>
                           </div>
@@ -607,7 +605,7 @@ export default function IncidentsPage() {
                           {getDuration(inc)}
                         </span>
                         {isResolved && inc.time_to_resolve_secs && (
-                          <span className="text-[10px] text-success font-medium">
+                          <span className="text-ui-2xs text-success font-medium">
                             MTTR {getMTTRLabel(inc.time_to_resolve_secs)}
                           </span>
                         )}

@@ -282,7 +282,7 @@ export default function InvestigationPage() {
         <StatusBadge status={currentStatus} />
 
         {incident.slo_violated && (
-          <span className="text-[10px] px-2 py-0.5 rounded-md bg-severity-p0/10 text-severity-p0 font-bold font-mono border border-severity-p0/20">
+          <span className="text-ui-2xs px-2 py-0.5 rounded-md bg-severity-p0/10 text-severity-p0 font-bold font-mono border border-severity-p0/20">
             SLO · {incident.error_budget_consumed}% burned · {incident.burn_rate}x
           </span>
         )}
@@ -293,7 +293,7 @@ export default function InvestigationPage() {
         </span>
 
         {incident.slack_channel_name && (
-          <span className="text-[11px] font-mono text-muted-foreground bg-secondary/50 px-2 py-0.5 rounded-md border border-border/50 hidden md:block">
+          <span className="text-ui-2xs font-mono text-muted-foreground bg-secondary/50 px-2 py-0.5 rounded-md border border-border/50 hidden md:block">
             #{incident.slack_channel_name}
           </span>
         )}
@@ -367,7 +367,7 @@ export default function InvestigationPage() {
               : <div className="h-3.5 w-3.5 rounded-full border-2 border-primary shrink-0" />
           )}
           <span className={cn(
-            'text-[10px] font-bold uppercase tracking-[0.12em]',
+            'label-overline',
             isInvestigationComplete ? 'text-success' : 'text-primary',
           )}>
             {isInvestigationComplete ? 'Complete' : `Phase: ${PHASE_LABELS[investigation.phase || 'classify']}`}
@@ -382,7 +382,7 @@ export default function InvestigationPage() {
             return (
               <div key={phase} className="flex items-center gap-0 shrink-0">
                 <div className={cn(
-                  'px-2 py-1 text-[10px] font-semibold transition-all',
+                  'px-2 py-1 text-ui-2xs font-semibold transition-all',
                   isDone ? 'text-success' :
                   isCurrent ? 'text-primary border-b-2 border-primary' :
                   'text-muted-foreground/35',
@@ -398,7 +398,7 @@ export default function InvestigationPage() {
         </div>
 
         {/* Confidence + progress compact */}
-        <div className="flex items-center gap-3 shrink-0 text-[10px] text-muted-foreground">
+        <div className="flex items-center gap-3 shrink-0 text-ui-2xs text-muted-foreground">
           <span className="font-mono">
             <span className="text-foreground font-bold">{Math.round(investigation.overall_confidence * 100)}%</span> conf
           </span>
@@ -431,36 +431,36 @@ export default function InvestigationPage() {
         {/* ── Left Panel ────────────────────────────────────────────────────── */}
         <div className="w-[240px] shrink-0 border-r border-border p-4 space-y-5 overflow-y-auto scrollbar-thin bg-muted/20">
           <motion.div initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1 }}>
-            <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground mb-2">Scope</p>
+            <p className="label-overline mb-2">Scope</p>
             <div className="space-y-2">
               <div className="flex items-center gap-2 flex-wrap">
                 <SeverityBadge severity={incident.severity} />
                 <StatusBadge status={currentStatus} />
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-[11px] px-2 py-0.5 rounded-md bg-secondary text-secondary-foreground capitalize border border-border/50">{incident.environment}</span>
-                <span className="text-[11px] text-muted-foreground">· {incident.source}</span>
+                <span className="text-ui-2xs px-2 py-0.5 rounded-md bg-secondary text-secondary-foreground capitalize border border-border/50">{incident.environment}</span>
+                <span className="text-ui-2xs text-muted-foreground">· {incident.source}</span>
               </div>
               {incident.customer_impact && (
-                <p className="text-[11px] text-muted-foreground/70 italic leading-snug pl-0.5">{incident.customer_impact}</p>
+                <p className="text-ui-2xs text-muted-foreground/70 italic leading-snug pl-0.5">{incident.customer_impact}</p>
               )}
             </div>
           </motion.div>
 
           {incident.slo_violated && (
             <motion.div initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.15 }}>
-              <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground mb-2">SLO Impact</p>
+              <p className="label-overline mb-2">SLO Impact</p>
               <div className="p-3 rounded-lg bg-severity-p0/5 border border-severity-p0/15 space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] text-muted-foreground">Burn rate</span>
+                  <span className="text-ui-2xs text-muted-foreground">Burn rate</span>
                   <span className={cn('text-sm font-mono font-bold', (incident.burn_rate || 0) > 5 ? 'text-severity-p0' : 'text-severity-p2')}>
                     {incident.burn_rate}x
                   </span>
                 </div>
                 <div>
                   <div className="flex items-center justify-between mb-1">
-                    <span className="text-[11px] text-muted-foreground">Budget consumed</span>
-                    <span className="text-[11px] font-mono text-severity-p0 font-bold">{incident.error_budget_consumed}%</span>
+                    <span className="text-ui-2xs text-muted-foreground">Budget consumed</span>
+                    <span className="text-ui-2xs font-mono text-severity-p0 font-bold">{incident.error_budget_consumed}%</span>
                   </div>
                   <div className="h-1.5 rounded-full bg-muted overflow-hidden">
                     <div className="h-full rounded-full bg-severity-p0" style={{ width: `${incident.error_budget_consumed}%` }} />
@@ -471,7 +471,7 @@ export default function InvestigationPage() {
           )}
 
           <motion.div initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2 }}>
-            <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground mb-2">Affected Services</p>
+            <p className="label-overline mb-2">Affected Services</p>
             <div className="space-y-1">
               {incident.affected_services.map(s => (
                 <Link
@@ -488,7 +488,7 @@ export default function InvestigationPage() {
           </motion.div>
 
           <motion.div initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.25 }}>
-            <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground mb-2">On-Call</p>
+            <p className="label-overline mb-2">On-Call</p>
             <div className="space-y-2">
               {[
                 { user: incident.ic, role: 'Incident Commander' },
@@ -496,11 +496,11 @@ export default function InvestigationPage() {
               ].filter(item => item.user).map(item => (
                 <div key={item.role} className="flex items-center gap-2.5 p-2.5 rounded-lg bg-secondary/30 border border-border/30">
                   <div className="h-7 w-7 rounded-full bg-primary/15 border border-primary/20 flex items-center justify-center shrink-0">
-                    <span className="text-[9px] font-bold text-primary">{item.user!.name.split(' ').map(n => n[0]).join('')}</span>
+                    <span className="text-ui-3xs font-bold text-primary">{item.user!.name.split(' ').map(n => n[0]).join('')}</span>
                   </div>
                   <div>
                     <p className="text-xs text-foreground font-medium leading-tight">{item.user!.name}</p>
-                    <p className="text-[10px] text-muted-foreground leading-tight">{item.role}</p>
+                    <p className="text-ui-2xs text-muted-foreground leading-tight">{item.role}</p>
                   </div>
                 </div>
               ))}
@@ -510,7 +510,7 @@ export default function InvestigationPage() {
           {/* ── War Room Panel ──────────────────────────────────────────────── */}
           {incident.slack_channel_name && (
             <motion.div initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.28 }}>
-              <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground mb-2">War Room</p>
+              <p className="label-overline mb-2">War Room</p>
               <div className="p-3 rounded-lg border border-border/50 bg-secondary/20 space-y-2.5">
                 <div className="flex items-center gap-1.5">
                   <Hash className="h-3 w-3 text-muted-foreground shrink-0" />
@@ -518,25 +518,25 @@ export default function InvestigationPage() {
                     href={`https://slack.com/app_redirect?channel=${incident.slack_channel_name}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-[11px] font-mono text-primary hover:underline truncate"
+                    className="text-ui-2xs font-mono text-primary hover:underline truncate"
                   >
                     {incident.slack_channel_name}
                   </a>
                   <div className="ml-auto flex items-center gap-1 shrink-0">
                     <span className="relative flex h-1.5 w-1.5">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                      <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-400" />
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75" />
+                      <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-success" />
                     </span>
-                    <span className="text-[10px] text-emerald-400 font-medium">Live</span>
+                    <span className="text-ui-2xs text-success font-medium">Live</span>
                   </div>
                 </div>
                 <div className="flex gap-2">
-                  <Button size="sm" variant="outline" className="h-6 text-[10px] flex-1 gap-1" asChild>
+                  <Button size="sm" variant="outline" className="h-6 text-ui-2xs flex-1 gap-1" asChild>
                     <a href={`https://slack.com/app_redirect?channel=${incident.slack_channel_name}`} target="_blank" rel="noopener noreferrer">
                       <ExternalLink className="h-2.5 w-2.5" /> Open
                     </a>
                   </Button>
-                  <Button size="sm" variant="outline" className="h-6 text-[10px] flex-1 gap-1" onClick={handleCopyChannelLink}>
+                  <Button size="sm" variant="outline" className="h-6 text-ui-2xs flex-1 gap-1" onClick={handleCopyChannelLink}>
                     <Copy className="h-2.5 w-2.5" /> Copy
                   </Button>
                 </div>
@@ -547,7 +547,7 @@ export default function InvestigationPage() {
           {/* Recent Changes Panel */}
           {relevantChanges.length > 0 && (
             <motion.div initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.3 }}>
-              <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground mb-2">
+              <p className="label-overline mb-2">
                 Recent Changes
                 <span className="ml-1.5 font-mono normal-case text-muted-foreground/60">({relevantChanges.length})</span>
               </p>
@@ -558,22 +558,22 @@ export default function InvestigationPage() {
                   return (
                     <div key={change.id} className="p-2.5 rounded-lg border border-border/40 bg-secondary/20 space-y-1.5 hover:bg-secondary/40 transition-colors">
                       <div className="flex items-center gap-2">
-                        <span className={cn('inline-flex items-center gap-1 text-[9px] font-bold px-1.5 py-0.5 rounded-md uppercase', colorClass)}>
+                        <span className={cn('inline-flex items-center gap-1 text-ui-3xs font-bold px-1.5 py-0.5 rounded-md uppercase', colorClass)}>
                           <Icon className="h-2.5 w-2.5" />
                           {change.change_type}
                         </span>
-                        <span className="text-[10px] text-muted-foreground/60 ml-auto shrink-0">
+                        <span className="text-ui-2xs text-muted-foreground/60 ml-auto shrink-0">
                           {formatDistanceToNow(new Date(change.occurred_at), { addSuffix: true })}
                         </span>
                       </div>
-                      <p className="text-[11px] font-medium text-foreground leading-tight">{change.title}</p>
-                      <p className="text-[10px] text-muted-foreground/60 leading-tight font-mono">{change.service_name}</p>
+                      <p className="text-ui-2xs font-medium text-foreground leading-tight">{change.title}</p>
+                      <p className="text-ui-2xs text-muted-foreground/60 leading-tight font-mono">{change.service_name}</p>
                       {change.description && (
-                        <p className="text-[10px] text-muted-foreground leading-snug">{change.description}</p>
+                        <p className="text-ui-2xs text-muted-foreground leading-snug">{change.description}</p>
                       )}
                       {change.source_ref && (
                         <a href={change.source_ref} target="_blank" rel="noopener noreferrer"
-                          className="text-[10px] text-primary hover:underline flex items-center gap-1">
+                          className="text-ui-2xs text-primary hover:underline flex items-center gap-1">
                           View change <ExternalLink className="h-2.5 w-2.5" />
                         </a>
                       )}
@@ -586,19 +586,19 @@ export default function InvestigationPage() {
 
           {investigation.missing_signals.length > 0 && investigation.completeness_score < 0.85 && (
             <motion.div initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.35 }}>
-              <div className="rounded-lg border border-severity-p2/20 bg-severity-p2/5 p-3">
+              <div className="rounded-lg border border-warning/20 bg-warning/5 p-3">
                 <div className="flex items-center gap-1.5 mb-2">
-                  <AlertTriangle className="h-3.5 w-3.5 text-severity-p2" />
-                  <p className="text-[11px] font-medium text-severity-p2">
+                  <AlertTriangle className="h-3.5 w-3.5 text-warning" />
+                  <p className="text-ui-2xs font-medium text-warning">
                     {investigation.missing_signals.length} missing signals
                   </p>
                 </div>
                 <ul className="space-y-1">
                   {investigation.missing_signals.map((s, i) => (
-                    <li key={i} className="text-[10px] text-muted-foreground pl-2 border-l-2 border-severity-p2/20">{s}</li>
+                    <li key={i} className="text-ui-2xs text-muted-foreground pl-2 border-l-2 border-warning/20">{s}</li>
                   ))}
                 </ul>
-                <Button size="sm" variant="ghost" className="h-6 text-[10px] mt-2 text-severity-p2 hover:text-severity-p2 p-0" onClick={() => navigate('/integrations')}>
+                <Button size="sm" variant="ghost" className="h-6 text-ui-2xs mt-2 text-warning hover:text-warning p-0" onClick={() => navigate('/integrations')}>
                   Fix in Integrations →
                 </Button>
               </div>
@@ -612,17 +612,17 @@ export default function InvestigationPage() {
             {/* Evidence Header */}
             <div className="flex items-center justify-between mb-3 gap-3">
               <div className="flex items-center gap-2">
-                <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground">
+                <p className="label-overline">
                   Evidence Timeline
                 </p>
-                <span className="text-[11px] font-mono text-muted-foreground/60 bg-secondary px-1.5 py-0.5 rounded">
+                <span className="text-ui-2xs font-mono text-muted-foreground/60 bg-secondary px-1.5 py-0.5 rounded">
                   {filteredEvidence.length}/{evidence.length}
                 </span>
               </div>
               <button
                 onClick={() => setPinnedOnly(p => !p)}
                 className={cn(
-                  'flex items-center gap-1 h-6 px-2 rounded-md text-[11px] font-medium border transition-colors',
+                  'flex items-center gap-1 h-6 px-2 rounded-md text-ui-2xs font-medium border transition-colors',
                   pinnedOnly
                     ? 'bg-primary/10 text-primary border-primary/20'
                     : 'border-border/50 text-muted-foreground hover:text-foreground'
@@ -647,7 +647,7 @@ export default function InvestigationPage() {
               <div className="flex items-center bg-secondary/50 rounded-lg p-0.5 border border-border/50">
                 {EVIDENCE_TABS.map(tab => (
                   <button key={tab.label} onClick={() => setActiveTab(tab.label)} className={cn(
-                    'px-2 py-1 text-[11px] rounded-md transition-all font-medium',
+                    'px-2 py-1 text-ui-2xs rounded-md transition-all font-medium',
                     activeTab === tab.label ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-secondary-foreground'
                   )}>
                     {tab.label}
@@ -660,9 +660,9 @@ export default function InvestigationPage() {
             <div className="mb-4 p-3 rounded-lg border border-border/50 bg-secondary/20 space-y-2">
               <div className="flex items-center gap-2">
                 <Clock className="h-3 w-3 text-muted-foreground/60 shrink-0" />
-                <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground/60">Time Range Filter</span>
+                <span className="label-overline text-muted-foreground/60">Time Range Filter</span>
               </div>
-              <div className="text-[10px] text-muted-foreground">
+              <div className="text-ui-2xs text-muted-foreground">
                 {timeStart || timeEnd ? (
                   <span>
                     Showing events from{' '}
@@ -681,27 +681,27 @@ export default function InvestigationPage() {
               </div>
               <div className="flex items-center gap-2 flex-wrap">
                 <div className="flex items-center gap-1.5">
-                  <span className="text-[10px] text-muted-foreground/60 shrink-0">From</span>
+                  <span className="text-ui-2xs text-muted-foreground/60 shrink-0">From</span>
                   <input
                     type="datetime-local"
                     value={timeStart}
                     onChange={e => setTimeStart(e.target.value)}
-                    className="h-6 px-2 text-[10px] bg-background border border-border/50 rounded-md focus:outline-none focus:ring-1 focus:ring-primary/30 text-foreground"
+                    className="h-6 px-2 text-ui-2xs bg-background border border-border/50 rounded-md focus:outline-none focus:ring-1 focus:ring-primary/30 text-foreground"
                   />
                 </div>
                 <div className="flex items-center gap-1.5">
-                  <span className="text-[10px] text-muted-foreground/60 shrink-0">To</span>
+                  <span className="text-ui-2xs text-muted-foreground/60 shrink-0">To</span>
                   <input
                     type="datetime-local"
                     value={timeEnd}
                     onChange={e => setTimeEnd(e.target.value)}
-                    className="h-6 px-2 text-[10px] bg-background border border-border/50 rounded-md focus:outline-none focus:ring-1 focus:ring-primary/30 text-foreground"
+                    className="h-6 px-2 text-ui-2xs bg-background border border-border/50 rounded-md focus:outline-none focus:ring-1 focus:ring-primary/30 text-foreground"
                   />
                 </div>
                 {(timeStart || timeEnd) && (
                   <button
                     onClick={() => { setTimeStart(''); setTimeEnd(''); }}
-                    className="h-6 px-2 text-[10px] text-primary hover:underline"
+                    className="h-6 px-2 text-ui-2xs text-primary hover:underline"
                   >
                     Reset
                   </button>
@@ -714,16 +714,16 @@ export default function InvestigationPage() {
               {!noteOpen ? (
                 <button
                   onClick={() => setNoteOpen(true)}
-                  className="flex items-center gap-1.5 h-7 px-3 rounded-md text-[11px] font-medium border border-dashed border-border/60 text-muted-foreground hover:text-foreground hover:border-primary/40 hover:bg-secondary/30 transition-colors w-full justify-center"
+                  className="flex items-center gap-1.5 h-7 px-3 rounded-md text-ui-2xs font-medium border border-dashed border-border/60 text-muted-foreground hover:text-foreground hover:border-primary/40 hover:bg-secondary/30 transition-colors w-full justify-center"
                 >
                   <Pencil className="h-3 w-3" />
                   Add Note
                 </button>
               ) : (
-                <div className="rounded-lg border border-amber-400/30 bg-amber-400/5 p-3 space-y-2">
+                <div className="rounded-lg border border-warning/30 bg-warning/10 p-3 space-y-2">
                   <div className="flex items-center gap-1.5 mb-1">
-                    <Pencil className="h-3 w-3 text-amber-400" />
-                    <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-amber-400">New Note</span>
+                    <Pencil className="h-3 w-3 text-warning" />
+                    <span className="label-overline text-warning">New Note</span>
                   </div>
                   <textarea
                     value={noteText}
@@ -731,13 +731,13 @@ export default function InvestigationPage() {
                     placeholder="Add investigation note..."
                     rows={3}
                     autoFocus
-                    className="w-full text-xs bg-background/50 border border-border/50 rounded-md p-2 focus:outline-none focus:ring-1 focus:ring-amber-400/40 focus:border-amber-400/40 text-foreground placeholder:text-muted-foreground/50 resize-none"
+                    className="w-full text-xs bg-background/50 border border-border/50 rounded-md p-2 focus:outline-none focus:ring-1 focus:ring-warning/40 focus:border-warning/40 text-foreground placeholder:text-muted-foreground/50 resize-none"
                   />
                   <div className="flex gap-2 justify-end">
-                    <Button size="sm" variant="ghost" className="h-6 text-[10px]" onClick={() => { setNoteOpen(false); setNoteText(''); }}>
+                    <Button size="sm" variant="ghost" className="h-6 text-ui-2xs" onClick={() => { setNoteOpen(false); setNoteText(''); }}>
                       Cancel
                     </Button>
-                    <Button size="sm" className="h-6 text-[10px] bg-amber-400/20 text-amber-600 hover:bg-amber-400/30 border border-amber-400/30" onClick={handleAddNote} disabled={!noteText.trim()}>
+                    <Button size="sm" className="h-6 text-ui-2xs bg-warning/20 text-warning hover:bg-warning/30 border border-warning/30" onClick={handleAddNote} disabled={!noteText.trim()}>
                       Save Note
                     </Button>
                   </div>
@@ -769,13 +769,12 @@ export default function InvestigationPage() {
                     initial={{ opacity: 0, y: -6 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: i * 0.04 }}
-                    className="rounded-lg border border-amber-400/25 p-3 space-y-1.5"
-                    style={{ backgroundColor: 'rgba(251, 191, 36, 0.06)' }}
+                    className="rounded-lg border border-warning/25 p-3 space-y-1.5 bg-warning/10"
                   >
                     <div className="flex items-center gap-2">
-                      <Pencil className="h-3 w-3 text-amber-400 shrink-0" />
-                      <span className="text-[11px] font-medium text-amber-600">{note.actor}</span>
-                      <span className="text-[10px] text-muted-foreground/60 ml-auto">
+                      <Pencil className="h-3 w-3 text-warning shrink-0" />
+                      <span className="text-ui-2xs font-medium text-warning">{note.actor}</span>
+                      <span className="text-ui-2xs text-muted-foreground/60 ml-auto">
                         {formatDistanceToNow(new Date(note.timestamp), { addSuffix: true })}
                       </span>
                     </div>
@@ -800,9 +799,9 @@ export default function InvestigationPage() {
           {/* Investigation Progress */}
           <motion.div initial={{ opacity: 0, x: 8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1 }}>
             <div className="flex items-center justify-between mb-3">
-              <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground">Investigation</p>
+              <p className="label-overline">Investigation</p>
               {investigation.llm_model_used && (
-                <span className="text-[9px] font-mono text-muted-foreground/50 bg-secondary px-1.5 py-0.5 rounded border border-border/40">
+                <span className="text-ui-3xs font-mono text-muted-foreground/50 bg-secondary px-1.5 py-0.5 rounded border border-border/40">
                   {investigation.llm_model_used}
                 </span>
               )}
@@ -810,9 +809,9 @@ export default function InvestigationPage() {
 
             {/* Complete banner */}
             {isInvestigationComplete && (
-              <div className="mb-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20 px-3 py-2.5 flex items-center gap-2">
-                <CheckCircle className="h-3.5 w-3.5 text-emerald-400 shrink-0" />
-                <span className="text-[11px] font-bold text-emerald-400">Investigation Complete</span>
+              <div className="mb-3 rounded-lg bg-success/10 border border-success/20 px-3 py-2.5 flex items-center gap-2">
+                <CheckCircle className="h-3.5 w-3.5 text-success shrink-0" />
+                <span className="text-ui-2xs font-bold text-success">Investigation Complete</span>
               </div>
             )}
 
@@ -830,7 +829,7 @@ export default function InvestigationPage() {
                     )}
                   >
                     {isDone ? (
-                      <CheckCircle className="h-3 w-3 text-emerald-400 shrink-0" />
+                      <CheckCircle className="h-3 w-3 text-success shrink-0" />
                     ) : isCurrent ? (
                       investigation.status === 'running'
                         ? <Loader2 className="h-3 w-3 text-primary animate-spin shrink-0" />
@@ -840,14 +839,14 @@ export default function InvestigationPage() {
                     )}
                     <span className={cn(
                       'text-xs capitalize flex-1',
-                      isDone ? 'text-emerald-400' :
+                      isDone ? 'text-success' :
                       isCurrent ? 'text-primary font-medium' :
                       'text-muted-foreground/40'
                     )}>
                       {PHASE_LABELS[phase]}
                     </span>
                     {isCurrent && investigation.status === 'running' && (
-                      <span className="text-[10px] text-primary/60">Running...</span>
+                      <span className="text-ui-2xs text-primary/60">Running...</span>
                     )}
                   </div>
                 );
@@ -858,17 +857,17 @@ export default function InvestigationPage() {
             <div className="mt-3 space-y-2">
               <div className="flex items-center gap-2">
                 <ConfidenceBar confidence={investigation.overall_confidence} className="flex-1" />
-                <span className="text-[10px] text-muted-foreground whitespace-nowrap font-mono font-bold">
+                <span className="text-ui-2xs text-muted-foreground whitespace-nowrap font-mono font-bold">
                   {Math.round(investigation.overall_confidence * 100)}%
                 </span>
               </div>
-              <div className="flex items-center justify-between text-[10px] text-muted-foreground/60">
+              <div className="flex items-center justify-between text-ui-2xs text-muted-foreground/60">
                 <span className="font-mono">Completeness: {Math.round(investigation.completeness_score * 100)}%</span>
                 {investigation.cost_usd && <span className="font-mono">${investigation.cost_usd.toFixed(3)}</span>}
               </div>
 
               {elapsedMinutes !== null && (
-                <div className="text-[10px] text-muted-foreground/60 flex items-center gap-1">
+                <div className="text-ui-2xs text-muted-foreground/60 flex items-center gap-1">
                   <Clock className="h-2.5 w-2.5 shrink-0" />
                   {isInvestigationComplete ? 'Took' : 'Running for'}{' '}
                   <span className="font-mono text-foreground/60">{elapsedMinutes}m</span>
@@ -877,7 +876,7 @@ export default function InvestigationPage() {
 
               {(investigation.tokens_in || investigation.tokens_out) && (
                 <div className="pt-2 border-t border-border/40">
-                  <p className="text-[10px] font-mono text-muted-foreground/50 leading-relaxed">
+                  <p className="text-ui-2xs font-mono text-muted-foreground/50 leading-relaxed">
                     {investigation.tokens_in?.toLocaleString()} in
                     {investigation.tokens_out ? ` / ${investigation.tokens_out.toLocaleString()} out` : ''}
                     {investigation.cost_usd ? ` · $${investigation.cost_usd.toFixed(3)}` : ''}
@@ -890,8 +889,8 @@ export default function InvestigationPage() {
           {/* Hypotheses */}
           <motion.div initial={{ opacity: 0, x: 8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2 }}>
             <div className="flex items-center justify-between mb-2">
-              <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground">Hypotheses</p>
-              <span className="text-[10px] font-mono text-muted-foreground/60 bg-secondary px-1.5 py-0.5 rounded">
+              <p className="label-overline">Hypotheses</p>
+              <span className="text-ui-2xs font-mono text-muted-foreground/60 bg-secondary px-1.5 py-0.5 rounded">
                 {hypotheses.length}
               </span>
             </div>
@@ -903,17 +902,17 @@ export default function InvestigationPage() {
           {/* Fixes */}
           <motion.div initial={{ opacity: 0, x: 8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.3 }}>
             {hypotheses[0] && hypotheses[0].confidence < 0.65 ? (
-              <div className="rounded-lg border border-severity-p2/20 bg-severity-p2/5 p-3">
-                <p className="text-xs text-severity-p2 font-semibold mb-1">Fix generation locked</p>
-                <p className="text-[11px] text-muted-foreground">
+              <div className="rounded-lg border border-warning/20 bg-warning/5 p-3">
+                <p className="text-xs text-warning font-semibold mb-1">Fix generation locked</p>
+                <p className="text-ui-2xs text-muted-foreground">
                   Confidence {Math.round(hypotheses[0].confidence * 100)}% — need ≥65% to generate fixes.
                 </p>
               </div>
             ) : (
               <>
                 <div className="flex items-center justify-between mb-2">
-                  <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground">Proposed Fixes</p>
-                  <span className="text-[10px] font-mono text-muted-foreground/60 bg-secondary px-1.5 py-0.5 rounded">
+                  <p className="label-overline">Proposed Fixes</p>
+                  <span className="text-ui-2xs font-mono text-muted-foreground/60 bg-secondary px-1.5 py-0.5 rounded">
                     {fixes.length}
                   </span>
                 </div>
@@ -928,7 +927,7 @@ export default function InvestigationPage() {
           {(incident.latest_packet_id || incident.investigation_status === 'complete') && (
             <motion.div initial={{ opacity: 0, x: 8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.4 }}>
               <div className="border-t border-border pt-4 space-y-2">
-                <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground mb-2">Outputs</p>
+                <p className="label-overline mb-2">Outputs</p>
                 {incident.latest_packet_id && (
                   <Link
                     to={`/incidents/${incident.id}/packet`}
@@ -937,7 +936,7 @@ export default function InvestigationPage() {
                     <FileText className="h-4 w-4 text-primary shrink-0" />
                     <div>
                       <p className="text-xs font-medium text-foreground">Resolution Packet</p>
-                      <p className="text-[10px] text-muted-foreground">Full RCA with confidence scoring</p>
+                      <p className="text-ui-2xs text-muted-foreground">Full RCA with confidence scoring</p>
                     </div>
                     <ExternalLink className="h-3 w-3 text-muted-foreground/40 ml-auto group-hover:text-primary transition-colors" />
                   </Link>
@@ -950,7 +949,7 @@ export default function InvestigationPage() {
                     <FileText className="h-4 w-4 text-muted-foreground shrink-0" />
                     <div>
                       <p className="text-xs font-medium text-foreground">Postmortem</p>
-                      <p className="text-[10px] text-muted-foreground">Blameless review & action items</p>
+                      <p className="text-ui-2xs text-muted-foreground">Blameless review & action items</p>
                     </div>
                     <ExternalLink className="h-3 w-3 text-muted-foreground/40 ml-auto group-hover:text-foreground transition-colors" />
                   </Link>
@@ -964,7 +963,7 @@ export default function InvestigationPage() {
       {/* ── Sticky Footer: Quick Status Update Bar ─────────────────────────── */}
       <div className="sticky bottom-0 z-20 border-t border-border bg-surface-raised/90 backdrop-blur-sm px-6 py-2.5 flex items-center gap-3 flex-wrap">
         <div className="flex items-center gap-2 shrink-0">
-          <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground/60">Status</span>
+          <span className="label-overline text-muted-foreground/60">Status</span>
           <select
             value={footerStatusValue}
             onChange={e => {
