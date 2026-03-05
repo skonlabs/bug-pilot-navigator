@@ -557,7 +557,7 @@ export default function InvestigationPage() {
                   return (
                     <div key={change.id} className="p-2.5 rounded-lg border border-border/40 bg-secondary/20 space-y-1.5 hover:bg-secondary/40 transition-colors">
                       <div className="flex items-center gap-2">
-                        <span className={cn('inline-flex items-center gap-1 text-ui-3xs font-bold px-1.5 py-0.5 rounded-md uppercase', colorClass)}>
+                        <span className={cn('inline-flex items-center gap-1 label-overline px-1.5 py-0.5 rounded-md', colorClass)}>
                           <Icon className="h-2.5 w-2.5" />
                           {change.change_type}
                         </span>
