@@ -282,18 +282,18 @@ export default function InvestigationPage() {
         <StatusBadge status={currentStatus} />
 
         {incident.slo_violated && (
-          <span className="text-ui-2xs px-2 py-0.5 rounded-md bg-severity-p0/10 text-severity-p0 font-bold font-mono border border-severity-p0/20">
+          <span className="text-xs px-2 py-0.5 rounded-md bg-severity-p0/10 text-severity-p0 font-bold font-mono border border-severity-p0/20">
             SLO · {incident.error_budget_consumed}% burned · {incident.burn_rate}x
           </span>
         )}
 
         <div className="h-4 w-px bg-border mx-1 hidden sm:block" />
-        <span className="text-sm text-foreground font-medium truncate max-w-[220px] md:max-w-xs hidden sm:block">
+        <span className="text-xs text-foreground font-medium truncate max-w-[220px] md:max-w-xs hidden sm:block">
           {incident.title}
         </span>
 
         {incident.slack_channel_name && (
-          <span className="text-ui-2xs font-mono text-muted-foreground bg-secondary/50 px-2 py-0.5 rounded-md border border-border/50 hidden md:block">
+          <span className="text-xs font-mono text-muted-foreground bg-secondary/50 px-2 py-0.5 rounded-md border border-border/50 hidden md:block">
             #{incident.slack_channel_name}
           </span>
         )}
