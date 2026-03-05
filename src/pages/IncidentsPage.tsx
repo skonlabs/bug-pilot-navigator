@@ -61,17 +61,17 @@ function getMTTRLabel(secs: number) {
 
 function envBadgeClass(env: string) {
   if (env === 'production') return 'bg-severity-p0/10 text-severity-p0 border-severity-p0/20';
-  if (env === 'staging') return 'bg-yellow-500/10 text-yellow-600 border-yellow-500/20';
+  if (env === 'staging') return 'bg-severity-p2/10 text-severity-p2 border-severity-p2/20';
   return 'bg-secondary text-secondary-foreground border-border/50';
 }
 
 function tagColor(tag: string) {
   const palette = [
-    'bg-blue-500/10 text-blue-600 border-blue-500/20',
-    'bg-purple-500/10 text-purple-600 border-purple-500/20',
-    'bg-emerald-500/10 text-emerald-600 border-emerald-500/20',
-    'bg-orange-500/10 text-orange-600 border-orange-500/20',
-    'bg-pink-500/10 text-pink-600 border-pink-500/20',
+    'bg-severity-p3/10 text-severity-p3 border-severity-p3/20',
+    'bg-status-identified/10 text-status-identified border-status-identified/20',
+    'bg-status-resolved/10 text-status-resolved border-status-resolved/20',
+    'bg-severity-p1/10 text-severity-p1 border-severity-p1/20',
+    'bg-primary/10 text-primary border-primary/20',
   ];
   let hash = 0;
   for (let i = 0; i < tag.length; i++) hash = (hash + tag.charCodeAt(i)) % palette.length;
@@ -79,7 +79,7 @@ function tagColor(tag: string) {
 }
 
 function durationColor(mins: number) {
-  if (mins < 30) return 'text-emerald-400';
+  if (mins < 30) return 'text-success';
   if (mins < 120) return 'text-severity-p2';
   if (mins < 360) return 'text-severity-p1';
   return 'text-severity-p0';
@@ -237,7 +237,7 @@ export default function IncidentsPage() {
       {/* Header: Page title + summary stats + declare button */}
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="text-xl font-bold text-foreground tracking-tight mb-1">Incidents</h1>
+          <h1 className="text-lg font-bold text-foreground tracking-tight mb-1">Incidents</h1>
           <div className="flex items-center gap-4 text-xs flex-wrap">
             <div className="flex items-center gap-1.5">
               <div className="h-2 w-2 rounded-full bg-muted-foreground/40" />
@@ -252,7 +252,7 @@ export default function IncidentsPage() {
               </span>
             </div>
             <div className="flex items-center gap-1.5">
-              <CheckCircle2 className="h-3 w-3 text-emerald-500" />
+              <CheckCircle2 className="h-3 w-3 text-success" />
               <span className="text-muted-foreground">
                 <span className="font-mono font-bold text-foreground">{resolvedCount}</span> resolved
               </span>
@@ -607,7 +607,7 @@ export default function IncidentsPage() {
                           {getDuration(inc)}
                         </span>
                         {isResolved && inc.time_to_resolve_secs && (
-                          <span className="text-[10px] text-emerald-500 font-medium">
+                          <span className="text-[10px] text-success font-medium">
                             MTTR {getMTTRLabel(inc.time_to_resolve_secs)}
                           </span>
                         )}

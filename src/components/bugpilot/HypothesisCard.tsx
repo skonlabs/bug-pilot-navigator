@@ -11,8 +11,8 @@ const statusStyles: Record<string, string> = {
   eliminated: 'bg-muted text-muted-foreground line-through',
 };
 
-export function HypothesisCard({ hypothesis }: { hypothesis: Hypothesis }) {
-  const [expanded, setExpanded] = useState(false);
+export function HypothesisCard({ hypothesis, defaultExpanded = false }: { hypothesis: Hypothesis; defaultExpanded?: boolean }) {
+  const [expanded, setExpanded] = useState(defaultExpanded);
 
   return (
     <div className="rounded-lg border border-border bg-card p-3 transition-colors">
