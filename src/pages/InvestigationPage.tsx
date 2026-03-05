@@ -622,7 +622,7 @@ export default function InvestigationPage() {
               <button
                 onClick={() => setPinnedOnly(p => !p)}
                 className={cn(
-                  'flex items-center gap-1 h-6 px-2 rounded-md text-ui-2xs font-medium border transition-colors',
+                  'flex items-center gap-1 h-6 px-2 rounded-md label-overline border transition-colors',
                   pinnedOnly
                     ? 'bg-primary/10 text-primary border-primary/20'
                     : 'border-border/50 text-muted-foreground hover:text-foreground'
