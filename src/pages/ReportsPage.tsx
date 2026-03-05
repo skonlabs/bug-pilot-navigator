@@ -25,19 +25,28 @@ const chartStyle = {
   tooltip: { background: 'hsl(0 0% 7%)', border: '1px solid hsl(0 0% 14%)', borderRadius: 10, color: 'hsl(0 0% 90%)', fontSize: 12 },
 };
 
-function KpiCard({ label, value, trend, icon: Icon, iconColor, subtext }: {
-  label: string; value: string | number; trend?: number; icon: React.ElementType; iconColor: string; subtext?: string;
+function KpiCard({ label, value, trend, icon: Icon, iconColor, subtext, accentColor }: {
+  label: string; value: string | number; trend?: number; icon: React.ElementType; iconColor: string; subtext?: string; accentColor?: string;
 }) {
   return (
-    <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="rounded-xl border border-border bg-card p-4">
-      <div className="flex items-center gap-2 mb-3">
-        <Icon className={cn('h-4 w-4', iconColor)} />
-        <span className="text-[11px] text-muted-foreground font-medium">{label}</span>
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      className={cn(
+        'rounded-xl border border-border bg-card p-4 border-l-2',
+        accentColor ?? 'border-l-border',
+      )}
+    >
+      <div className="flex items-center justify-between mb-3">
+        <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground">{label}</p>
+        <div className={cn('h-7 w-7 rounded-lg flex items-center justify-center bg-muted/50')}>
+          <Icon className={cn('h-3.5 w-3.5', iconColor)} />
+        </div>
       </div>
       <div className="flex items-end gap-2">
-        <span className="text-2xl font-bold text-foreground tracking-tight">{value}</span>
+        <span className="text-2xl font-bold font-mono tabular-nums text-foreground tracking-tight">{value}</span>
         {trend !== undefined && (
-          <span className={cn('flex items-center gap-0.5 text-xs font-medium mb-1', trend < 0 ? 'text-emerald-400' : 'text-severity-p0')}>
+          <span className={cn('flex items-center gap-0.5 text-xs font-medium mb-0.5', trend < 0 ? 'text-emerald-400' : 'text-severity-p0')}>
             {trend < 0 ? <TrendingDown className="h-3 w-3" /> : <TrendingUp className="h-3 w-3" />}
             {Math.abs(trend)}%
           </span>
@@ -69,23 +78,18 @@ export default function ReportsPage() {
 
   return (
     <div className="space-y-6 max-w-6xl">
-      {/* Controls */}
-      <div className="flex items-center justify-between gap-3 flex-wrap">
-        <div className="flex items-center bg-secondary/50 rounded-lg p-0.5 border border-border/50 flex-wrap">
-          {TABS.map(t => (
-            <button key={t} onClick={() => setTab(t)}
-              className={cn('px-3 py-1.5 text-xs rounded-md capitalize transition-all font-medium whitespace-nowrap',
-                tab === t ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-secondary-foreground'
-              )}>
-              {t.replace(/-/g, ' ')}
-            </button>
-          ))}
+      {/* ── Page Header ─────────────────────────────────────────────────────── */}
+      <div className="flex items-center justify-between flex-wrap gap-3">
+        <div>
+          <h1 className="text-lg font-bold text-foreground">Analytics & Reports</h1>
+          <p className="text-xs text-muted-foreground mt-0.5">DORA metrics, incident trends, and operational health</p>
         </div>
-        <div className="flex items-center bg-secondary/50 rounded-lg p-0.5 border border-border/50">
+        {/* Date range selector */}
+        <div className="flex items-center gap-1 bg-card rounded-lg border border-border p-0.5">
           {['7d', '30d', '90d'].map(r => (
             <button key={r} onClick={() => setDateRange(r)}
-              className={cn('px-2.5 py-1.5 text-xs rounded-md font-medium transition-all',
-                dateRange === r ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
+              className={cn('px-3 py-1.5 text-xs rounded-md font-medium transition-all tabular-nums',
+                dateRange === r ? 'bg-primary/10 text-primary border border-primary/20' : 'text-muted-foreground hover:text-foreground'
               )}>
               {r}
             </button>
@@ -93,15 +97,56 @@ export default function ReportsPage() {
         </div>
       </div>
 
+      {/* ── 30-day Summary Banner ───────────────────────────────────────────── */}
+      {tab === 'overview' && (
+        <motion.div
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="rounded-xl border border-primary/20 bg-primary/5 px-5 py-4 flex items-center gap-6 flex-wrap"
+        >
+          <div className="flex-1 min-w-0">
+            <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-primary mb-1">30-Day Summary</p>
+            <p className="text-sm text-foreground font-medium">
+              {m.total_incidents} incidents · avg MTTR {m.mttr_minutes}m · {m.slo_violations} SLO violations
+            </p>
+          </div>
+          {[
+            { label: 'P0 Rate', value: `${m.p0_incidents}`, sub: 'critical incidents', color: 'text-severity-p0' },
+            { label: 'Alert Noise', value: `${Math.round(m.alert_noise_ratio * 100)}%`, sub: 'suppressed', color: 'text-severity-p2' },
+            { label: 'Trend', value: `↓${Math.abs(m.mttr_trend ?? 0)}%`, sub: 'MTTR improvement', color: 'text-emerald-400' },
+          ].map(item => (
+            <div key={item.label} className="text-center">
+              <p className={cn('text-xl font-bold font-mono tabular-nums', item.color)}>{item.value}</p>
+              <p className="text-[10px] text-muted-foreground">{item.sub}</p>
+            </div>
+          ))}
+        </motion.div>
+      )}
+
+      {/* ── Tab bar ─────────────────────────────────────────────────────────── */}
+      <div className="flex items-center gap-1 flex-wrap">
+        {TABS.map(t => (
+          <button key={t} onClick={() => setTab(t)}
+            className={cn(
+              'px-3 py-1.5 text-xs rounded-full capitalize transition-all font-medium border whitespace-nowrap',
+              tab === t
+                ? 'bg-primary/10 text-primary border-primary/30'
+                : 'text-muted-foreground border-border/50 hover:text-foreground hover:border-border bg-transparent',
+            )}>
+            {t.replace(/-/g, ' ')}
+          </button>
+        ))}
+      </div>
+
       {/* OVERVIEW TAB */}
       {tab === 'overview' && (
         <div className="space-y-5">
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
-            <KpiCard label="Total Incidents" value={m.total_incidents} icon={AlertTriangle} iconColor="text-severity-p1" subtext="Last 30 days" />
-            <KpiCard label="MTTR" value={`${m.mttr_minutes}m`} trend={m.mttr_trend} icon={Clock} iconColor="text-primary" subtext="Avg time to resolve" />
-            <KpiCard label="SLO Violations" value={m.slo_violations} icon={Shield} iconColor="text-severity-p0" subtext="This period" />
-            <KpiCard label="P0 Incidents" value={m.p0_incidents} icon={BarChart3} iconColor="text-severity-p0" subtext="Critical severity" />
-            <KpiCard label="Alert Noise" value={`${Math.round(m.alert_noise_ratio * 100)}%`} icon={Bell} iconColor="text-severity-p2" subtext="Suppressed / correlated" />
+            <KpiCard label="Total Incidents" value={m.total_incidents} icon={AlertTriangle} iconColor="text-severity-p1" subtext="Last 30 days" accentColor="border-l-severity-p1" />
+            <KpiCard label="MTTR" value={`${m.mttr_minutes}m`} trend={m.mttr_trend} icon={Clock} iconColor="text-primary" subtext="Avg time to resolve" accentColor="border-l-primary" />
+            <KpiCard label="SLO Violations" value={m.slo_violations} icon={Shield} iconColor="text-severity-p0" subtext="This period" accentColor="border-l-severity-p0" />
+            <KpiCard label="P0 Incidents" value={m.p0_incidents} icon={BarChart3} iconColor="text-severity-p0" subtext="Critical severity" accentColor="border-l-severity-p0" />
+            <KpiCard label="Alert Noise" value={`${Math.round(m.alert_noise_ratio * 100)}%`} icon={Bell} iconColor="text-severity-p2" subtext="Suppressed / correlated" accentColor="border-l-severity-p2" />
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -139,7 +184,7 @@ export default function ReportsPage() {
 
           {/* Recurring Patterns */}
           <ChartCard title="Top Recurring Incident Patterns" subtitle="Most common root cause patterns this period" delay={0.3}>
-            <div className="space-y-2 mt-2">
+            <div className="space-y-3 mt-2">
               {[
                 { pattern: 'Deploy regression', count: 15, impact: 'P0–P1', trend: 'stable' },
                 { pattern: 'Dependency timeout cascade', count: 11, impact: 'P1–P2', trend: 'up' },
@@ -148,9 +193,9 @@ export default function ReportsPage() {
                 { pattern: 'Rate limit exhaustion', count: 3, impact: 'P2', trend: 'up' },
               ].map(({ pattern, count, impact, trend }, i) => (
                 <div key={pattern} className="flex items-center gap-3">
-                  <span className="text-[10px] font-mono text-muted-foreground/50 w-4">{i + 1}</span>
+                  <span className="text-[10px] font-mono text-muted-foreground/50 w-4 tabular-nums">{i + 1}</span>
                   <div className="flex-1">
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between mb-1">
                       <span className="text-xs font-medium text-foreground">{pattern}</span>
                       <div className="flex items-center gap-3">
                         <span className="text-[10px] text-muted-foreground">{impact}</span>
@@ -159,7 +204,7 @@ export default function ReportsPage() {
                         )}>
                           {trend === 'up' ? '↑' : trend === 'down' ? '↓' : '→'}
                         </span>
-                        <span className="text-xs font-mono font-bold text-foreground w-6 text-right">{count}</span>
+                        <span className="text-xs font-mono font-bold text-foreground w-6 text-right tabular-nums">{count}</span>
                       </div>
                     </div>
                     <div className="h-1 rounded-full bg-secondary mt-1 overflow-hidden">
@@ -177,9 +222,9 @@ export default function ReportsPage() {
       {tab === 'mttr' && (
         <div className="space-y-5">
           <div className="grid grid-cols-3 gap-3">
-            <KpiCard label="Overall MTTR" value={`${m.mttr_minutes}m`} trend={m.mttr_trend} icon={Clock} iconColor="text-primary" />
-            <KpiCard label="P0 MTTR" value="142m" trend={-18} icon={AlertTriangle} iconColor="text-severity-p0" />
-            <KpiCard label="P1 MTTR" value="58m" trend={-9} icon={AlertTriangle} iconColor="text-severity-p1" />
+            <KpiCard label="Overall MTTR" value={`${m.mttr_minutes}m`} trend={m.mttr_trend} icon={Clock} iconColor="text-primary" accentColor="border-l-primary" />
+            <KpiCard label="P0 MTTR" value="142m" trend={-18} icon={AlertTriangle} iconColor="text-severity-p0" accentColor="border-l-severity-p0" />
+            <KpiCard label="P1 MTTR" value="58m" trend={-9} icon={AlertTriangle} iconColor="text-severity-p1" accentColor="border-l-severity-p1" />
           </div>
           <ChartCard title="MTTR Trend — Last 30 Days" subtitle="Minutes by severity">
             <ResponsiveContainer width="100%" height={280}>
@@ -196,7 +241,7 @@ export default function ReportsPage() {
             </ResponsiveContainer>
           </ChartCard>
           <ChartCard title="MTTR Breakdown by Service" subtitle="Average resolution time per affected service">
-            <div className="space-y-2.5 mt-2">
+            <div className="space-y-3 mt-2">
               {[
                 { service: 'payment-service', mttr: 142, incidents: 8 },
                 { service: 'order-service', mttr: 89, incidents: 5 },
@@ -209,8 +254,8 @@ export default function ReportsPage() {
                   <div className="flex-1 h-1.5 rounded-full bg-secondary overflow-hidden">
                     <div className="h-full rounded-full bg-primary/60" style={{ width: `${(mttr / 142) * 100}%` }} />
                   </div>
-                  <span className="text-xs font-mono text-muted-foreground w-14 text-right">{mttr}m avg</span>
-                  <span className="text-[10px] text-muted-foreground w-8 text-right">{incidents} inc</span>
+                  <span className="text-xs font-mono text-muted-foreground w-14 text-right tabular-nums">{mttr}m avg</span>
+                  <span className="text-[10px] text-muted-foreground w-8 text-right tabular-nums">{incidents} inc</span>
                 </div>
               ))}
             </div>
@@ -222,10 +267,10 @@ export default function ReportsPage() {
       {tab === 'dora' && (
         <div className="space-y-5">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <KpiCard label="Deployment Frequency" value={`${dora.deployment_frequency}/day`} trend={dora.deployment_frequency_trend} icon={Zap} iconColor="text-primary" subtext="Elite: >1/day" />
-            <KpiCard label="Change Failure Rate" value={`${dora.change_failure_rate}%`} trend={dora.change_failure_rate_trend} icon={AlertTriangle} iconColor="text-amber-400" subtext="Elite: <5%" />
-            <KpiCard label="MTTR" value={`${dora.mttr_minutes}m`} trend={dora.mttr_trend} icon={Clock} iconColor="text-emerald-400" subtext="Elite: <1 hour" />
-            <KpiCard label="Change Lead Time" value={`${dora.change_lead_time_hours}h`} trend={dora.change_lead_time_trend} icon={ArrowUpRight} iconColor="text-blue-400" subtext="Elite: <1 hour" />
+            <KpiCard label="Deployment Frequency" value={`${dora.deployment_frequency}/day`} trend={dora.deployment_frequency_trend} icon={Zap} iconColor="text-primary" subtext="Elite: >1/day" accentColor="border-l-primary" />
+            <KpiCard label="Change Failure Rate" value={`${dora.change_failure_rate}%`} trend={dora.change_failure_rate_trend} icon={AlertTriangle} iconColor="text-amber-400" subtext="Elite: <5%" accentColor="border-l-amber-500" />
+            <KpiCard label="MTTR" value={`${dora.mttr_minutes}m`} trend={dora.mttr_trend} icon={Clock} iconColor="text-emerald-400" subtext="Elite: <1 hour" accentColor="border-l-emerald-500" />
+            <KpiCard label="Change Lead Time" value={`${dora.change_lead_time_hours}h`} trend={dora.change_lead_time_trend} icon={ArrowUpRight} iconColor="text-blue-400" subtext="Elite: <1 hour" accentColor="border-l-blue-500" />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
@@ -255,8 +300,10 @@ export default function ReportsPage() {
                     <div className="flex items-center justify-between mb-1">
                       <span className="text-xs text-foreground">{metric}</span>
                       <div className="flex items-center gap-2">
-                        <span className="text-xs font-mono text-foreground">{value}{unit}</span>
-                        <span className={cn('text-[10px] font-bold px-1.5 py-0.5 rounded', color, 'bg-current/10')}>{band}</span>
+                        <span className="text-xs font-mono text-foreground tabular-nums">{value}{unit}</span>
+                        <span className={cn('text-[10px] font-bold px-1.5 py-0.5 rounded-full border', color,
+                          color === 'text-emerald-400' ? 'bg-emerald-500/10 border-emerald-500/20' : 'bg-amber-500/10 border-amber-500/20'
+                        )}>{band}</span>
                       </div>
                     </div>
                     <div className="h-1.5 rounded-full bg-secondary overflow-hidden">
@@ -274,9 +321,9 @@ export default function ReportsPage() {
       {tab === 'slo' && (
         <div className="space-y-5">
           <div className="grid grid-cols-3 gap-3">
-            <KpiCard label="SLO Violations" value={m.slo_violations} icon={Shield} iconColor="text-severity-p0" subtext="Services breached SLO" />
-            <KpiCard label="Highest Burn Rate" value="8.5x" icon={AlertTriangle} iconColor="text-severity-p0" subtext="payment-service" />
-            <KpiCard label="Budget Avg Consumed" value="23%" icon={Target} iconColor="text-amber-400" subtext="Across all violations" />
+            <KpiCard label="SLO Violations" value={m.slo_violations} icon={Shield} iconColor="text-severity-p0" subtext="Services breached SLO" accentColor="border-l-severity-p0" />
+            <KpiCard label="Highest Burn Rate" value="8.5x" icon={AlertTriangle} iconColor="text-severity-p0" subtext="payment-service" accentColor="border-l-severity-p0" />
+            <KpiCard label="Budget Avg Consumed" value="23%" icon={Target} iconColor="text-amber-400" subtext="Across all violations" accentColor="border-l-amber-500" />
           </div>
           <ChartCard title="SLO Availability Trend" subtitle="30-day rolling availability by service">
             <ResponsiveContainer width="100%" height={280}>
@@ -293,7 +340,7 @@ export default function ReportsPage() {
             </ResponsiveContainer>
           </ChartCard>
           <ChartCard title="Services by SLO Health" subtitle="Current status across all defined SLOs">
-            <div className="space-y-3 mt-2">
+            <div className="space-y-2.5 mt-2">
               {[
                 { service: 'payment-service', slo: 99.9, current: 97.2, budget: 45.2, violated: true },
                 { service: 'order-service', slo: 99.5, current: 99.7, budget: 8, violated: false },
@@ -301,13 +348,17 @@ export default function ReportsPage() {
                 { service: 'checkout-api', slo: 99.5, current: 99.1, budget: 22, violated: true },
                 { service: 'user-profile-service', slo: 99.0, current: 99.4, budget: 5, violated: false },
               ].map(({ service, slo, current, budget, violated }) => (
-                <div key={service} className={cn('flex items-center gap-3 p-2.5 rounded-lg border', violated ? 'border-severity-p0/20 bg-severity-p0/5' : 'border-border')}>
+                <div key={service} className={cn('flex items-center gap-3 p-3 rounded-xl border', violated ? 'border-severity-p0/20 bg-severity-p0/5' : 'border-border bg-card')}>
                   <div className={cn('h-2 w-2 rounded-full shrink-0', violated ? 'bg-severity-p0 animate-pulse' : 'bg-emerald-400')} />
                   <span className="text-xs font-mono text-foreground flex-1">{service}</span>
                   <span className="text-xs text-muted-foreground">Target: {slo}%</span>
-                  <span className={cn('text-xs font-mono font-bold', violated ? 'text-severity-p0' : 'text-emerald-400')}>{current}%</span>
-                  <span className={cn('text-[10px] font-mono', budget > 30 ? 'text-severity-p0' : budget > 10 ? 'text-amber-400' : 'text-muted-foreground')}>
-                    {budget}% budget used
+                  <span className={cn('text-xs font-mono font-bold tabular-nums', violated ? 'text-severity-p0' : 'text-emerald-400')}>{current}%</span>
+                  <span className={cn('text-[10px] font-mono tabular-nums px-2 py-0.5 rounded-full',
+                    budget > 30 ? 'text-severity-p0 bg-severity-p0/10' :
+                    budget > 10 ? 'text-amber-400 bg-amber-500/10' :
+                    'text-muted-foreground bg-muted'
+                  )}>
+                    {budget}% budget
                   </span>
                 </div>
               ))}
@@ -321,8 +372,8 @@ export default function ReportsPage() {
         <div className="space-y-5">
           <div className="grid grid-cols-3 gap-3">
             <KpiCard label="Total Alerts" value="1,247" icon={Bell} iconColor="text-muted-foreground" subtext="Last 30 days" />
-            <KpiCard label="Suppressed / Correlated" value="34%" trend={-8} icon={CheckCircle2} iconColor="text-emerald-400" subtext="Alert noise reduced" />
-            <KpiCard label="Actionable Alerts" value="823" icon={Zap} iconColor="text-primary" subtext="Led to real incidents" />
+            <KpiCard label="Suppressed / Correlated" value="34%" trend={-8} icon={CheckCircle2} iconColor="text-emerald-400" subtext="Alert noise reduced" accentColor="border-l-emerald-500" />
+            <KpiCard label="Actionable Alerts" value="823" icon={Zap} iconColor="text-primary" subtext="Led to real incidents" accentColor="border-l-primary" />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <ChartCard title="Alert Volume — 14 Days" subtitle="Total, correlated, and suppressed" delay={0.2}>
@@ -348,12 +399,12 @@ export default function ReportsPage() {
                   { rule: 'cpu throttling > 20%', count: 73, actionRate: 0.08, risk: true },
                   { rule: 'disk usage > 80%', count: 56, actionRate: 0.34, risk: false },
                 ].map(({ rule, count, actionRate, risk }) => (
-                  <div key={rule} className={cn('flex items-center gap-2 p-2 rounded-lg border', risk ? 'border-amber-500/20 bg-amber-500/5' : 'border-border')}>
+                  <div key={rule} className={cn('flex items-center gap-2 p-2.5 rounded-xl border', risk ? 'border-amber-500/20 bg-amber-500/5' : 'border-border bg-card/50')}>
                     <div className="flex-1 min-w-0">
                       <p className="text-xs font-mono text-foreground truncate">{rule}</p>
-                      <p className="text-[10px] text-muted-foreground">{count} alerts · {Math.round(actionRate * 100)}% action rate</p>
+                      <p className="text-[10px] text-muted-foreground mt-0.5">{count} alerts · {Math.round(actionRate * 100)}% action rate</p>
                     </div>
-                    {risk && <span className="text-[9px] text-amber-400 border border-amber-500/30 px-1.5 py-0.5 rounded font-bold">TUNE</span>}
+                    {risk && <span className="text-[9px] text-amber-400 border border-amber-500/30 px-1.5 py-0.5 rounded-full font-bold">TUNE</span>}
                   </div>
                 ))}
               </div>
@@ -366,28 +417,28 @@ export default function ReportsPage() {
       {tab === 'on-call' && (
         <div className="space-y-5">
           <div className="grid grid-cols-3 gap-3">
-            <KpiCard label="Total Pages This Week" value="20" icon={Bell} iconColor="text-severity-p1" />
-            <KpiCard label="After-Hours Pages" value="7" icon={Clock} iconColor="text-severity-p0" subtext="35% of total" />
-            <KpiCard label="Avg MTTA" value="4.5m" trend={-12} icon={Users} iconColor="text-primary" />
+            <KpiCard label="Total Pages This Week" value="20" icon={Bell} iconColor="text-severity-p1" accentColor="border-l-severity-p1" />
+            <KpiCard label="After-Hours Pages" value="7" icon={Clock} iconColor="text-severity-p0" subtext="35% of total" accentColor="border-l-severity-p0" />
+            <KpiCard label="Avg MTTA" value="4.5m" trend={-12} icon={Users} iconColor="text-primary" accentColor="border-l-primary" />
           </div>
           <ChartCard title="On-Call Load by Engineer" subtitle="Pages this week vs monthly average">
             <div className="space-y-3 mt-3">
-              {mockOnCallMetrics.map((eng, i) => (
-                <div key={eng.engineer} className="space-y-1">
+              {mockOnCallMetrics.map((eng) => (
+                <div key={eng.engineer} className="space-y-1.5">
                   <div className="flex items-center justify-between text-xs">
                     <div className="flex items-center gap-2">
-                      <div className="h-6 w-6 rounded-full bg-primary/15 flex items-center justify-center">
+                      <div className="h-6 w-6 rounded-full bg-primary/15 border border-primary/20 flex items-center justify-center">
                         <span className="text-[9px] font-bold text-primary">{eng.engineer.split(' ').map(n => n[0]).join('')}</span>
                       </div>
                       <span className="text-foreground font-medium">{eng.engineer}</span>
                     </div>
                     <div className="flex items-center gap-4 text-muted-foreground">
-                      <span>{eng.pages_this_week} pages/wk</span>
-                      <span className={cn('font-medium', eng.after_hours_pages > 2 ? 'text-severity-p0' : 'text-muted-foreground')}>
+                      <span className="tabular-nums">{eng.pages_this_week} pages/wk</span>
+                      <span className={cn('font-medium tabular-nums', eng.after_hours_pages > 2 ? 'text-severity-p0' : 'text-muted-foreground')}>
                         {eng.after_hours_pages} after-hours
                       </span>
-                      <span>MTTA: {eng.mtta_minutes}m</span>
-                      <span>{eng.incidents_this_month} this month</span>
+                      <span className="tabular-nums">MTTA: {eng.mtta_minutes}m</span>
+                      <span className="tabular-nums">{eng.incidents_this_month} this month</span>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
@@ -403,16 +454,16 @@ export default function ReportsPage() {
             </div>
           </ChartCard>
           <ChartCard title="On-Call Health Signals">
-            <div className="grid grid-cols-2 gap-4 mt-2">
+            <div className="grid grid-cols-2 gap-3 mt-2">
               {[
                 { label: 'Engineers with >5 pages/wk', value: 2, alert: true },
                 { label: 'Engineers with >2 after-hours/wk', value: 2, alert: true },
                 { label: 'Avg pages per engineer/wk', value: 4, alert: false },
                 { label: 'Teams with single point of failure', value: 1, alert: true },
               ].map(({ label, value, alert }) => (
-                <div key={label} className={cn('p-3 rounded-lg border', alert ? 'border-amber-500/20 bg-amber-500/5' : 'border-border')}>
-                  <p className="text-[10px] text-muted-foreground">{label}</p>
-                  <p className={cn('text-lg font-bold mt-1', alert ? 'text-amber-400' : 'text-foreground')}>{value}</p>
+                <div key={label} className={cn('p-4 rounded-xl border', alert ? 'border-amber-500/20 bg-amber-500/5' : 'border-border bg-card/50')}>
+                  <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground">{label}</p>
+                  <p className={cn('text-2xl font-bold font-mono tabular-nums mt-2', alert ? 'text-amber-400' : 'text-foreground')}>{value}</p>
                 </div>
               ))}
             </div>
@@ -424,9 +475,9 @@ export default function ReportsPage() {
       {tab === 'rca-accuracy' && (
         <div className="space-y-5">
           <div className="grid grid-cols-3 gap-3">
-            <KpiCard label="RCA Accuracy Rate" value={`${Math.round(mockHypothesisAccuracy.accuracy_rate * 100)}%`} icon={Target} iconColor="text-emerald-400" subtext="Top hypothesis correct" />
-            <KpiCard label="Incidents Analyzed" value={mockHypothesisAccuracy.total_incidents} icon={BarChart3} iconColor="text-primary" />
-            <KpiCard label="Fix Acceptance Rate" value="68%" icon={CheckCircle2} iconColor="text-emerald-400" subtext="Fixes accepted as-is" />
+            <KpiCard label="RCA Accuracy Rate" value={`${Math.round(mockHypothesisAccuracy.accuracy_rate * 100)}%`} icon={Target} iconColor="text-emerald-400" subtext="Top hypothesis correct" accentColor="border-l-emerald-500" />
+            <KpiCard label="Incidents Analyzed" value={mockHypothesisAccuracy.total_incidents} icon={BarChart3} iconColor="text-primary" accentColor="border-l-primary" />
+            <KpiCard label="Fix Acceptance Rate" value="68%" icon={CheckCircle2} iconColor="text-emerald-400" subtext="Fixes accepted as-is" accentColor="border-l-emerald-500" />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
@@ -437,8 +488,8 @@ export default function ReportsPage() {
                     <div className="flex items-center justify-between text-xs mb-1">
                       <span className="text-foreground">{pattern}</span>
                       <div className="flex items-center gap-3">
-                        <span className="text-muted-foreground">{count} incidents</span>
-                        <span className={cn('font-mono font-bold',
+                        <span className="text-muted-foreground tabular-nums">{count} incidents</span>
+                        <span className={cn('font-mono font-bold tabular-nums',
                           accuracy >= 0.8 ? 'text-emerald-400' : accuracy >= 0.65 ? 'text-amber-400' : 'text-severity-p0'
                         )}>{Math.round(accuracy * 100)}%</span>
                       </div>
@@ -469,10 +520,10 @@ export default function ReportsPage() {
                     <div className="flex-1 h-1.5 rounded-full bg-secondary overflow-hidden">
                       <div className="h-full rounded-full bg-primary/60" style={{ width: `${correct}%` }} />
                     </div>
-                    <span className="font-mono text-foreground w-20 text-right">{correct}% correct ({total} incidents)</span>
+                    <span className="font-mono text-foreground w-20 text-right tabular-nums">{correct}% correct ({total})</span>
                   </div>
                 ))}
-                <div className="p-3 rounded-lg bg-secondary/50 border border-border mt-2">
+                <div className="p-3 rounded-xl bg-secondary/50 border border-border mt-2">
                   <p className="text-[11px] text-muted-foreground">
                     Confidence model is <span className="text-emerald-400 font-medium">well calibrated</span> at high confidence ranges.
                     Low confidence ranges show slight over-estimation — adjustment in progress.
@@ -485,15 +536,15 @@ export default function ReportsPage() {
           <ChartCard title="Fix Outcome Analysis" subtitle="What happened to BugPilot's proposed fixes" delay={0.3}>
             <div className="grid grid-cols-4 gap-3 mt-3">
               {[
-                { label: 'Accepted As-Is', count: 28, pct: 68, color: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20' },
-                { label: 'Modified & Accepted', count: 8, pct: 20, color: 'text-blue-400 bg-blue-500/10 border-blue-500/20' },
-                { label: 'Rejected', count: 3, pct: 7, color: 'text-muted-foreground bg-secondary border-border' },
-                { label: 'Not Reviewed', count: 2, pct: 5, color: 'text-muted-foreground/50 bg-secondary/50 border-border/50' },
-              ].map(({ label, count, pct, color }) => (
-                <div key={label} className={cn('p-3 rounded-xl border text-center', color)}>
-                  <p className="text-2xl font-bold">{pct}%</p>
-                  <p className="text-[10px] mt-1 font-medium">{label}</p>
-                  <p className="text-[10px] opacity-60">{count} fixes</p>
+                { label: 'Accepted As-Is', count: 28, pct: 68, color: 'text-emerald-400', bg: 'bg-emerald-500/10 border-emerald-500/20', accent: 'border-l-emerald-500' },
+                { label: 'Modified & Accepted', count: 8, pct: 20, color: 'text-blue-400', bg: 'bg-blue-500/10 border-blue-500/20', accent: 'border-l-blue-500' },
+                { label: 'Rejected', count: 3, pct: 7, color: 'text-muted-foreground', bg: 'bg-secondary border-border', accent: 'border-l-border' },
+                { label: 'Not Reviewed', count: 2, pct: 5, color: 'text-muted-foreground/50', bg: 'bg-secondary/50 border-border/50', accent: 'border-l-border/50' },
+              ].map(({ label, count, pct, color, bg, accent }) => (
+                <div key={label} className={cn('p-4 rounded-xl border border-l-2 text-center', bg, accent)}>
+                  <p className={cn('text-2xl font-bold font-mono tabular-nums', color)}>{pct}%</p>
+                  <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-muted-foreground mt-2">{label}</p>
+                  <p className="text-[10px] text-muted-foreground/60 mt-0.5 tabular-nums">{count} fixes</p>
                 </div>
               ))}
             </div>

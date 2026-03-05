@@ -10,17 +10,19 @@ import {
   CheckCircle, AlertCircle, Clock, Link2, Search, ArrowRight, ArrowLeft,
   ExternalLink, Shield, Check, Loader2, KeyRound, ChevronRight, X,
   GitBranch, MessageSquare, Server, FolderGit2, Hash, Lock, Eye, RefreshCw,
-  Globe, Webhook, Database
+  Globe, Webhook, Database, Plus, Zap
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 type ConnectorSetupStep = 'list' | 'overview' | 'permissions' | 'authenticate' | 'configure' | 'validate';
 
-const statusConfig = {
-  connected: { border: 'border-success/15', badge: 'bg-success/10 text-success', icon: CheckCircle, label: 'Healthy' },
-  error: { border: 'border-destructive/15', badge: 'bg-destructive/10 text-destructive', icon: AlertCircle, label: 'Error' },
-  stale: { border: 'border-warning/15', badge: 'bg-warning/10 text-warning', icon: Clock, label: 'Stale' },
-  not_connected: { border: 'border-border', badge: '', icon: Link2, label: '' },
+type ConnectorStatus = 'connected' | 'error' | 'stale' | 'not_connected';
+
+const statusConfig: Record<ConnectorStatus, { border: string; dotColor: string; badge: string; label: string; badgeBg: string }> = {
+  connected: { border: 'border-emerald-500/20', dotColor: 'bg-emerald-400', badge: 'text-emerald-400', label: 'Connected', badgeBg: 'bg-emerald-500/10 border-emerald-500/20' },
+  error: { border: 'border-severity-p0/20', dotColor: 'bg-severity-p0', badge: 'text-severity-p0', label: 'Error', badgeBg: 'bg-severity-p0/10 border-severity-p0/20' },
+  stale: { border: 'border-severity-p2/20', dotColor: 'bg-severity-p2', badge: 'text-severity-p2', label: 'Stale', badgeBg: 'bg-severity-p2/10 border-severity-p2/20' },
+  not_connected: { border: 'border-border', dotColor: 'bg-muted-foreground/40', badge: 'text-muted-foreground', label: 'Not Connected', badgeBg: 'bg-muted border-border' },
 };
 
 // Full connector configuration with resource selection
@@ -193,10 +195,13 @@ const connectorDetails: Record<string, ConnectorDetail> = {
   },
 };
 
+type StatusFilter = 'all' | 'connected' | 'error' | 'stale' | 'not_connected';
+
 export default function IntegrationsPage() {
   const navigate = useNavigate();
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('all');
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [setupStep, setSetupStep] = useState<ConnectorSetupStep>('list');
   const [selectedConnector, setSelectedConnector] = useState<typeof mockConnectors[0] | null>(null);
   const [apiKey, setApiKey] = useState('');
@@ -206,10 +211,19 @@ export default function IntegrationsPage() {
   const [resourceSearch, setResourceSearch] = useState('');
 
   const categories = ['all', ...new Set(mockConnectors.map(c => c.category))];
-  const connected = mockConnectors.filter(c => c.status !== 'not_connected');
-  const available = mockConnectors.filter(c => c.status === 'not_connected');
+  const connected = mockConnectors.filter(c => c.status === 'connected');
+  const errored = mockConnectors.filter(c => c.status === 'error');
+  const stale = mockConnectors.filter(c => c.status === 'stale');
+  const notConnected = mockConnectors.filter(c => c.status === 'not_connected');
 
-  const filteredAvailable = available.filter(c => {
+  const allConnectors = mockConnectors.filter(c => {
+    if (statusFilter !== 'all' && c.status !== statusFilter) return false;
+    if (category !== 'all' && c.category !== category) return false;
+    if (search && !c.name.toLowerCase().includes(search.toLowerCase())) return false;
+    return true;
+  });
+
+  const filteredAvailable = notConnected.filter(c => {
     if (category !== 'all' && c.category !== category) return false;
     if (search && !c.name.toLowerCase().includes(search.toLowerCase())) return false;
     return true;
@@ -274,20 +288,20 @@ export default function IntegrationsPage() {
             <div key={s} className="flex items-center">
               <div className={cn(
                 'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-colors',
-                i === currentStepIdx ? 'bg-primary/10 text-primary' :
-                i < currentStepIdx ? 'text-success' : 'text-muted-foreground/40'
+                i === currentStepIdx ? 'bg-primary/10 text-primary border border-primary/20' :
+                i < currentStepIdx ? 'text-emerald-400' : 'text-muted-foreground/40'
               )}>
                 <span className={cn(
                   'h-5 w-5 rounded-full text-[10px] font-bold flex items-center justify-center border',
                   i === currentStepIdx ? 'border-primary bg-primary/20 text-primary' :
-                  i < currentStepIdx ? 'border-success bg-success/20 text-success' :
+                  i < currentStepIdx ? 'border-emerald-500 bg-emerald-500/20 text-emerald-400' :
                   'border-border bg-muted text-muted-foreground/40'
                 )}>
                   {i < currentStepIdx ? <Check className="h-3 w-3" /> : i + 1}
                 </span>
                 <span className="hidden sm:inline">{s}</span>
               </div>
-              {i < stepLabels.length - 1 && <div className={cn('w-6 h-px mx-1', i < currentStepIdx ? 'bg-success/40' : 'bg-border')} />}
+              {i < stepLabels.length - 1 && <div className={cn('w-6 h-px mx-1', i < currentStepIdx ? 'bg-emerald-500/40' : 'bg-border')} />}
             </div>
           ))}
         </div>
@@ -301,7 +315,7 @@ export default function IntegrationsPage() {
               </button>
 
               <div className="flex items-center gap-3 mb-6">
-                <div className="h-11 w-11 rounded-xl bg-primary/10 flex items-center justify-center">
+                <div className="h-12 w-12 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center">
                   <Link2 className="h-5 w-5 text-primary" />
                 </div>
                 <div>
@@ -313,11 +327,13 @@ export default function IntegrationsPage() {
               <div className="rounded-xl border border-border bg-card p-5 mb-6">
                 <h3 className="text-sm font-semibold text-foreground mb-3">What this connector does</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed mb-5">{selectedConnector.description}</p>
-                <h4 className="text-xs font-semibold text-foreground mb-3">Features this enables:</h4>
+                <h4 className="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground mb-3">Features this enables</h4>
                 <ul className="space-y-2">
                   {detail.features.map((f, i) => (
                     <li key={i} className="flex items-start gap-2.5 text-sm text-muted-foreground">
-                      <Check className="h-4 w-4 text-success shrink-0 mt-0.5" />
+                      <div className="h-5 w-5 rounded-full bg-emerald-500/15 border border-emerald-500/20 flex items-center justify-center shrink-0 mt-0.5">
+                        <Check className="h-3 w-3 text-emerald-400" />
+                      </div>
                       {f}
                     </li>
                   ))}
@@ -342,9 +358,9 @@ export default function IntegrationsPage() {
               </p>
               <div className="space-y-2 mb-6">
                 {detail.scopes.map((scope, i) => (
-                  <div key={scope} className="flex items-start gap-3 p-3.5 rounded-lg border border-border bg-card">
-                    <div className="h-6 w-6 rounded-md bg-success/10 flex items-center justify-center shrink-0 mt-0.5">
-                      <Check className="h-3.5 w-3.5 text-success" />
+                  <div key={scope} className="flex items-start gap-3 p-3.5 rounded-xl border border-border bg-card">
+                    <div className="h-6 w-6 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center shrink-0 mt-0.5">
+                      <Check className="h-3.5 w-3.5 text-emerald-400" />
                     </div>
                     <div>
                       <p className="text-sm font-medium text-foreground font-mono">{scope}</p>
@@ -353,9 +369,9 @@ export default function IntegrationsPage() {
                   </div>
                 ))}
               </div>
-              <div className="rounded-lg border border-primary/10 bg-primary/5 p-3 mb-6">
-                <p className="text-xs text-muted-foreground">
-                  <Shield className="h-3.5 w-3.5 text-primary inline mr-1.5" />
+              <div className="rounded-xl border border-primary/20 bg-primary/5 p-3.5 mb-6 flex items-start gap-2.5">
+                <Shield className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                <p className="text-xs text-muted-foreground leading-relaxed">
                   All data encrypted in transit (TLS 1.3) and at rest (AES-256). PII/secrets auto-redacted before processing.
                 </p>
               </div>
@@ -393,7 +409,7 @@ export default function IntegrationsPage() {
                   </div>
                   <div>
                     <Label className="text-sm font-medium text-foreground">Kubeconfig</Label>
-                    <textarea placeholder="Paste your kubeconfig YAML..." className="mt-1.5 w-full h-32 rounded-lg border border-border bg-card px-3 py-2 text-sm font-mono text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary resize-none" />
+                    <textarea placeholder="Paste your kubeconfig YAML..." className="mt-1.5 w-full h-32 rounded-xl border border-border bg-card px-3 py-2 text-sm font-mono text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary resize-none" />
                   </div>
                   <Button onClick={() => setSetupStep('configure')} className="w-full h-11 gradient-brand border-0 text-primary-foreground hover:opacity-90">
                     Continue to Configuration <ArrowRight className="h-4 w-4 ml-2" />
@@ -450,12 +466,12 @@ export default function IntegrationsPage() {
                   return (
                     <div key={resourceGroup.type} className="rounded-xl border border-border bg-card overflow-hidden">
                       {/* Resource group header */}
-                      <div className="px-4 py-3 border-b border-border bg-surface-raised/50">
+                      <div className="px-4 py-3 border-b border-border bg-muted/30">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
                             <ResourceIcon className="h-4 w-4 text-primary" />
                             <h3 className="text-sm font-semibold text-foreground">{resourceGroup.pluralLabel}</h3>
-                            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary font-medium">
+                            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary font-medium border border-primary/20">
                               {selected.length}/{resourceGroup.items.length}
                             </span>
                           </div>
@@ -491,7 +507,7 @@ export default function IntegrationsPage() {
                               key={item.id}
                               className={cn(
                                 'flex items-center gap-3 px-4 py-3 cursor-pointer transition-colors',
-                                isSelected ? 'bg-primary/[0.03]' : 'hover:bg-surface-hover'
+                                isSelected ? 'bg-primary/[0.03]' : 'hover:bg-muted/30'
                               )}
                             >
                               <Checkbox
@@ -507,7 +523,7 @@ export default function IntegrationsPage() {
                                       'text-[10px] px-1.5 py-0.5 rounded flex items-center gap-1',
                                       item.visibility === 'private' ? 'bg-muted text-muted-foreground' :
                                       item.visibility === 'internal' ? 'bg-primary/10 text-primary' :
-                                      'bg-success/10 text-success'
+                                      'bg-emerald-500/10 text-emerald-400'
                                     )}>
                                       {item.visibility === 'private' && <Lock className="h-2.5 w-2.5" />}
                                       {item.visibility === 'public' && <Eye className="h-2.5 w-2.5" />}
@@ -525,7 +541,7 @@ export default function IntegrationsPage() {
                                 )}
                               </div>
                               {item.meta && (
-                                <span className="text-[10px] text-muted-foreground/60 shrink-0">{item.meta}</span>
+                                <span className="text-[10px] text-muted-foreground/60 shrink-0 font-mono">{item.meta}</span>
                               )}
                             </label>
                           );
@@ -538,7 +554,7 @@ export default function IntegrationsPage() {
 
               <div className="flex items-center justify-between mt-6">
                 <p className="text-xs text-muted-foreground">
-                  {totalSelectedResources} resource{totalSelectedResources !== 1 ? 's' : ''} selected
+                  <span className="font-mono tabular-nums text-foreground">{totalSelectedResources}</span> resource{totalSelectedResources !== 1 ? 's' : ''} selected
                 </p>
                 <Button
                   onClick={() => setSetupStep('validate')}
@@ -556,8 +572,11 @@ export default function IntegrationsPage() {
             <motion.div key="validate" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
               {!validationDone && !isValidating && (
                 <div className="text-center py-12">
-                  <p className="text-sm text-muted-foreground mb-2">Ready to test the connection</p>
-                  <p className="text-xs text-muted-foreground/60 mb-6">
+                  <div className="h-16 w-16 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center mx-auto mb-4">
+                    <Zap className="h-7 w-7 text-primary" />
+                  </div>
+                  <p className="text-sm font-semibold text-foreground mb-1">Ready to test the connection</p>
+                  <p className="text-xs text-muted-foreground mb-6 max-w-sm mx-auto">
                     BugPilot will verify credentials, test each selected scope, and confirm access to {totalSelectedResources} resource{totalSelectedResources !== 1 ? 's' : ''}.
                   </p>
                   <Button onClick={handleValidate} className="gradient-brand border-0 text-primary-foreground hover:opacity-90 h-11 px-8">
@@ -569,7 +588,7 @@ export default function IntegrationsPage() {
               {isValidating && (
                 <div className="flex flex-col items-center py-16">
                   <Loader2 className="h-8 w-8 text-primary animate-spin mb-4" />
-                  <p className="text-sm text-foreground mb-1">Testing connection to {selectedConnector.name}...</p>
+                  <p className="text-sm font-semibold text-foreground mb-1">Testing connection to {selectedConnector.name}...</p>
                   <p className="text-xs text-muted-foreground mb-6">Verifying credentials, scopes, and resource access</p>
                   <div className="w-full max-w-sm space-y-2">
                     {detail.scopes.map((scope, i) => (
@@ -585,10 +604,10 @@ export default function IntegrationsPage() {
                           animate={{ scale: 1 }}
                           transition={{ delay: i * 0.4 + 0.3 }}
                         >
-                          <Check className="h-3.5 w-3.5 text-success" />
+                          <Check className="h-3.5 w-3.5 text-emerald-400" />
                         </motion.div>
                         <span className="font-mono text-muted-foreground">{scope}</span>
-                        <span className="text-success text-[10px] ml-auto">verified</span>
+                        <span className="text-emerald-400 text-[10px] ml-auto">verified</span>
                       </motion.div>
                     ))}
                   </div>
@@ -597,17 +616,17 @@ export default function IntegrationsPage() {
 
               {validationDone && !isValidating && (
                 <div className="text-center py-12">
-                  <div className="w-14 h-14 rounded-full bg-success/10 flex items-center justify-center mx-auto mb-4">
-                    <Check className="h-7 w-7 text-success" />
+                  <div className="w-16 h-16 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mx-auto mb-4">
+                    <Check className="h-7 w-7 text-emerald-400" />
                   </div>
                   <p className="text-lg font-semibold text-foreground mb-1">Connection successful!</p>
-                  <p className="text-sm text-muted-foreground mb-4">
+                  <p className="text-sm text-muted-foreground mb-6">
                     {selectedConnector.name} is connected with access to {totalSelectedResources} resource{totalSelectedResources !== 1 ? 's' : ''}.
                   </p>
 
                   {/* Summary of selected resources */}
-                  <div className="rounded-lg border border-border bg-card p-4 mb-6 text-left max-w-md mx-auto">
-                    <p className="text-xs font-semibold text-foreground mb-3">Configuration summary</p>
+                  <div className="rounded-xl border border-border bg-card p-4 mb-4 text-left max-w-md mx-auto">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground mb-3">Configuration summary</p>
                     {detail.resources.map(rg => {
                       const sel = selectedResources[rg.type] || [];
                       if (sel.length === 0) return null;
@@ -618,7 +637,7 @@ export default function IntegrationsPage() {
                             {sel.map(id => {
                               const item = rg.items.find(i => i.id === id);
                               return item ? (
-                                <span key={id} className="text-[10px] px-1.5 py-0.5 rounded bg-primary/10 text-primary font-medium">
+                                <span key={id} className="text-[10px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary font-medium border border-primary/20">
                                   {item.name}
                                 </span>
                               ) : null;
@@ -629,12 +648,12 @@ export default function IntegrationsPage() {
                     })}
                   </div>
 
-                  <div className="rounded-lg border border-success/20 bg-success/5 p-3 mb-6 text-left max-w-md mx-auto">
-                    <div className="flex items-center gap-2 mb-1">
-                      <RefreshCw className="h-3 w-3 text-success" />
-                      <p className="text-xs text-success font-medium">Initial sync starting</p>
+                  <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-3.5 mb-6 text-left max-w-md mx-auto flex items-start gap-2.5">
+                    <RefreshCw className="h-3.5 w-3.5 text-emerald-400 shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-xs text-emerald-400 font-medium">Initial sync starting</p>
+                      <p className="text-[11px] text-muted-foreground mt-0.5">Data ingestion typically takes 2-5 minutes.</p>
                     </div>
-                    <p className="text-[11px] text-muted-foreground">Data ingestion typically takes 2-5 minutes.</p>
                   </div>
                   <Button onClick={closeSetup} className="gradient-brand border-0 text-primary-foreground hover:opacity-90 h-11 px-8">
                     Done <Check className="h-4 w-4 ml-2" />
@@ -649,75 +668,67 @@ export default function IntegrationsPage() {
   }
 
   return (
-    <div className="space-y-8 max-w-5xl">
-      {/* Connected */}
-      {connected.length > 0 && (
+    <div className="space-y-6 max-w-5xl">
+      {/* ── Page Header ─────────────────────────────────────────────────────── */}
+      <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h2 className="text-sm font-semibold text-foreground mb-1">Connected Sources</h2>
-          <p className="text-xs text-muted-foreground mb-4">Actively syncing with BugPilot.</p>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-            {connected.map((c, i) => {
-              const config = statusConfig[c.status];
-              const StatusIcon = config.icon;
-              return (
-                <motion.div key={c.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.04 }}
-                  className={cn('rounded-xl border bg-card p-4 transition-all hover:border-primary/10', config.border)}>
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex items-center gap-2.5">
-                      <div className="h-9 w-9 rounded-lg bg-muted flex items-center justify-center">
-                        <Link2 className="h-4 w-4 text-muted-foreground" />
-                      </div>
-                      <div>
-                        <span className="text-sm font-semibold text-foreground">{c.name}</span>
-                        <p className="text-[10px] text-muted-foreground">{c.category}</p>
-                      </div>
-                    </div>
-                    <span className={cn('inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full font-medium', config.badge)}>
-                      <StatusIcon className="h-3 w-3" />
-                      {config.label}
-                    </span>
-                  </div>
-
-                  {c.status === 'error' && c.error_message && (
-                    <div className="mb-3 p-2.5 rounded-md bg-destructive/5 border border-destructive/10">
-                      <p className="text-[11px] text-destructive">{c.error_message}</p>
-                    </div>
-                  )}
-
-                  {c.status === 'stale' && (
-                    <div className="mb-3 p-2.5 rounded-md bg-warning/5 border border-warning/10">
-                      <p className="text-[11px] text-warning">Last sync {c.last_sync}. Data may be outdated.</p>
-                    </div>
-                  )}
-
-                  <div className="flex items-center justify-between text-[11px] text-muted-foreground mb-3">
-                    {c.last_sync && c.status !== 'stale' && <span>Synced {c.last_sync}</span>}
-                    {c.items_synced && <span>{c.items_synced.toLocaleString()} items</span>}
-                  </div>
-
-                  <div className="flex gap-2">
-                    {c.status === 'error' && <Button size="sm" className="h-7 text-xs gradient-brand border-0 text-primary-foreground">Re-authenticate</Button>}
-                    {c.status === 'stale' && <Button size="sm" className="h-7 text-xs">Force Sync</Button>}
-                    <Button size="sm" variant="ghost" className="h-7 text-xs text-muted-foreground">Configure</Button>
-                  </div>
-                </motion.div>
-              );
-            })}
-          </div>
+          <h1 className="text-lg font-bold text-foreground">Integrations</h1>
+          <p className="text-xs text-muted-foreground mt-0.5">Manage data source connections for incident investigations</p>
         </div>
-      )}
-
-      {/* Available */}
-      <div>
-        <h2 className="text-sm font-semibold text-foreground mb-1">Available Integrations</h2>
-        <p className="text-xs text-muted-foreground mb-4">Connect additional data sources to improve investigation quality.</p>
-
-        <div className="flex items-center gap-3 mb-4">
-          <div className="relative flex-1 max-w-xs">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
-            <Input placeholder="Search integrations..." value={search} onChange={e => setSearch(e.target.value)} className="pl-9 h-9 bg-card border-border text-sm" />
+        <div className="flex items-center gap-3">
+          {/* Status summary */}
+          <div className="flex items-center gap-2">
+            <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              <span className="h-2 w-2 rounded-full bg-emerald-400" />
+              <span className="tabular-nums font-mono text-foreground">{connected.length}</span> connected
+            </span>
+            {errored.length > 0 && (
+              <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <span className="h-2 w-2 rounded-full bg-severity-p0" />
+                <span className="tabular-nums font-mono text-severity-p0">{errored.length}</span> error{errored.length !== 1 ? 's' : ''}
+              </span>
+            )}
           </div>
-          <div className="flex items-center bg-card rounded-lg p-0.5 border border-border overflow-x-auto">
+          <Button size="sm" className="h-8 text-xs gap-1.5 gradient-brand border-0 text-primary-foreground hover:opacity-90">
+            <Plus className="h-3.5 w-3.5" />
+            Add Integration
+          </Button>
+        </div>
+      </div>
+
+      {/* ── Status filter tabs ───────────────────────────────────────────────── */}
+      <div className="flex items-center gap-2 flex-wrap">
+        {([
+          { key: 'all' as StatusFilter, label: 'All', count: mockConnectors.length },
+          { key: 'connected' as StatusFilter, label: 'Connected', count: connected.length },
+          { key: 'error' as StatusFilter, label: 'Errors', count: errored.length },
+          { key: 'stale' as StatusFilter, label: 'Stale', count: stale.length },
+          { key: 'not_connected' as StatusFilter, label: 'Not Connected', count: notConnected.length },
+        ]).map(f => (
+          <button
+            key={f.key}
+            onClick={() => setStatusFilter(f.key)}
+            className={cn(
+              'flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-full transition-all font-medium border',
+              statusFilter === f.key
+                ? 'bg-primary/10 text-primary border-primary/30'
+                : 'text-muted-foreground border-border/50 hover:text-foreground hover:border-border bg-transparent',
+            )}
+          >
+            {f.label}
+            <span className={cn(
+              'min-w-[16px] h-4 rounded-full text-[10px] font-bold flex items-center justify-center px-1',
+              statusFilter === f.key ? 'bg-primary/20 text-primary' : 'bg-muted text-muted-foreground',
+            )}>{f.count}</span>
+          </button>
+        ))}
+
+        <div className="ml-auto flex items-center gap-2">
+          <div className="relative">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+            <Input placeholder="Search..." value={search} onChange={e => setSearch(e.target.value)} className="pl-8 h-8 w-48 bg-card border-border text-xs" />
+          </div>
+          <div className="flex items-center gap-1 bg-card rounded-lg border border-border p-0.5 overflow-x-auto">
             {categories.map(cat => (
               <button key={cat} onClick={() => setCategory(cat)}
                 className={cn(
@@ -729,33 +740,133 @@ export default function IntegrationsPage() {
             ))}
           </div>
         </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-          {filteredAvailable.map((c, i) => (
-            <motion.div key={c.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.04 }}
-              className="rounded-xl border border-border bg-card p-4 hover:border-primary/20 transition-all group cursor-pointer"
-              onClick={() => startSetup(c)}>
-              <div className="flex items-start gap-3 mb-3">
-                <div className="h-9 w-9 rounded-lg bg-muted flex items-center justify-center group-hover:bg-primary/10 transition-colors">
-                  <Link2 className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <span className="text-sm font-semibold text-foreground">{c.name}</span>
-                  <p className="text-[10px] text-muted-foreground">{c.category}</p>
-                </div>
-                <ChevronRight className="h-4 w-4 text-muted-foreground/30 group-hover:text-primary transition-colors mt-0.5" />
-              </div>
-              <p className="text-xs text-muted-foreground leading-relaxed">{c.description}</p>
-            </motion.div>
-          ))}
-        </div>
-
-        {filteredAvailable.length === 0 && (
-          <div className="text-center py-12 text-muted-foreground">
-            <p className="text-sm">No integrations match your search.</p>
-          </div>
-        )}
       </div>
+
+      {/* ── Connected + Active Sources ───────────────────────────────────────── */}
+      {(statusFilter === 'all' || statusFilter === 'connected' || statusFilter === 'error' || statusFilter === 'stale') && (
+        <>
+          {mockConnectors.filter(c => c.status !== 'not_connected').filter(c => {
+            if (statusFilter !== 'all' && c.status !== statusFilter) return false;
+            if (category !== 'all' && c.category !== category) return false;
+            if (search && !c.name.toLowerCase().includes(search.toLowerCase())) return false;
+            return true;
+          }).length > 0 && (
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground">Active Connections</p>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                {mockConnectors.filter(c => c.status !== 'not_connected').filter(c => {
+                  if (statusFilter !== 'all' && c.status !== statusFilter) return false;
+                  if (category !== 'all' && c.category !== category) return false;
+                  if (search && !c.name.toLowerCase().includes(search.toLowerCase())) return false;
+                  return true;
+                }).map((c, i) => {
+                  const config = statusConfig[c.status as ConnectorStatus];
+                  return (
+                    <motion.div key={c.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.04 }}
+                      className={cn('rounded-xl border bg-card p-4 transition-all hover:border-border', config.border)}>
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex items-center gap-2.5">
+                          <div className="h-10 w-10 rounded-xl bg-muted border border-border flex items-center justify-center shrink-0">
+                            <Link2 className="h-4 w-4 text-muted-foreground" />
+                          </div>
+                          <div>
+                            <span className="text-sm font-semibold text-foreground">{c.name}</span>
+                            <div className="flex items-center gap-1.5 mt-0.5">
+                              <span className="px-1.5 py-0.5 rounded-md bg-secondary text-[10px] text-muted-foreground border border-border/50">{c.category}</span>
+                            </div>
+                          </div>
+                        </div>
+                        <span className={cn('inline-flex items-center gap-1.5 text-[10px] px-2 py-1 rounded-full font-medium border', config.badgeBg, config.badge)}>
+                          <span className={cn('h-1.5 w-1.5 rounded-full', config.dotColor, c.status === 'connected' ? 'animate-pulse' : '')} />
+                          {config.label}
+                        </span>
+                      </div>
+
+                      {c.status === 'error' && c.error_message && (
+                        <div className="mb-3 p-2.5 rounded-lg bg-severity-p0/5 border border-severity-p0/20">
+                          <p className="text-[11px] text-severity-p0 leading-relaxed">{c.error_message}</p>
+                        </div>
+                      )}
+
+                      {c.status === 'stale' && (
+                        <div className="mb-3 p-2.5 rounded-lg bg-severity-p2/5 border border-severity-p2/20">
+                          <p className="text-[11px] text-severity-p2">Last sync {c.last_sync}. Data may be outdated.</p>
+                        </div>
+                      )}
+
+                      <div className="flex items-center justify-between text-[11px] text-muted-foreground mb-3">
+                        {c.last_sync && c.status !== 'stale' && (
+                          <span className="font-mono">Synced {c.last_sync}</span>
+                        )}
+                        {c.items_synced && (
+                          <span className="font-mono tabular-nums">{c.items_synced.toLocaleString()} items</span>
+                        )}
+                      </div>
+
+                      <div className="flex gap-2">
+                        {c.status === 'error' && (
+                          <Button size="sm" className="h-7 text-xs gradient-brand border-0 text-primary-foreground">Re-authenticate</Button>
+                        )}
+                        {c.status === 'stale' && (
+                          <Button size="sm" variant="outline" className="h-7 text-xs">Force Sync</Button>
+                        )}
+                        <Button size="sm" variant="ghost" className="h-7 text-xs text-muted-foreground ml-auto">Configure</Button>
+                      </div>
+                    </motion.div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </>
+      )}
+
+      {/* ── Available Integrations ───────────────────────────────────────────── */}
+      {(statusFilter === 'all' || statusFilter === 'not_connected') && filteredAvailable.length > 0 && (
+        <div>
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground">Available Integrations</p>
+            <p className="text-[11px] text-muted-foreground">Connect to improve investigation quality</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            {filteredAvailable.map((c, i) => (
+              <motion.div key={c.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.04 }}
+                className="rounded-xl border border-border bg-card p-4 hover:border-primary/20 transition-all group cursor-pointer"
+                onClick={() => startSetup(c)}>
+                <div className="flex items-start gap-3 mb-3">
+                  <div className="h-10 w-10 rounded-xl bg-muted border border-border group-hover:bg-primary/10 group-hover:border-primary/20 transition-all flex items-center justify-center shrink-0">
+                    <Link2 className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <span className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors">{c.name}</span>
+                    <div className="mt-0.5">
+                      <span className="px-1.5 py-0.5 rounded-md bg-secondary text-[10px] text-muted-foreground border border-border/50">{c.category}</span>
+                    </div>
+                  </div>
+                  <ChevronRight className="h-4 w-4 text-muted-foreground/30 group-hover:text-primary transition-colors mt-0.5 shrink-0" />
+                </div>
+                <p className="text-xs text-muted-foreground leading-relaxed">{c.description}</p>
+                <div className="mt-3 flex items-center gap-1.5">
+                  <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/40" />
+                  <span className="text-[10px] text-muted-foreground">Not connected</span>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {allConnectors.length === 0 && (
+        <div className="text-center py-16 text-muted-foreground">
+          <div className="h-14 w-14 rounded-2xl bg-muted border border-border flex items-center justify-center mx-auto mb-4">
+            <Search className="h-6 w-6 text-muted-foreground" />
+          </div>
+          <p className="text-sm font-medium text-foreground mb-1">No integrations found</p>
+          <p className="text-xs text-muted-foreground">Try adjusting your search or filter.</p>
+        </div>
+      )}
     </div>
   );
 }

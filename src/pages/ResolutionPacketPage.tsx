@@ -18,12 +18,16 @@ import { format } from 'date-fns';
 
 const SectionHeader = ({ icon: Icon, title, badge }: { icon: React.ElementType; title: string; badge?: string }) => (
   <div className="flex items-center gap-2.5 mb-4">
-    <div className="h-6 w-6 rounded-md bg-primary/10 flex items-center justify-center">
+    <div className="h-7 w-7 rounded-lg bg-primary/10 border border-primary/15 flex items-center justify-center shrink-0">
       <Icon className="h-3.5 w-3.5 text-primary" />
     </div>
     <h2 className="text-sm font-semibold text-foreground">{title}</h2>
-    {badge && <Badge variant="secondary" className="text-[10px]">{badge}</Badge>}
-    <div className="flex-1 h-px bg-border ml-2" />
+    {badge && (
+      <span className="text-[10px] px-2 py-0.5 rounded-full bg-secondary border border-border text-muted-foreground font-medium">
+        {badge}
+      </span>
+    )}
+    <div className="flex-1 h-px bg-border/60 ml-1" />
   </div>
 );
 
@@ -68,6 +72,33 @@ const EventTypeIcon = ({ type }: { type: string }) => {
   return <Icon className={cn('h-3.5 w-3.5 shrink-0', color)} />;
 };
 
+// Circular confidence display
+const ConfidenceRing = ({ value, label, color }: { value: number; label: string; color: string }) => {
+  const pct = Math.round(value * 100);
+  const r = 26;
+  const circ = 2 * Math.PI * r;
+  const dash = (pct / 100) * circ;
+  return (
+    <div className="flex flex-col items-center gap-1">
+      <div className="relative h-16 w-16">
+        <svg className="h-16 w-16 -rotate-90" viewBox="0 0 64 64">
+          <circle cx="32" cy="32" r={r} fill="none" stroke="currentColor" strokeWidth="5" className="text-border/40" />
+          <circle
+            cx="32" cy="32" r={r} fill="none" stroke="currentColor" strokeWidth="5"
+            strokeDasharray={`${dash} ${circ - dash}`}
+            strokeLinecap="round"
+            className={color}
+          />
+        </svg>
+        <div className="absolute inset-0 flex items-center justify-center">
+          <span className={cn('text-sm font-mono font-bold', color)}>{pct}%</span>
+        </div>
+      </div>
+      <span className="text-[10px] text-muted-foreground">{label}</span>
+    </div>
+  );
+};
+
 export default function ResolutionPacketPage() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -87,6 +118,10 @@ export default function ResolutionPacketPage() {
     packet.overall_confidence >= 0.65 ? 'text-blue-400' :
     packet.overall_confidence >= 0.40 ? 'text-amber-400' : 'text-muted-foreground';
 
+  const confidenceRingColor = packet.overall_confidence >= 0.85 ? 'text-emerald-400' :
+    packet.overall_confidence >= 0.65 ? 'text-blue-400' :
+    packet.overall_confidence >= 0.40 ? 'text-amber-400' : 'text-muted-foreground';
+
   return (
     <div className="space-y-0 -m-6">
       {/* Sticky Header */}
@@ -102,12 +137,12 @@ export default function ResolutionPacketPage() {
           <FileText className="h-4 w-4 text-primary" />
           <span className="text-sm font-semibold text-foreground">Resolution Packet</span>
           <span className="text-muted-foreground text-sm">·</span>
-          <span className="font-mono text-xs bg-secondary px-2 py-0.5 rounded">{incident.short_id}</span>
+          <span className="font-mono text-xs bg-secondary px-2 py-0.5 rounded border border-border/50">{incident.short_id}</span>
           <SeverityBadge severity={incident.severity} />
         </div>
         <div className="ml-auto flex items-center gap-2">
           <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-            <span>v{packet.version}</span>
+            <span className="font-mono">v{packet.version}</span>
             <span>·</span>
             <span>Generated {format(new Date(packet.created_at), 'MMM d, HH:mm')} UTC</span>
           </div>
@@ -120,72 +155,78 @@ export default function ResolutionPacketPage() {
         </div>
       </motion.div>
 
-      {/* Packet Metadata Bar */}
-      <div className="px-6 py-2.5 border-b border-border bg-surface-raised/30 flex items-center gap-6 flex-wrap text-xs text-muted-foreground">
-        <div className="flex items-center gap-1.5">
-          <span className="text-foreground font-medium">Confidence:</span>
-          <span className={cn('font-mono font-bold', confidenceColor)}>{Math.round(packet.overall_confidence * 100)}%</span>
-          <span className="text-muted-foreground/60">({packet.summary.confidence_statement})</span>
+      {/* Missing signals warning bar */}
+      {packet.missing_signals.length > 0 && (
+        <div className="px-6 py-2 bg-amber-500/5 border-b border-amber-500/20 flex items-center gap-2 text-xs text-amber-400">
+          <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
+          <span>
+            <strong>{packet.missing_signals.length} missing signals</strong> — reduced confidence.
+            Some signals were unavailable during investigation.
+          </span>
         </div>
-        <div className="flex items-center gap-1.5">
-          <span className="text-foreground font-medium">Completeness:</span>
-          <span className="font-mono">{Math.round(packet.completeness_score * 100)}%</span>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <span className="text-foreground font-medium">Model:</span>
-          <span className="font-mono">{packet.llm_model_used}</span>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <span className="text-foreground font-medium">Prompt:</span>
-          <span className="font-mono">{packet.prompt_version}</span>
-        </div>
-        {packet.missing_signals.length > 0 && (
-          <div className="flex items-center gap-1.5 ml-auto text-amber-400">
-            <AlertTriangle className="h-3 w-3" />
-            <span>{packet.missing_signals.length} missing signals — reduced confidence</span>
-          </div>
-        )}
-      </div>
+      )}
 
       {/* Content */}
       <div className="max-w-4xl mx-auto px-6 py-6 space-y-6">
 
-        {/* SUMMARY */}
+        {/* SUMMARY — Hero card with confidence rings */}
         <motion.section initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}>
           <SectionHeader icon={FileText} title="Summary" />
-          <div className="rounded-xl border border-border bg-surface-raised/30 p-5 space-y-4">
+          <div className="rounded-xl border border-border bg-card p-5 space-y-5">
             <p className="text-base font-medium text-foreground leading-relaxed">{packet.summary.one_line}</p>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-              <div className="p-3 rounded-lg bg-secondary/50 space-y-1">
-                <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">Severity Basis</p>
-                <p className="text-xs text-foreground">{packet.summary.severity_basis}</p>
-              </div>
-              <div className="p-3 rounded-lg bg-secondary/50 space-y-1">
-                <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">Customer Impact</p>
-                <p className="text-xs text-foreground">{packet.summary.customer_impact}</p>
-              </div>
-              <div className="p-3 rounded-lg bg-severity-p0/5 border border-severity-p0/10 space-y-1">
-                <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">SLO Impact</p>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-mono font-bold text-severity-p0">{packet.summary.slo_impact.burn_rate}x burn rate</span>
-                  <span className="text-xs text-muted-foreground">{packet.summary.slo_impact.budget_consumed}% budget consumed</span>
+
+            {/* Confidence + completeness rings */}
+            <div className="flex items-center gap-6 p-4 rounded-lg bg-secondary/30 border border-border/40">
+              <ConfidenceRing
+                value={packet.overall_confidence}
+                label="Confidence"
+                color={confidenceRingColor}
+              />
+              <ConfidenceRing
+                value={packet.completeness_score}
+                label="Completeness"
+                color="text-primary"
+              />
+              <div className="flex-1 space-y-2">
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">Overall Confidence</span>
+                    <span className={cn('text-xs font-mono font-bold', confidenceColor)}>
+                      {Math.round(packet.overall_confidence * 100)}% — {packet.summary.confidence_statement}
+                    </span>
+                  </div>
+                  <ConfidenceBar confidence={packet.overall_confidence} />
+                </div>
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">Packet Completeness</span>
+                    <span className="text-xs font-mono">{Math.round(packet.completeness_score * 100)}%</span>
+                  </div>
+                  <Progress value={packet.completeness_score * 100} className="h-1.5" />
+                </div>
+                <div className="flex gap-2 text-[10px] text-muted-foreground pt-1">
+                  <span className="font-mono bg-secondary px-1.5 py-0.5 rounded">{packet.llm_model_used}</span>
+                  <span className="font-mono bg-secondary px-1.5 py-0.5 rounded">{packet.prompt_version}</span>
                 </div>
               </div>
             </div>
-            <div className="flex items-center gap-3 pt-1">
-              <div className="flex-1">
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-[10px] text-muted-foreground">Overall Confidence</span>
-                  <span className={cn('text-xs font-mono font-bold', confidenceColor)}>{Math.round(packet.overall_confidence * 100)}% — {packet.summary.confidence_statement}</span>
-                </div>
-                <ConfidenceBar confidence={packet.overall_confidence} />
+
+            {/* Summary grid */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <div className="p-3 rounded-lg bg-secondary/40 border border-border/40 space-y-1">
+                <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">Severity Basis</p>
+                <p className="text-xs text-foreground">{packet.summary.severity_basis}</p>
               </div>
-              <div className="flex-1">
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-[10px] text-muted-foreground">Packet Completeness</span>
-                  <span className="text-xs font-mono">{Math.round(packet.completeness_score * 100)}%</span>
+              <div className="p-3 rounded-lg bg-secondary/40 border border-border/40 space-y-1">
+                <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">Customer Impact</p>
+                <p className="text-xs text-foreground">{packet.summary.customer_impact}</p>
+              </div>
+              <div className="p-3 rounded-lg bg-severity-p0/5 border border-severity-p0/15 space-y-1">
+                <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">SLO Impact</p>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-mono font-bold text-severity-p0">{packet.summary.slo_impact.burn_rate}x burn</span>
+                  <span className="text-xs text-muted-foreground">{packet.summary.slo_impact.budget_consumed}% consumed</span>
                 </div>
-                <Progress value={packet.completeness_score * 100} className="h-1.5" />
               </div>
             </div>
           </div>
@@ -194,8 +235,8 @@ export default function ResolutionPacketPage() {
         {/* AFFECTED SCOPE */}
         <motion.section initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
           <SectionHeader icon={AlertCircle} title="Affected Scope" badge={`${packet.affected_scope.scope_confidence * 100}% confidence`} />
-          <div className="rounded-xl border border-border bg-surface-raised/30 p-5">
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          <div className="rounded-xl border border-border bg-card p-5">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {[
                 { label: 'Services', items: packet.affected_scope.services },
                 { label: 'Endpoints', items: packet.affected_scope.endpoints },
@@ -203,11 +244,11 @@ export default function ResolutionPacketPage() {
                 { label: 'Versions', items: packet.affected_scope.versions },
               ].map(({ label, items }) => (
                 <div key={label}>
-                  <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider mb-1.5">{label}</p>
+                  <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground mb-2">{label}</p>
                   {items.length > 0 ? (
                     <div className="flex flex-wrap gap-1">
                       {items.map(item => (
-                        <span key={item} className="text-[11px] px-2 py-0.5 bg-secondary rounded font-mono">{item}</span>
+                        <span key={item} className="text-[11px] px-2 py-0.5 bg-secondary rounded-md font-mono border border-border/40">{item}</span>
                       ))}
                     </div>
                   ) : (
@@ -223,7 +264,7 @@ export default function ResolutionPacketPage() {
         {packet.topology_slice && (
           <motion.section initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12 }}>
             <SectionHeader icon={GitBranch} title="Topology — Causal Path" badge={packet.topology_slice.source === 'inferred' ? 'Inferred' : 'Explicit'} />
-            <div className="rounded-xl border border-border bg-surface-raised/30 p-5">
+            <div className="rounded-xl border border-border bg-card p-5">
               <div className="flex items-center gap-2 flex-wrap mb-4">
                 {packet.topology_slice.causal_path.map((svc, i) => (
                   <div key={svc} className="flex items-center gap-2">
@@ -245,28 +286,29 @@ export default function ResolutionPacketPage() {
                 ))}
               </div>
               <p className="text-xs text-muted-foreground">
-                Source: {packet.topology_slice.source === 'inferred' ? 'Inferred from distributed traces and service calls — not from explicit service catalog entry.' : 'From service catalog dependency definitions.'}
-                {' '}Confidence: {Math.round(packet.topology_slice.confidence * 100)}%.
+                Source: {packet.topology_slice.source === 'inferred' ? 'Inferred from distributed traces and service calls.' : 'From service catalog dependency definitions.'}
+                {' '}Confidence: <span className="font-mono font-medium text-foreground">{Math.round(packet.topology_slice.confidence * 100)}%</span>.
               </p>
             </div>
           </motion.section>
         )}
 
-        {/* UNIFIED TIMELINE */}
+        {/* UNIFIED TIMELINE — cleaner vertical timeline */}
         <motion.section initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
           <SectionHeader icon={Clock} title="Unified Timeline" badge={`${packet.unified_timeline.length} events`} />
-          <div className="rounded-xl border border-border bg-surface-raised/30 p-5">
-            <div className="relative pl-4 border-l border-border space-y-0">
+          <div className="rounded-xl border border-border bg-card p-5">
+            <div className="relative pl-6 border-l-2 border-border/40 space-y-0">
               {packet.unified_timeline.map((event, i) => (
                 <div key={event.id} className="relative pb-5 last:pb-0">
-                  <div className="absolute -left-5 top-0 h-3 w-3 rounded-full border-2 border-border bg-background" />
-                  <div className="flex items-start gap-3">
+                  {/* Connector dot */}
+                  <div className="absolute -left-[25px] top-0.5 h-3 w-3 rounded-full border-2 border-border bg-card" />
+                  <div className="flex items-start gap-3 group hover:bg-secondary/20 -ml-3 pl-3 pr-2 py-1.5 rounded-lg transition-colors">
                     <EventTypeIcon type={event.event_type} />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="text-xs font-medium text-foreground">{event.title}</span>
                         {event.service && (
-                          <span className="text-[10px] px-1.5 py-0.5 bg-secondary rounded font-mono">{event.service}</span>
+                          <span className="text-[10px] px-1.5 py-0.5 bg-secondary rounded font-mono border border-border/40">{event.service}</span>
                         )}
                         {event.actor && (
                           <span className="text-[10px] text-muted-foreground">by {event.actor}</span>
@@ -275,7 +317,7 @@ export default function ResolutionPacketPage() {
                       {event.description && (
                         <p className="text-[11px] text-muted-foreground mt-0.5">{event.description}</p>
                       )}
-                      <p className="text-[10px] text-muted-foreground/50 mt-0.5 font-mono">
+                      <p className="text-[10px] text-muted-foreground/50 mt-0.5 font-mono tabular-nums">
                         {format(new Date(event.timestamp), 'HH:mm:ss')} UTC
                         {event.source && ` · ${event.source}`}
                       </p>
@@ -298,10 +340,10 @@ export default function ResolutionPacketPage() {
         {/* ROOT CAUSE CONCLUSION */}
         <motion.section initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
           <SectionHeader icon={CheckCircle2} title="Root Cause Conclusion" />
-          <div className="rounded-xl border border-border bg-surface-raised/30 p-5 space-y-4">
+          <div className="rounded-xl border border-border bg-card p-5 space-y-5">
             {packet.root_cause_conclusion.probable_root_causes.length > 0 && (
-              <div>
-                <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider mb-2 flex items-center gap-1.5">
+              <div className="p-4 rounded-lg bg-blue-500/5 border border-blue-500/15">
+                <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground mb-3 flex items-center gap-1.5">
                   <div className="h-2 w-2 rounded-full bg-blue-400" />
                   Probable Root Causes
                 </p>
@@ -312,10 +354,10 @@ export default function ResolutionPacketPage() {
             )}
             {packet.root_cause_conclusion.contributing_factors.length > 0 && (
               <div>
-                <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider mb-2">Contributing Factors</p>
-                <ul className="space-y-1">
+                <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground mb-2">Contributing Factors</p>
+                <ul className="space-y-2">
                   {packet.root_cause_conclusion.contributing_factors.map((cf, i) => (
-                    <li key={i} className="flex items-start gap-2 text-xs text-foreground">
+                    <li key={i} className="flex items-start gap-2.5 text-xs text-foreground p-2 rounded-md hover:bg-secondary/30 transition-colors">
                       <div className="h-1.5 w-1.5 rounded-full bg-amber-400 mt-1.5 shrink-0" />
                       {cf}
                     </li>
@@ -324,14 +366,17 @@ export default function ResolutionPacketPage() {
               </div>
             )}
             {packet.root_cause_conclusion.explicit_unknowns.length > 0 && (
-              <div className="p-3 rounded-lg bg-secondary/50 border border-border">
-                <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider mb-2 flex items-center gap-1.5">
+              <div className="p-3 rounded-lg bg-secondary/40 border border-border/40">
+                <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground mb-2 flex items-center gap-1.5">
                   <AlertTriangle className="h-3 w-3 text-amber-400" />
-                  Explicit Unknowns (Could Not Determine)
+                  Explicit Unknowns
                 </p>
                 <ul className="space-y-1">
                   {packet.root_cause_conclusion.explicit_unknowns.map((u, i) => (
-                    <li key={i} className="text-xs text-muted-foreground">{u}</li>
+                    <li key={i} className="text-xs text-muted-foreground flex items-start gap-2">
+                      <div className="h-1 w-1 rounded-full bg-muted-foreground/40 mt-1.5 shrink-0" />
+                      {u}
+                    </li>
                   ))}
                 </ul>
               </div>
@@ -339,46 +384,40 @@ export default function ResolutionPacketPage() {
           </div>
         </motion.section>
 
-        {/* MITIGATION PLAN */}
+        {/* MITIGATION PLAN — styled as action cards */}
         <motion.section initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
           <SectionHeader icon={Zap} title="Mitigation Plan" />
-          <div className="space-y-4">
+          <div className="space-y-5">
             {[
-              { label: 'Immediate Actions', actions: packet.mitigation_plan.immediate_actions, color: 'text-severity-p0' },
-              { label: 'Durable Fixes', actions: packet.mitigation_plan.durable_fixes, color: 'text-blue-400' },
-              { label: 'Preventive Actions', actions: packet.mitigation_plan.preventive_actions, color: 'text-emerald-400' },
-            ].map(({ label, actions, color }) => (
+              { label: 'Immediate Actions', actions: packet.mitigation_plan.immediate_actions, color: 'text-severity-p0', borderColor: 'border-severity-p0/20', bgColor: 'bg-severity-p0/5' },
+              { label: 'Durable Fixes', actions: packet.mitigation_plan.durable_fixes, color: 'text-blue-400', borderColor: 'border-blue-500/20', bgColor: 'bg-blue-500/5' },
+              { label: 'Preventive Actions', actions: packet.mitigation_plan.preventive_actions, color: 'text-emerald-400', borderColor: 'border-emerald-500/20', bgColor: 'bg-emerald-500/5' },
+            ].map(({ label, actions, color, borderColor, bgColor }) => (
               actions.length > 0 && (
                 <div key={label}>
-                  <p className={cn('text-xs font-medium mb-2', color)}>{label}</p>
+                  <p className={cn('text-[10px] font-bold uppercase tracking-[0.12em] mb-3', color)}>{label}</p>
                   <div className="space-y-2">
                     {actions.map((action, i) => (
-                      <div key={action.id} className="flex gap-3 p-3 rounded-lg border border-border bg-surface-raised/30">
-                        <div className="h-5 w-5 rounded-full bg-secondary flex items-center justify-center shrink-0 mt-0.5">
-                          <span className="text-[10px] font-bold text-muted-foreground">{i + 1}</span>
+                      <div key={action.id} className={cn('flex gap-3 p-4 rounded-xl border', borderColor, bgColor)}>
+                        {/* Number badge */}
+                        <div className="h-6 w-6 rounded-full bg-secondary/80 border border-border/50 flex items-center justify-center shrink-0 mt-0.5">
+                          <span className="text-[10px] font-bold text-muted-foreground tabular-nums">{i + 1}</span>
                         </div>
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 flex-wrap mb-1">
-                            <span className="text-xs font-medium text-foreground">{action.description}</span>
-                          </div>
+                          <p className="text-xs font-semibold text-foreground mb-2">{action.description}</p>
                           <div className="flex items-center gap-2 flex-wrap">
                             <TierBadge tier={action.tier} />
                             <RiskBadge risk={action.risk_level} />
-                            <span className="text-[10px] text-muted-foreground">·</span>
-                            <span className="text-[10px] text-muted-foreground">{action.estimated_time}</span>
-                            <span className="text-[10px] text-muted-foreground">·</span>
-                            <span className="text-[10px] text-muted-foreground">Owner: {action.owner_role}</span>
+                            <span className="text-[10px] text-muted-foreground font-mono">{action.estimated_time}</span>
+                            <span className="text-[10px] text-muted-foreground">Owner: <span className="text-foreground">{action.owner_role}</span></span>
                             {action.rollback_available && (
-                              <>
-                                <span className="text-[10px] text-muted-foreground">·</span>
-                                <span className="text-[10px] text-emerald-400">Rollback available</span>
-                              </>
+                              <span className="text-[10px] text-emerald-400 font-medium">Rollback available</span>
                             )}
                           </div>
                           {action.commands && action.commands.length > 0 && (
-                            <div className="mt-2 p-2 bg-background/50 rounded border border-border/50 font-mono text-[11px] text-muted-foreground space-y-0.5">
+                            <div className="mt-2.5 p-2.5 bg-background/60 rounded-lg border border-border/50 font-mono text-[11px] text-muted-foreground space-y-0.5">
                               {action.commands.map((cmd, ci) => (
-                                <p key={ci} className="whitespace-pre-wrap break-all">{cmd}</p>
+                                <p key={ci} className="whitespace-pre-wrap break-all leading-relaxed">{cmd}</p>
                               ))}
                             </div>
                           )}
@@ -396,22 +435,22 @@ export default function ResolutionPacketPage() {
         {packet.verification_criteria.length > 0 && (
           <motion.section initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}>
             <SectionHeader icon={CheckCircle2} title="Verification Criteria" />
-            <div className="rounded-xl border border-border bg-surface-raised/30 overflow-hidden">
+            <div className="rounded-xl border border-border bg-card overflow-hidden">
               <table className="w-full text-xs">
-                <thead className="border-b border-border">
-                  <tr className="bg-secondary/30">
-                    <th className="text-left px-4 py-2.5 text-[10px] text-muted-foreground font-medium uppercase tracking-wider">Check</th>
-                    <th className="text-left px-4 py-2.5 text-[10px] text-muted-foreground font-medium uppercase tracking-wider">Success Threshold</th>
-                    <th className="text-left px-4 py-2.5 text-[10px] text-muted-foreground font-medium uppercase tracking-wider">Timeout</th>
-                    <th className="text-left px-4 py-2.5 text-[10px] text-muted-foreground font-medium uppercase tracking-wider">Fallback</th>
+                <thead className="border-b border-border bg-secondary/20">
+                  <tr>
+                    <th className="text-left px-4 py-2.5 text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">Check</th>
+                    <th className="text-left px-4 py-2.5 text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">Success Threshold</th>
+                    <th className="text-left px-4 py-2.5 text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">Timeout</th>
+                    <th className="text-left px-4 py-2.5 text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">Fallback</th>
                   </tr>
                 </thead>
                 <tbody>
                   {packet.verification_criteria.map((vc, i) => (
-                    <tr key={vc.id} className={cn('border-b border-border/50', i % 2 === 0 ? '' : 'bg-secondary/10')}>
+                    <tr key={vc.id} className={cn('border-b border-border/40 last:border-0 hover:bg-secondary/20 transition-colors', i % 2 === 0 ? '' : 'bg-secondary/10')}>
                       <td className="px-4 py-2.5 font-medium">{vc.check_type}</td>
                       <td className="px-4 py-2.5 font-mono text-emerald-400">{vc.success_threshold}</td>
-                      <td className="px-4 py-2.5 text-muted-foreground">{vc.timeout}</td>
+                      <td className="px-4 py-2.5 text-muted-foreground font-mono">{vc.timeout}</td>
                       <td className="px-4 py-2.5 text-muted-foreground">{vc.fallback_action}</td>
                     </tr>
                   ))}
@@ -426,16 +465,16 @@ export default function ResolutionPacketPage() {
           <motion.section initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
             <SectionHeader icon={Shield} title="Gap Artifacts" badge="Prerequisites Builder" />
             <p className="text-xs text-muted-foreground mb-3">
-              These instrumentation and process improvements would have detected or prevented this incident faster. Generated by BugPilot Prerequisites Builder.
+              These instrumentation and process improvements would have detected or prevented this incident faster.
             </p>
             <div className="space-y-2">
               {packet.gap_artifacts.map(gap => (
-                <div key={gap.id} className="flex items-start gap-3 p-3 rounded-lg border border-border bg-surface-raised/30">
+                <div key={gap.id} className="flex items-start gap-3 p-3.5 rounded-xl border border-border bg-card hover:bg-surface-hover transition-colors">
                   <div className={cn(
-                    'text-[9px] px-1.5 py-1 rounded font-bold uppercase tracking-wider shrink-0 mt-0.5',
-                    gap.priority === 'critical' ? 'bg-severity-p0/10 text-severity-p0' :
-                    gap.priority === 'high' ? 'bg-amber-500/10 text-amber-400' :
-                    'bg-secondary text-muted-foreground'
+                    'text-[9px] px-1.5 py-1 rounded font-bold uppercase tracking-wider shrink-0 mt-0.5 border',
+                    gap.priority === 'critical' ? 'bg-severity-p0/10 text-severity-p0 border-severity-p0/20' :
+                    gap.priority === 'high' ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' :
+                    'bg-secondary text-muted-foreground border-border'
                   )}>
                     {gap.priority}
                   </div>
@@ -443,7 +482,7 @@ export default function ResolutionPacketPage() {
                     <p className="text-xs font-medium text-foreground">{gap.title}</p>
                     <p className="text-[11px] text-muted-foreground mt-0.5">{gap.description}</p>
                     <div className="flex items-center gap-2 mt-1.5">
-                      <span className="text-[10px] px-1.5 py-0.5 bg-secondary rounded capitalize">{gap.artifact_type.replace('_', ' ')}</span>
+                      <span className="text-[10px] px-1.5 py-0.5 bg-secondary rounded-md capitalize border border-border/40">{gap.artifact_type.replace('_', ' ')}</span>
                       <span className="text-[10px] text-muted-foreground">{gap.dimension.replace('_', ' ')}</span>
                     </div>
                   </div>
@@ -466,18 +505,18 @@ export default function ResolutionPacketPage() {
               <table className="w-full text-xs">
                 <thead className="border-b border-amber-500/20">
                   <tr>
-                    <th className="text-left px-4 py-2.5 text-[10px] text-amber-400/80 font-medium uppercase tracking-wider">Signal Source</th>
-                    <th className="text-left px-4 py-2.5 text-[10px] text-amber-400/80 font-medium uppercase tracking-wider">Reason Unavailable</th>
-                    <th className="text-left px-4 py-2.5 text-[10px] text-amber-400/80 font-medium uppercase tracking-wider">Confidence Impact</th>
-                    <th className="text-left px-4 py-2.5 text-[10px] text-amber-400/80 font-medium uppercase tracking-wider">Fix</th>
+                    <th className="text-left px-4 py-2.5 text-[10px] font-bold uppercase tracking-[0.12em] text-amber-400/80">Signal Source</th>
+                    <th className="text-left px-4 py-2.5 text-[10px] font-bold uppercase tracking-[0.12em] text-amber-400/80">Reason Unavailable</th>
+                    <th className="text-left px-4 py-2.5 text-[10px] font-bold uppercase tracking-[0.12em] text-amber-400/80">Confidence Impact</th>
+                    <th className="text-left px-4 py-2.5 text-[10px] font-bold uppercase tracking-[0.12em] text-amber-400/80">Fix</th>
                   </tr>
                 </thead>
                 <tbody>
                   {packet.missing_signals.map((ms, i) => (
-                    <tr key={i} className="border-b border-amber-500/10 last:border-0">
+                    <tr key={i} className="border-b border-amber-500/10 last:border-0 hover:bg-amber-500/5 transition-colors">
                       <td className="px-4 py-2.5 font-medium text-foreground">{ms.source}</td>
                       <td className="px-4 py-2.5 text-muted-foreground">{ms.reason}</td>
-                      <td className="px-4 py-2.5 text-amber-400 font-mono">-{Math.round(ms.confidence_impact * 100)}%</td>
+                      <td className="px-4 py-2.5 text-amber-400 font-mono font-bold">-{Math.round(ms.confidence_impact * 100)}%</td>
                       <td className="px-4 py-2.5">
                         <Link to="/integrations" className="text-primary text-[11px] flex items-center gap-1 hover:underline">
                           Connect <ExternalLink className="h-2.5 w-2.5" />
@@ -491,7 +530,7 @@ export default function ResolutionPacketPage() {
           </motion.section>
         )}
 
-        {/* Actions */}
+        {/* Bottom Actions */}
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}
           className="border-t border-border pt-6 flex items-center gap-3 flex-wrap">
           <Button variant="default" size="sm" asChild>

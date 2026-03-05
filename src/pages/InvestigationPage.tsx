@@ -90,6 +90,19 @@ interface LocalNote {
   timestamp: string;
 }
 
+// ─── Phase step colors ────────────────────────────────────────────────────────
+
+const PHASE_LABELS: Record<InvestigationPhase, string> = {
+  classify: 'Classify',
+  scope: 'Scope',
+  evidence: 'Evidence',
+  topology: 'Topology',
+  hypothesize: 'Hypothesize',
+  test: 'Test',
+  fix: 'Fix',
+  packet: 'Packet',
+};
+
 export default function InvestigationPage() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -244,6 +257,9 @@ export default function InvestigationPage() {
     }
   };
 
+  // Phase progress %
+  const phaseProgress = isInvestigationComplete ? 100 : Math.round(((currentPhaseIdx + 1) / phases.length) * 100);
+
   return (
     <div className="space-y-0 -m-6 flex flex-col">
       {/* ── Incident Header ─────────────────────────────────────────────────── */}
@@ -255,18 +271,29 @@ export default function InvestigationPage() {
         <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground" onClick={() => navigate('/incidents')}>
           <ArrowLeft className="h-4 w-4" />
         </Button>
-        <span className="font-mono text-xs font-bold text-foreground bg-secondary px-2 py-0.5 rounded">{incident.short_id}</span>
+
+        {/* Severity badge — prominent */}
         <SeverityBadge severity={incident.severity} />
+
+        <span className="font-mono text-xs font-bold text-muted-foreground bg-secondary px-2 py-0.5 rounded border border-border/50">
+          {incident.short_id}
+        </span>
+
         <StatusBadge status={currentStatus} />
+
         {incident.slo_violated && (
-          <span className="text-[11px] px-2 py-0.5 rounded-md bg-severity-p0/10 text-severity-p0 font-bold font-mono border border-severity-p0/20">
-            SLO ·{incident.error_budget_consumed}% burned · {incident.burn_rate}x burn
+          <span className="text-[10px] px-2 py-0.5 rounded-md bg-severity-p0/10 text-severity-p0 font-bold font-mono border border-severity-p0/20">
+            SLO · {incident.error_budget_consumed}% burned · {incident.burn_rate}x
           </span>
         )}
-        <div className="h-4 w-px bg-border mx-1" />
-        <span className="text-sm text-foreground font-medium truncate max-w-xs">{incident.title}</span>
+
+        <div className="h-4 w-px bg-border mx-1 hidden sm:block" />
+        <span className="text-sm text-foreground font-medium truncate max-w-[220px] md:max-w-xs hidden sm:block">
+          {incident.title}
+        </span>
+
         {incident.slack_channel_name && (
-          <span className="text-[11px] font-mono text-muted-foreground bg-secondary/50 px-2 py-0.5 rounded-md border border-border/50">
+          <span className="text-[11px] font-mono text-muted-foreground bg-secondary/50 px-2 py-0.5 rounded-md border border-border/50 hidden md:block">
             #{incident.slack_channel_name}
           </span>
         )}
@@ -293,11 +320,11 @@ export default function InvestigationPage() {
                   <ChevronDown className="h-3 w-3" />
                 </Button>
                 {statusDropdownOpen && (
-                  <div className="absolute right-0 top-8 z-50 min-w-[160px] rounded-md border border-border bg-background shadow-lg py-1">
+                  <div className="absolute right-0 top-8 z-50 min-w-[160px] rounded-lg border border-border bg-card shadow-xl py-1">
                     {nextStatuses.map(s => (
                       <button
                         key={s}
-                        className="w-full text-left px-3 py-1.5 text-xs hover:bg-secondary transition-colors"
+                        className="w-full text-left px-3 py-2 text-xs hover:bg-secondary transition-colors text-foreground"
                         onClick={() => handleStatusTransition(s)}
                       >
                         {NEXT_STATUS_BUTTON_LABELS[s] ?? STATUS_LABELS[s]}
@@ -329,6 +356,58 @@ export default function InvestigationPage() {
         </div>
       </motion.div>
 
+      {/* ── Investigation Phase Progress Bar ────────────────────────────────── */}
+      <div className="px-6 py-2 border-b border-border bg-background/60 flex items-center gap-3">
+        <div className="flex items-center gap-1.5 shrink-0">
+          {isInvestigationComplete ? (
+            <CheckCircle className="h-3.5 w-3.5 text-emerald-400 shrink-0" />
+          ) : (
+            investigation.status === 'running'
+              ? <Loader2 className="h-3.5 w-3.5 text-primary animate-spin shrink-0" />
+              : <div className="h-3.5 w-3.5 rounded-full border-2 border-primary shrink-0" />
+          )}
+          <span className={cn(
+            'text-[10px] font-bold uppercase tracking-[0.12em]',
+            isInvestigationComplete ? 'text-emerald-400' : 'text-primary',
+          )}>
+            {isInvestigationComplete ? 'Complete' : `Phase: ${PHASE_LABELS[investigation.phase || 'classify']}`}
+          </span>
+        </div>
+
+        {/* Phase stepper */}
+        <div className="flex items-center gap-0.5 flex-1 overflow-x-auto scrollbar-thin">
+          {phases.map((phase, i) => {
+            const isDone = isInvestigationComplete || i < currentPhaseIdx;
+            const isCurrent = !isInvestigationComplete && i === currentPhaseIdx;
+            return (
+              <div key={phase} className="flex items-center gap-0.5 shrink-0">
+                <div className={cn(
+                  'px-2 py-0.5 rounded text-[10px] font-medium transition-colors',
+                  isDone ? 'text-emerald-400 bg-emerald-400/10' :
+                  isCurrent ? 'text-primary bg-primary/10 border border-primary/20' :
+                  'text-muted-foreground/40 bg-transparent',
+                )}>
+                  {PHASE_LABELS[phase]}
+                </div>
+                {i < phases.length - 1 && (
+                  <div className={cn('h-px w-2', isDone ? 'bg-emerald-400/40' : 'bg-border/50')} />
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Confidence + progress compact */}
+        <div className="flex items-center gap-3 shrink-0 text-[10px] text-muted-foreground">
+          <span className="font-mono">
+            <span className="text-foreground font-bold">{Math.round(investigation.overall_confidence * 100)}%</span> conf
+          </span>
+          <span className="font-mono">
+            <span className="text-foreground font-bold">{phaseProgress}%</span> done
+          </span>
+        </div>
+      </div>
+
       {/* ── Status Banner ───────────────────────────────────────────────────── */}
       {statusBanner && (
         <motion.div
@@ -352,14 +431,14 @@ export default function InvestigationPage() {
         {/* ── Left Panel ────────────────────────────────────────────────────── */}
         <div className="w-[260px] shrink-0 border-r border-border p-4 space-y-5 overflow-y-auto scrollbar-thin">
           <motion.div initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1 }}>
-            <h3 className="text-[10px] font-semibold text-muted-foreground/60 uppercase tracking-[0.12em] mb-2">Scope</h3>
+            <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground mb-2">Scope</p>
             <div className="space-y-2">
               <div className="flex items-center gap-2 flex-wrap">
                 <SeverityBadge severity={incident.severity} />
                 <StatusBadge status={currentStatus} />
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-[11px] px-2 py-0.5 rounded-md bg-secondary text-secondary-foreground capitalize">{incident.environment}</span>
+                <span className="text-[11px] px-2 py-0.5 rounded-md bg-secondary text-secondary-foreground capitalize border border-border/50">{incident.environment}</span>
                 <span className="text-[11px] text-muted-foreground">· {incident.source}</span>
               </div>
               {incident.customer_impact && (
@@ -370,8 +449,8 @@ export default function InvestigationPage() {
 
           {incident.slo_violated && (
             <motion.div initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.15 }}>
-              <h3 className="text-[10px] font-semibold text-muted-foreground/60 uppercase tracking-[0.12em] mb-2">SLO Impact</h3>
-              <div className="p-3 rounded-lg bg-severity-p0/5 border border-severity-p0/10 space-y-2">
+              <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground mb-2">SLO Impact</p>
+              <div className="p-3 rounded-lg bg-severity-p0/5 border border-severity-p0/15 space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-[11px] text-muted-foreground">Burn rate</span>
                   <span className={cn('text-sm font-mono font-bold', (incident.burn_rate || 0) > 5 ? 'text-severity-p0' : 'text-severity-p2')}>
@@ -384,7 +463,7 @@ export default function InvestigationPage() {
                     <span className="text-[11px] font-mono text-severity-p0 font-bold">{incident.error_budget_consumed}%</span>
                   </div>
                   <div className="h-1.5 rounded-full bg-muted overflow-hidden">
-                    <div className="h-full rounded-full bg-severity-p0 progress-stripe" style={{ width: `${incident.error_budget_consumed}%` }} />
+                    <div className="h-full rounded-full bg-severity-p0" style={{ width: `${incident.error_budget_consumed}%` }} />
                   </div>
                 </div>
               </div>
@@ -392,16 +471,16 @@ export default function InvestigationPage() {
           )}
 
           <motion.div initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2 }}>
-            <h3 className="text-[10px] font-semibold text-muted-foreground/60 uppercase tracking-[0.12em] mb-2">Affected Services</h3>
+            <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground mb-2">Affected Services</p>
             <div className="space-y-1">
               {incident.affected_services.map(s => (
                 <Link
                   key={s}
                   to={`/topology?highlight=${encodeURIComponent(s)}`}
-                  className="flex items-center gap-2 text-xs p-2 rounded-md bg-secondary/50 text-secondary-foreground hover:bg-surface-hover transition-colors cursor-pointer group"
+                  className="flex items-center gap-2 text-xs p-2 rounded-md bg-secondary/50 text-secondary-foreground hover:bg-surface-hover transition-colors cursor-pointer group border border-border/30"
                 >
                   <div className="h-1.5 w-1.5 rounded-full bg-severity-p0 shrink-0" />
-                  <span className="flex-1 truncate">{s}</span>
+                  <span className="flex-1 truncate font-mono">{s}</span>
                   <ExternalLink className="h-2.5 w-2.5 opacity-0 group-hover:opacity-50 transition-opacity" />
                 </Link>
               ))}
@@ -409,14 +488,14 @@ export default function InvestigationPage() {
           </motion.div>
 
           <motion.div initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.25 }}>
-            <h3 className="text-[10px] font-semibold text-muted-foreground/60 uppercase tracking-[0.12em] mb-2">On-Call</h3>
+            <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground mb-2">On-Call</p>
             <div className="space-y-2">
               {[
                 { user: incident.ic, role: 'Incident Commander' },
                 { user: incident.tl, role: 'Tech Lead' },
               ].filter(item => item.user).map(item => (
-                <div key={item.role} className="flex items-center gap-2.5 p-2 rounded-md bg-secondary/30">
-                  <div className="h-7 w-7 rounded-full bg-primary/15 flex items-center justify-center shrink-0">
+                <div key={item.role} className="flex items-center gap-2.5 p-2.5 rounded-lg bg-secondary/30 border border-border/30">
+                  <div className="h-7 w-7 rounded-full bg-primary/15 border border-primary/20 flex items-center justify-center shrink-0">
                     <span className="text-[9px] font-bold text-primary">{item.user!.name.split(' ').map(n => n[0]).join('')}</span>
                   </div>
                   <div>
@@ -431,9 +510,8 @@ export default function InvestigationPage() {
           {/* ── War Room Panel ──────────────────────────────────────────────── */}
           {incident.slack_channel_name && (
             <motion.div initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.28 }}>
-              <h3 className="text-[10px] font-semibold text-muted-foreground/60 uppercase tracking-[0.12em] mb-2">War Room</h3>
+              <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground mb-2">War Room</p>
               <div className="p-3 rounded-lg border border-border/50 bg-secondary/20 space-y-2.5">
-                {/* Channel name */}
                 <div className="flex items-center gap-1.5">
                   <Hash className="h-3 w-3 text-muted-foreground shrink-0" />
                   <a
@@ -444,42 +522,22 @@ export default function InvestigationPage() {
                   >
                     {incident.slack_channel_name}
                   </a>
+                  <div className="ml-auto flex items-center gap-1 shrink-0">
+                    <span className="relative flex h-1.5 w-1.5">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                      <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-400" />
+                    </span>
+                    <span className="text-[10px] text-emerald-400 font-medium">Live</span>
+                  </div>
                 </div>
-
-                {/* Status badge */}
-                <div className="flex items-center gap-1.5">
-                  <span className="relative flex h-2 w-2 shrink-0">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75" />
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-success" />
-                  </span>
-                  <span className="text-[10px] text-success font-medium">Active</span>
-                </div>
-
-                {/* Buttons */}
                 <div className="flex gap-2">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="h-6 text-[10px] flex-1 gap-1"
-                    asChild
-                  >
-                    <a
-                      href={`https://slack.com/app_redirect?channel=${incident.slack_channel_name}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <ExternalLink className="h-2.5 w-2.5" />
-                      Open in Slack
+                  <Button size="sm" variant="outline" className="h-6 text-[10px] flex-1 gap-1" asChild>
+                    <a href={`https://slack.com/app_redirect?channel=${incident.slack_channel_name}`} target="_blank" rel="noopener noreferrer">
+                      <ExternalLink className="h-2.5 w-2.5" /> Open
                     </a>
                   </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="h-6 text-[10px] flex-1 gap-1"
-                    onClick={handleCopyChannelLink}
-                  >
-                    <Copy className="h-2.5 w-2.5" />
-                    Copy Link
+                  <Button size="sm" variant="outline" className="h-6 text-[10px] flex-1 gap-1" onClick={handleCopyChannelLink}>
+                    <Copy className="h-2.5 w-2.5" /> Copy
                   </Button>
                 </div>
               </div>
@@ -489,16 +547,16 @@ export default function InvestigationPage() {
           {/* Recent Changes Panel */}
           {relevantChanges.length > 0 && (
             <motion.div initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.3 }}>
-              <h3 className="text-[10px] font-semibold text-muted-foreground/60 uppercase tracking-[0.12em] mb-2">
+              <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground mb-2">
                 Recent Changes
-                <span className="ml-1 font-normal normal-case text-muted-foreground">({relevantChanges.length})</span>
-              </h3>
+                <span className="ml-1.5 font-mono normal-case text-muted-foreground/60">({relevantChanges.length})</span>
+              </p>
               <div className="space-y-2">
                 {relevantChanges.map(change => {
                   const Icon = CHANGE_TYPE_ICONS[change.change_type] || GitCommit;
                   const colorClass = CHANGE_TYPE_COLORS[change.change_type] || 'text-muted-foreground bg-secondary';
                   return (
-                    <div key={change.id} className="p-2.5 rounded-lg border border-border/50 bg-secondary/20 space-y-1.5 hover:bg-secondary/40 transition-colors">
+                    <div key={change.id} className="p-2.5 rounded-lg border border-border/40 bg-secondary/20 space-y-1.5 hover:bg-secondary/40 transition-colors">
                       <div className="flex items-center gap-2">
                         <span className={cn('inline-flex items-center gap-1 text-[9px] font-bold px-1.5 py-0.5 rounded-md uppercase', colorClass)}>
                           <Icon className="h-2.5 w-2.5" />
@@ -509,7 +567,7 @@ export default function InvestigationPage() {
                         </span>
                       </div>
                       <p className="text-[11px] font-medium text-foreground leading-tight">{change.title}</p>
-                      <p className="text-[10px] text-muted-foreground/60 leading-tight">{change.service_name}</p>
+                      <p className="text-[10px] text-muted-foreground/60 leading-tight font-mono">{change.service_name}</p>
                       {change.description && (
                         <p className="text-[10px] text-muted-foreground leading-snug">{change.description}</p>
                       )}
@@ -554,27 +612,25 @@ export default function InvestigationPage() {
             {/* Evidence Header */}
             <div className="flex items-center justify-between mb-3 gap-3">
               <div className="flex items-center gap-2">
-                <h3 className="text-[10px] font-semibold text-muted-foreground/60 uppercase tracking-[0.12em]">
+                <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground">
                   Evidence Timeline
-                </h3>
-                <span className="text-[11px] text-muted-foreground">
+                </p>
+                <span className="text-[11px] font-mono text-muted-foreground/60 bg-secondary px-1.5 py-0.5 rounded">
                   {filteredEvidence.length}/{evidence.length}
                 </span>
               </div>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setPinnedOnly(p => !p)}
-                  className={cn(
-                    'flex items-center gap-1 h-6 px-2 rounded-md text-[11px] font-medium border transition-colors',
-                    pinnedOnly
-                      ? 'bg-primary/10 text-primary border-primary/20'
-                      : 'border-border/50 text-muted-foreground hover:text-foreground'
-                  )}
-                >
-                  <Pin className="h-3 w-3" />
-                  Pinned{pinnedCount > 0 ? ` (${pinnedCount})` : ''}
-                </button>
-              </div>
+              <button
+                onClick={() => setPinnedOnly(p => !p)}
+                className={cn(
+                  'flex items-center gap-1 h-6 px-2 rounded-md text-[11px] font-medium border transition-colors',
+                  pinnedOnly
+                    ? 'bg-primary/10 text-primary border-primary/20'
+                    : 'border-border/50 text-muted-foreground hover:text-foreground'
+                )}
+              >
+                <Pin className="h-3 w-3" />
+                Pinned{pinnedCount > 0 ? ` (${pinnedCount})` : ''}
+              </button>
             </div>
 
             {/* Search + Tabs */}
@@ -604,22 +660,22 @@ export default function InvestigationPage() {
             <div className="mb-4 p-3 rounded-lg border border-border/50 bg-secondary/20 space-y-2">
               <div className="flex items-center gap-2">
                 <Clock className="h-3 w-3 text-muted-foreground/60 shrink-0" />
-                <span className="text-[10px] text-muted-foreground/60 font-semibold uppercase tracking-wide">Time Range Filter</span>
+                <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground/60">Time Range Filter</span>
               </div>
               <div className="text-[10px] text-muted-foreground">
                 {timeStart || timeEnd ? (
                   <span>
                     Showing events from{' '}
-                    <span className="text-foreground font-medium">{timeStart ? formatDatetimeLocal(new Date(timeStart).toISOString()) : formatDatetimeLocal(defaultStart)}</span>
+                    <span className="text-foreground font-medium font-mono">{timeStart ? formatDatetimeLocal(new Date(timeStart).toISOString()) : formatDatetimeLocal(defaultStart)}</span>
                     {' '}to{' '}
-                    <span className="text-foreground font-medium">{timeEnd ? formatDatetimeLocal(new Date(timeEnd).toISOString()) : formatDatetimeLocal(defaultEnd)}</span>
+                    <span className="text-foreground font-medium font-mono">{timeEnd ? formatDatetimeLocal(new Date(timeEnd).toISOString()) : formatDatetimeLocal(defaultEnd)}</span>
                   </span>
                 ) : (
                   <span>
                     Showing all events from{' '}
-                    <span className="text-foreground font-medium">{formatDatetimeLocal(defaultStart)}</span>
+                    <span className="text-foreground font-medium font-mono">{formatDatetimeLocal(defaultStart)}</span>
                     {' '}to{' '}
-                    <span className="text-foreground font-medium">{formatDatetimeLocal(defaultEnd)}</span>
+                    <span className="text-foreground font-medium font-mono">{formatDatetimeLocal(defaultEnd)}</span>
                   </span>
                 )}
               </div>
@@ -667,7 +723,7 @@ export default function InvestigationPage() {
                 <div className="rounded-lg border border-amber-400/30 bg-amber-400/5 p-3 space-y-2">
                   <div className="flex items-center gap-1.5 mb-1">
                     <Pencil className="h-3 w-3 text-amber-400" />
-                    <span className="text-[10px] font-semibold text-amber-400 uppercase tracking-wide">New Note</span>
+                    <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-amber-400">New Note</span>
                   </div>
                   <textarea
                     value={noteText}
@@ -689,24 +745,31 @@ export default function InvestigationPage() {
               )}
             </div>
 
-            {/* ── Evidence Feed (notes at top) ─────────────────────────────── */}
+            {/* ── Evidence Feed ────────────────────────────────────────────── */}
             {notes.length === 0 && filteredEvidence.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-16 text-center">
-                <Search className="h-8 w-8 text-muted-foreground/30 mb-3" />
-                <p className="text-sm text-muted-foreground">No evidence matches your filter</p>
-                <button onClick={() => { setActiveTab('All'); setEvidenceSearch(''); setPinnedOnly(false); setTimeStart(''); setTimeEnd(''); }}
-                  className="text-xs text-primary hover:underline mt-2">Clear filters</button>
+                <div className="h-12 w-12 rounded-xl bg-secondary/60 border border-border flex items-center justify-center mb-3">
+                  <Search className="h-5 w-5 text-muted-foreground/30" />
+                </div>
+                <p className="text-sm font-medium text-foreground mb-1">No evidence matches your filter</p>
+                <p className="text-xs text-muted-foreground mb-3">Try adjusting your search or time range</p>
+                <button
+                  onClick={() => { setActiveTab('All'); setEvidenceSearch(''); setPinnedOnly(false); setTimeStart(''); setTimeEnd(''); }}
+                  className="text-xs text-primary hover:underline"
+                >
+                  Clear filters
+                </button>
               </div>
             ) : (
               <div className="space-y-2">
-                {/* Note cards at the top */}
+                {/* Note cards */}
                 {notes.map((note, i) => (
                   <motion.div
                     key={note.id}
                     initial={{ opacity: 0, y: -6 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: i * 0.04 }}
-                    className="rounded-lg border border-amber-400/25 bg-amber-400/8 p-3 space-y-1.5"
+                    className="rounded-lg border border-amber-400/25 p-3 space-y-1.5"
                     style={{ backgroundColor: 'rgba(251, 191, 36, 0.06)' }}
                   >
                     <div className="flex items-center gap-2">
@@ -731,14 +794,15 @@ export default function InvestigationPage() {
           </motion.div>
         </div>
 
-        {/* ── Right Panel - Investigation Status, Hypotheses & Fixes ─────────── */}
+        {/* ── Right Panel ─────────────────────────────────────────────────────── */}
         <div className="w-[300px] shrink-0 border-l border-border p-4 space-y-5 overflow-y-auto scrollbar-thin">
+
           {/* Investigation Progress */}
           <motion.div initial={{ opacity: 0, x: 8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1 }}>
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-[10px] font-semibold text-muted-foreground/60 uppercase tracking-[0.12em]">Investigation</h3>
+              <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground">Investigation</p>
               {investigation.llm_model_used && (
-                <span className="text-[9px] font-mono text-muted-foreground/50 bg-secondary px-1.5 py-0.5 rounded">
+                <span className="text-[9px] font-mono text-muted-foreground/50 bg-secondary px-1.5 py-0.5 rounded border border-border/40">
                   {investigation.llm_model_used}
                 </span>
               )}
@@ -746,71 +810,75 @@ export default function InvestigationPage() {
 
             {/* Complete banner */}
             {isInvestigationComplete && (
-              <div className="mb-3 rounded-md bg-success/10 border border-success/20 px-3 py-2 flex items-center gap-2">
-                <CheckCircle className="h-3.5 w-3.5 text-success shrink-0" />
-                <span className="text-[11px] font-semibold text-success">Complete</span>
+              <div className="mb-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20 px-3 py-2.5 flex items-center gap-2">
+                <CheckCircle className="h-3.5 w-3.5 text-emerald-400 shrink-0" />
+                <span className="text-[11px] font-bold text-emerald-400">Investigation Complete</span>
               </div>
             )}
 
-            <div className="space-y-0">
+            {/* Phase list — compact */}
+            <div className="space-y-0 rounded-lg border border-border/40 bg-secondary/10 overflow-hidden">
               {phases.map((phase, i) => {
                 const isDone = isInvestigationComplete || i < currentPhaseIdx;
                 const isCurrent = !isInvestigationComplete && i === currentPhaseIdx;
                 return (
-                  <div key={phase} className="flex items-center gap-2.5 py-1.5">
+                  <div
+                    key={phase}
+                    className={cn(
+                      'flex items-center gap-2.5 px-3 py-1.5 border-b border-border/30 last:border-0',
+                      isCurrent && 'bg-primary/5',
+                    )}
+                  >
                     {isDone ? (
-                      <CheckCircle className="h-3.5 w-3.5 text-success shrink-0" />
+                      <CheckCircle className="h-3 w-3 text-emerald-400 shrink-0" />
                     ) : isCurrent ? (
                       investigation.status === 'running'
-                        ? <Loader2 className="h-3.5 w-3.5 text-primary animate-spin shrink-0" />
-                        : <CheckCircle className="h-3.5 w-3.5 text-primary shrink-0" />
+                        ? <Loader2 className="h-3 w-3 text-primary animate-spin shrink-0" />
+                        : <div className="h-3 w-3 rounded-full border-2 border-primary shrink-0" />
                     ) : (
-                      <div className="h-3.5 w-3.5 rounded-full border border-border shrink-0" />
+                      <div className="h-3 w-3 rounded-full border border-border/50 shrink-0" />
                     )}
                     <span className={cn(
-                      'text-xs capitalize',
-                      isDone ? 'text-success' :
+                      'text-xs capitalize flex-1',
+                      isDone ? 'text-emerald-400' :
                       isCurrent ? 'text-primary font-medium' :
-                      'text-muted-foreground/50'
+                      'text-muted-foreground/40'
                     )}>
-                      {phase}
+                      {PHASE_LABELS[phase]}
                     </span>
                     {isCurrent && investigation.status === 'running' && (
-                      <span className="text-[10px] text-primary/60 ml-auto">Running...</span>
-                    )}
-                    {isDone && isInvestigationComplete && (
-                      <span className="text-[10px] text-success/60 ml-auto">Done</span>
+                      <span className="text-[10px] text-primary/60">Running...</span>
                     )}
                   </div>
                 );
               })}
             </div>
 
-            <div className="mt-3 space-y-1.5">
+            {/* Confidence + stats */}
+            <div className="mt-3 space-y-2">
               <div className="flex items-center gap-2">
                 <ConfidenceBar confidence={investigation.overall_confidence} className="flex-1" />
-                <span className="text-[10px] text-muted-foreground whitespace-nowrap">
-                  {Math.round(investigation.overall_confidence * 100)}% conf
+                <span className="text-[10px] text-muted-foreground whitespace-nowrap font-mono font-bold">
+                  {Math.round(investigation.overall_confidence * 100)}%
                 </span>
               </div>
               <div className="flex items-center justify-between text-[10px] text-muted-foreground/60">
-                <span>Completeness: {Math.round(investigation.completeness_score * 100)}%</span>
-                {investigation.cost_usd && <span>${investigation.cost_usd.toFixed(3)}</span>}
+                <span className="font-mono">Completeness: {Math.round(investigation.completeness_score * 100)}%</span>
+                {investigation.cost_usd && <span className="font-mono">${investigation.cost_usd.toFixed(3)}</span>}
               </div>
 
-              {/* Elapsed time */}
               {elapsedMinutes !== null && (
                 <div className="text-[10px] text-muted-foreground/60 flex items-center gap-1">
                   <Clock className="h-2.5 w-2.5 shrink-0" />
-                  Investigation {isInvestigationComplete ? 'took' : 'running for'} {elapsedMinutes} minute{elapsedMinutes !== 1 ? 's' : ''}
+                  {isInvestigationComplete ? 'Took' : 'Running for'}{' '}
+                  <span className="font-mono text-foreground/60">{elapsedMinutes}m</span>
                 </div>
               )}
 
-              {/* Token / cost breakdown */}
               {(investigation.tokens_in || investigation.tokens_out) && (
-                <div className="mt-2 pt-2 border-t border-border/50">
+                <div className="pt-2 border-t border-border/40">
                   <p className="text-[10px] font-mono text-muted-foreground/50 leading-relaxed">
-                    {investigation.tokens_in?.toLocaleString()} tokens in
+                    {investigation.tokens_in?.toLocaleString()} in
                     {investigation.tokens_out ? ` / ${investigation.tokens_out.toLocaleString()} out` : ''}
                     {investigation.cost_usd ? ` · $${investigation.cost_usd.toFixed(3)}` : ''}
                   </p>
@@ -821,10 +889,12 @@ export default function InvestigationPage() {
 
           {/* Hypotheses */}
           <motion.div initial={{ opacity: 0, x: 8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2 }}>
-            <h3 className="text-[10px] font-semibold text-muted-foreground/60 uppercase tracking-[0.12em] mb-2">
-              Hypotheses
-              <span className="ml-1 text-muted-foreground font-normal">({hypotheses.length})</span>
-            </h3>
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground">Hypotheses</p>
+              <span className="text-[10px] font-mono text-muted-foreground/60 bg-secondary px-1.5 py-0.5 rounded">
+                {hypotheses.length}
+              </span>
+            </div>
             <div className="space-y-2">
               {hypotheses.map(h => <HypothesisCard key={h.id} hypothesis={h} />)}
             </div>
@@ -834,17 +904,19 @@ export default function InvestigationPage() {
           <motion.div initial={{ opacity: 0, x: 8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.3 }}>
             {hypotheses[0] && hypotheses[0].confidence < 0.65 ? (
               <div className="rounded-lg border border-severity-p2/20 bg-severity-p2/5 p-3">
-                <p className="text-xs text-severity-p2 font-medium mb-1">Fix generation locked</p>
+                <p className="text-xs text-severity-p2 font-semibold mb-1">Fix generation locked</p>
                 <p className="text-[11px] text-muted-foreground">
                   Confidence {Math.round(hypotheses[0].confidence * 100)}% — need ≥65% to generate fixes.
                 </p>
               </div>
             ) : (
               <>
-                <h3 className="text-[10px] font-semibold text-muted-foreground/60 uppercase tracking-[0.12em] mb-2">
-                  Proposed Fixes
-                  <span className="ml-1 text-muted-foreground font-normal">({fixes.length})</span>
-                </h3>
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground">Proposed Fixes</p>
+                  <span className="text-[10px] font-mono text-muted-foreground/60 bg-secondary px-1.5 py-0.5 rounded">
+                    {fixes.length}
+                  </span>
+                </div>
                 <div className="space-y-2">
                   {fixes.map(f => <FixProposalCard key={f.id} fix={f} />)}
                 </div>
@@ -856,7 +928,7 @@ export default function InvestigationPage() {
           {(incident.latest_packet_id || incident.investigation_status === 'complete') && (
             <motion.div initial={{ opacity: 0, x: 8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.4 }}>
               <div className="border-t border-border pt-4 space-y-2">
-                <p className="text-[10px] font-semibold text-muted-foreground/60 uppercase tracking-[0.12em] mb-2">Outputs</p>
+                <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground mb-2">Outputs</p>
                 {incident.latest_packet_id && (
                   <Link
                     to={`/incidents/${incident.id}/packet`}
@@ -892,7 +964,7 @@ export default function InvestigationPage() {
       {/* ── Sticky Footer: Quick Status Update Bar ─────────────────────────── */}
       <div className="sticky bottom-0 z-20 border-t border-border bg-surface-raised/90 backdrop-blur-sm px-6 py-2.5 flex items-center gap-3 flex-wrap">
         <div className="flex items-center gap-2 shrink-0">
-          <span className="text-[10px] font-semibold text-muted-foreground/60 uppercase tracking-wide">Status</span>
+          <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground/60">Status</span>
           <select
             value={footerStatusValue}
             onChange={e => {

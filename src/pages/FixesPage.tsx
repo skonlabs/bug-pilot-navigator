@@ -69,7 +69,7 @@ function ApprovalModal({ state, onConfirm, onClose }: ApprovalModalProps) {
         className="relative z-10 w-full max-w-lg bg-card border border-border rounded-xl shadow-2xl overflow-hidden"
       >
         {/* Header */}
-        <div className="flex items-start justify-between p-4 border-b border-border">
+        <div className="flex items-start justify-between p-4 border-b border-border bg-muted/20">
           <div>
             <h2 className="text-sm font-semibold text-foreground">Approve Fix Execution</h2>
             <p className="text-xs text-muted-foreground mt-0.5">{fix.title}</p>
@@ -82,10 +82,10 @@ function ApprovalModal({ state, onConfirm, onClose }: ApprovalModalProps) {
           </button>
         </div>
 
-        <div className="p-4 space-y-4 max-h-[70vh] overflow-y-auto">
+        <div className="p-4 space-y-4 max-h-[70vh] overflow-y-auto scrollbar-thin">
           {/* Incident context */}
           {incident && (
-            <div className="rounded-md bg-muted/50 border border-border px-3 py-2 flex items-center gap-2">
+            <div className="rounded-lg bg-muted/50 border border-border px-3 py-2.5 flex items-center gap-2.5">
               <span className={cn('text-[10px] font-bold px-1.5 py-0.5 rounded', severityClass[incident.severity])}>
                 {incident.severity}
               </span>
@@ -96,7 +96,7 @@ function ApprovalModal({ state, onConfirm, onClose }: ApprovalModalProps) {
 
           {/* Risk warning */}
           <div className={cn(
-            'rounded-md border px-3 py-2.5 flex items-start gap-2',
+            'rounded-lg border px-3 py-2.5 flex items-start gap-2.5',
             fix.risk === 'critical' || fix.risk === 'high'
               ? 'bg-severity-p0/5 border-severity-p0/30'
               : fix.risk === 'medium'
@@ -118,8 +118,8 @@ function ApprovalModal({ state, onConfirm, onClose }: ApprovalModalProps) {
           {/* Diff preview */}
           {fix.diff_preview && (
             <div className="space-y-1.5">
-              <p className="text-[10px] uppercase tracking-wide font-medium text-muted-foreground">Diff Preview</p>
-              <div className="rounded-md overflow-hidden border border-border text-[11px] font-mono bg-[#0d1117] max-h-40 overflow-y-auto">
+              <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground">Diff Preview</p>
+              <div className="rounded-lg overflow-hidden border border-border/50 text-[11px] font-mono bg-[#0d1117] max-h-40 overflow-y-auto scrollbar-thin">
                 {fix.diff_preview.split('\n').map((line, i) => {
                   const isAddition = line.startsWith('+') && !line.startsWith('+++');
                   const isRemoval = line.startsWith('-') && !line.startsWith('---');
@@ -147,7 +147,7 @@ function ApprovalModal({ state, onConfirm, onClose }: ApprovalModalProps) {
           {/* Rollback steps */}
           {fix.rollback_steps && fix.rollback_steps.length > 0 && (
             <div className="space-y-1.5">
-              <p className="text-[10px] uppercase tracking-wide font-medium text-muted-foreground">Rollback Steps</p>
+              <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground">Rollback Steps</p>
               <ol className="space-y-1">
                 {fix.rollback_steps.map((step, i) => (
                   <li key={i} className="flex items-start gap-2 text-xs text-foreground">
@@ -164,8 +164,8 @@ function ApprovalModal({ state, onConfirm, onClose }: ApprovalModalProps) {
           {/* Validation criteria */}
           {fix.validation_criteria && fix.validation_criteria.length > 0 && (
             <div className="space-y-1.5">
-              <p className="text-[10px] uppercase tracking-wide font-medium text-muted-foreground">Validation Criteria</p>
-              <div className="rounded-md border border-border overflow-hidden text-xs">
+              <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground">Validation Criteria</p>
+              <div className="rounded-lg border border-border overflow-hidden text-xs">
                 <table className="w-full">
                   <tbody>
                     {fix.validation_criteria.map((c, i) => (
@@ -184,7 +184,7 @@ function ApprovalModal({ state, onConfirm, onClose }: ApprovalModalProps) {
           <button
             onClick={() => setUnderstood(v => !v)}
             className={cn(
-              'w-full flex items-start gap-2.5 rounded-md border px-3 py-2.5 text-left transition-all',
+              'w-full flex items-start gap-2.5 rounded-lg border px-3 py-2.5 text-left transition-all',
               understood
                 ? 'border-confidence-high/40 bg-confidence-high/5'
                 : 'border-border bg-muted/30 hover:border-border/80',
@@ -209,7 +209,7 @@ function ApprovalModal({ state, onConfirm, onClose }: ApprovalModalProps) {
             size="sm"
             onClick={onConfirm}
             disabled={!understood}
-            className="h-8 text-xs px-4"
+            className="h-8 text-xs px-4 gradient-brand border-0 text-primary-foreground hover:opacity-90"
           >
             <Zap className="h-3 w-3 mr-1.5" />
             Execute Fix
@@ -244,6 +244,7 @@ function StatsBar({ fixes, statusMap }: StatsBarProps) {
 
   const pendingApproval = fixes.filter(f => getStatus(f) === 'proposed' && f.tier === 2).length;
   const executing = fixes.filter(f => getStatus(f) === 'executing').length;
+  const rejected = fixes.filter(f => getStatus(f) === 'rejected').length;
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -258,32 +259,52 @@ function StatsBar({ fixes, statusMap }: StatsBarProps) {
       label: 'Pending Approval',
       value: pendingApproval,
       icon: Clock,
-      colorClass: pendingApproval > 0 ? 'text-warning' : 'text-muted-foreground',
-      bgClass: pendingApproval > 0 ? 'bg-warning/10' : 'bg-muted/50',
+      colorClass: pendingApproval > 0 ? 'text-severity-p2' : 'text-muted-foreground',
+      bgClass: pendingApproval > 0 ? 'bg-severity-p2/10 border-severity-p2/20' : 'bg-muted/50 border-border/50',
+      leftBorder: pendingApproval > 0 ? 'border-l-severity-p2' : 'border-l-border',
     },
     {
       label: 'Executing',
       value: executing,
       icon: Zap,
       colorClass: executing > 0 ? 'text-primary' : 'text-muted-foreground',
-      bgClass: executing > 0 ? 'bg-primary/10' : 'bg-muted/50',
+      bgClass: executing > 0 ? 'bg-primary/10 border-primary/20' : 'bg-muted/50 border-border/50',
+      leftBorder: executing > 0 ? 'border-l-primary' : 'border-l-border',
     },
     {
       label: 'Executed Today',
       value: executedToday,
       icon: CheckCircle,
       colorClass: executedToday > 0 ? 'text-confidence-high' : 'text-muted-foreground',
-      bgClass: executedToday > 0 ? 'bg-confidence-high/10' : 'bg-muted/50',
+      bgClass: executedToday > 0 ? 'bg-confidence-high/10 border-confidence-high/20' : 'bg-muted/50 border-border/50',
+      leftBorder: executedToday > 0 ? 'border-l-confidence-high' : 'border-l-border',
+    },
+    {
+      label: 'Rejected',
+      value: rejected,
+      icon: X,
+      colorClass: 'text-muted-foreground',
+      bgClass: 'bg-muted/50 border-border/50',
+      leftBorder: 'border-l-border',
     },
   ];
 
   return (
-    <div className="flex items-center gap-3 flex-wrap">
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
       {stats.map(s => (
-        <div key={s.label} className={cn('flex items-center gap-2 rounded-lg px-3 py-1.5', s.bgClass)}>
-          <s.icon className={cn('h-3.5 w-3.5', s.colorClass)} />
-          <span className={cn('text-sm font-bold tabular-nums', s.colorClass)}>{s.value}</span>
-          <span className="text-[11px] text-muted-foreground">{s.label}</span>
+        <div
+          key={s.label}
+          className={cn(
+            'rounded-xl border bg-card p-4 border-l-2 transition-colors',
+            s.bgClass,
+            s.leftBorder,
+          )}
+        >
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground">{s.label}</p>
+            <s.icon className={cn('h-3.5 w-3.5', s.colorClass)} />
+          </div>
+          <p className={cn('text-2xl font-bold font-mono tabular-nums', s.colorClass)}>{s.value}</p>
         </div>
       ))}
     </div>
@@ -443,23 +464,47 @@ export default function FixesPage() {
   ];
 
   return (
-    <div className="space-y-4 max-w-4xl">
+    <div className="space-y-5 max-w-4xl">
+      {/* ── Page Header ────────────────────────────────────────────────────── */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-lg font-bold text-foreground">Fix Proposals</h1>
+          <p className="text-xs text-muted-foreground mt-0.5">Review and approve AI-generated fixes for active incidents</p>
+        </div>
+        {tier2Pending.length > 1 && tab === 'proposed' && (
+          <Button
+            size="sm"
+            onClick={handleBulkApprove}
+            disabled={selectedIds.size === 0}
+            className="h-8 text-xs gap-1.5 gradient-brand border-0 text-primary-foreground hover:opacity-90"
+          >
+            <Zap className="h-3 w-3" />
+            Bulk Approve
+            {selectedIds.size > 0 && (
+              <span className="ml-0.5 bg-white/20 rounded-full px-1.5 text-[10px] font-bold">
+                {selectedIds.size}
+              </span>
+            )}
+          </Button>
+        )}
+      </div>
+
       {/* ── Statistics bar ─────────────────────────────────────────────────── */}
       <StatsBar fixes={mockFixes} statusMap={statusMap} />
 
-      {/* ── Header row: tabs + bulk actions ───────────────────────────────── */}
-      <div className="flex flex-wrap items-center gap-3">
-        {/* Tabs */}
-        <div className="flex items-center bg-secondary/50 rounded-lg p-0.5 border border-border/50">
+      {/* ── Filter tabs + controls ─────────────────────────────────────────── */}
+      <div className="flex flex-wrap items-center gap-2">
+        {/* Pill tabs */}
+        <div className="flex items-center gap-1 flex-wrap">
           {tabDefs.map(t => (
             <button
               key={t.key}
               onClick={() => setTab(t.key)}
               className={cn(
-                'flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-md transition-all font-medium',
+                'flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-full transition-all font-medium border',
                 tab === t.key
-                  ? 'bg-background text-foreground shadow-sm'
-                  : 'text-muted-foreground hover:text-secondary-foreground',
+                  ? 'bg-primary/10 text-primary border-primary/30'
+                  : 'text-muted-foreground border-border/50 hover:text-foreground hover:border-border bg-transparent',
               )}
             >
               {t.label}
@@ -467,11 +512,13 @@ export default function FixesPage() {
                 <span
                   className={cn(
                     'min-w-[16px] h-4 rounded-full text-[10px] font-bold flex items-center justify-center px-1',
-                    t.key === 'proposed'
-                      ? 'bg-warning/20 text-warning'
-                      : t.key === 'executing'
-                        ? 'bg-primary/20 text-primary'
-                        : 'bg-muted text-muted-foreground',
+                    tab === t.key
+                      ? 'bg-primary/20 text-primary'
+                      : t.key === 'proposed'
+                        ? 'bg-severity-p2/20 text-severity-p2'
+                        : t.key === 'executing'
+                          ? 'bg-primary/20 text-primary'
+                          : 'bg-muted text-muted-foreground',
                   )}
                 >
                   {tabCounts[t.key]}
@@ -481,30 +528,11 @@ export default function FixesPage() {
           ))}
         </div>
 
-        {/* Bulk approve button */}
-        {tier2Pending.length > 1 && tab === 'proposed' && (
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={handleBulkApprove}
-            disabled={selectedIds.size === 0}
-            className="h-7 text-xs gap-1.5"
-          >
-            <Zap className="h-3 w-3" />
-            Approve All Tier-2
-            {selectedIds.size > 0 && (
-              <span className="ml-0.5 bg-primary/20 text-primary rounded-full px-1.5 text-[10px] font-bold">
-                {selectedIds.size}
-              </span>
-            )}
-          </Button>
-        )}
-
         {/* Filter toggle */}
         <button
           onClick={() => setShowFilters(v => !v)}
           className={cn(
-            'ml-auto flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-md border transition-all',
+            'ml-auto flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-full border transition-all',
             showFilters || hasActiveFilters
               ? 'border-primary/40 text-primary bg-primary/5'
               : 'border-border text-muted-foreground hover:text-foreground',
@@ -519,7 +547,7 @@ export default function FixesPage() {
         </button>
 
         {/* Sort */}
-        <div className="flex items-center gap-1 text-xs text-muted-foreground">
+        <div className="flex items-center gap-1 text-xs text-muted-foreground border border-border/50 rounded-full px-2.5 py-1.5">
           <ArrowUpDown className="h-3 w-3" />
           <select
             value={sortKey}
@@ -543,18 +571,18 @@ export default function FixesPage() {
             transition={{ duration: 0.15 }}
             className="overflow-hidden"
           >
-            <div className="flex flex-wrap gap-3 p-3 rounded-lg border border-border bg-muted/30">
+            <div className="flex flex-wrap gap-3 p-3 rounded-xl border border-border bg-card">
               {/* Tier filter */}
               <div className="flex items-center gap-1.5">
-                <span className="text-[10px] uppercase tracking-wide font-medium text-muted-foreground">Tier</span>
+                <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground">Tier</span>
                 {(['all', 1, 2, 3] as Array<FilterState['tier']>).map(v => (
                   <button
                     key={String(v)}
                     onClick={() => setFilters(f => ({ ...f, tier: v }))}
                     className={cn(
-                      'px-2 py-0.5 rounded text-[11px] font-medium border transition-all',
+                      'px-2 py-0.5 rounded-full text-[11px] font-medium border transition-all',
                       filters.tier === v
-                        ? 'bg-primary text-primary-foreground border-primary'
+                        ? 'bg-primary/10 text-primary border-primary/30'
                         : 'border-border text-muted-foreground hover:text-foreground',
                     )}
                   >
@@ -565,15 +593,15 @@ export default function FixesPage() {
 
               {/* Risk filter */}
               <div className="flex items-center gap-1.5">
-                <span className="text-[10px] uppercase tracking-wide font-medium text-muted-foreground">Risk</span>
+                <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground">Risk</span>
                 {(['all', 'low', 'medium', 'high', 'critical'] as Array<FilterState['risk']>).map(v => (
                   <button
                     key={v}
                     onClick={() => setFilters(f => ({ ...f, risk: v }))}
                     className={cn(
-                      'px-2 py-0.5 rounded text-[11px] font-medium border transition-all capitalize',
+                      'px-2 py-0.5 rounded-full text-[11px] font-medium border transition-all capitalize',
                       filters.risk === v
-                        ? 'bg-primary text-primary-foreground border-primary'
+                        ? 'bg-primary/10 text-primary border-primary/30'
                         : 'border-border text-muted-foreground hover:text-foreground',
                     )}
                   >
@@ -584,11 +612,11 @@ export default function FixesPage() {
 
               {/* Service filter */}
               <div className="flex items-center gap-1.5">
-                <span className="text-[10px] uppercase tracking-wide font-medium text-muted-foreground">Service</span>
+                <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground">Service</span>
                 <select
                   value={filters.service}
                   onChange={e => setFilters(f => ({ ...f, service: e.target.value }))}
-                  className="text-[11px] border border-border rounded px-1.5 py-0.5 bg-background text-foreground outline-none"
+                  className="text-[11px] border border-border rounded-full px-2.5 py-0.5 bg-background text-foreground outline-none"
                 >
                   <option value="">All</option>
                   {allServices.map(s => (
@@ -599,11 +627,11 @@ export default function FixesPage() {
 
               {/* Type filter */}
               <div className="flex items-center gap-1.5">
-                <span className="text-[10px] uppercase tracking-wide font-medium text-muted-foreground">Type</span>
+                <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground">Type</span>
                 <select
                   value={filters.fix_type}
                   onChange={e => setFilters(f => ({ ...f, fix_type: e.target.value as FilterState['fix_type'] }))}
-                  className="text-[11px] border border-border rounded px-1.5 py-0.5 bg-background text-foreground outline-none"
+                  className="text-[11px] border border-border rounded-full px-2.5 py-0.5 bg-background text-foreground outline-none"
                 >
                   {fixTypeOptions.map(o => (
                     <option key={o.value} value={o.value}>{o.label}</option>
@@ -628,7 +656,7 @@ export default function FixesPage() {
 
       {/* ── Tier-2 bulk select bar ─────────────────────────────────────────── */}
       {tier2Pending.length > 1 && tab === 'proposed' && (
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+        <div className="flex items-center gap-2 text-xs text-muted-foreground px-1">
           <button onClick={toggleAllTier2} className="flex items-center gap-1.5 hover:text-foreground transition-colors">
             {allTier2Selected
               ? <CheckSquare className="h-3.5 w-3.5 text-primary" />
@@ -641,7 +669,7 @@ export default function FixesPage() {
 
       {/* ── Fix list ───────────────────────────────────────────────────────── */}
       {filtered.length > 0 ? (
-        <div className="space-y-5">
+        <div className="space-y-4">
           {filtered.map((fix, i) => {
             const incident = mockIncidents.find(inc => inc.id === fix.incident_id);
             const effectiveStatus = getStatus(fix);
@@ -663,7 +691,7 @@ export default function FixesPage() {
               >
                 {/* Incident context banner */}
                 {incident && (
-                  <div className="flex items-center gap-2 flex-wrap">
+                  <div className="flex items-center gap-2 flex-wrap px-1">
                     {/* Select checkbox for tier-2 pending */}
                     {isSelectableTier2 && tier2Pending.length > 1 && (
                       <button onClick={() => toggleSelect(fix.id)} className="text-muted-foreground hover:text-foreground">
@@ -690,18 +718,17 @@ export default function FixesPage() {
                   </div>
                 )}
 
-                {/* Execution progress overlay for executing state */}
+                {/* Status banners */}
                 {isExecutingNow && (
-                  <div className="flex items-center gap-2 text-[11px]">
+                  <div className="flex items-center gap-2 text-[11px] px-1">
                     <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
                     <span className="text-primary font-medium">Executing…</span>
                     <span className="text-muted-foreground">This may take a moment</span>
                   </div>
                 )}
 
-                {/* Executed timestamp */}
                 {isExecutedNow && (
-                  <div className="flex items-center gap-1.5 text-[11px] text-confidence-high">
+                  <div className="flex items-center gap-1.5 text-[11px] text-confidence-high px-1">
                     <CheckCircle className="h-3 w-3" />
                     <span className="font-medium">Executed successfully</span>
                     {fix.executed_at && (
@@ -712,17 +739,15 @@ export default function FixesPage() {
                   </div>
                 )}
 
-                {/* Rejected state note */}
                 {isRejectedNow && (
-                  <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                  <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground px-1">
                     <X className="h-3 w-3" />
                     <span>Fix rejected</span>
                   </div>
                 )}
 
-                {/* Failed state note */}
                 {isFailedNow && (
-                  <div className="flex items-center gap-2 text-[11px]">
+                  <div className="flex items-center gap-2 text-[11px] px-1">
                     <AlertTriangle className="h-3 w-3 text-severity-p0" />
                     <span className="text-severity-p0 font-medium">Execution failed</span>
                     <button className="text-primary hover:underline">Rollback</button>
@@ -744,10 +769,10 @@ export default function FixesPage() {
           animate={{ opacity: 1, y: 0 }}
           className="flex flex-col items-center justify-center py-20 text-muted-foreground"
         >
-          <div className="h-14 w-14 rounded-full bg-confidence-high/10 flex items-center justify-center mb-4">
-            <CheckCircle className="h-6 w-6 text-confidence-high" />
+          <div className="h-16 w-16 rounded-2xl bg-confidence-high/10 border border-confidence-high/20 flex items-center justify-center mb-4">
+            <CheckCircle className="h-7 w-7 text-confidence-high" />
           </div>
-          <p className="text-sm font-medium text-foreground mb-1">All clear!</p>
+          <p className="text-sm font-semibold text-foreground mb-1">All clear</p>
           <p className="text-xs text-muted-foreground">
             {hasActiveFilters
               ? 'No fixes match the current filters.'
