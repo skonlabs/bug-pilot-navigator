@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800;1,9..40,400&family=DM+Mono:wght@400;500&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,85 +6,85 @@
 
 @layer base {
   :root {
-    /* Kiro-inspired deep black + violet theme */
-    --background: 0 0% 4%;
-    --foreground: 0 0% 93%;
+    /* Kiro-style deep black + violet accent */
+    --background: 0 0% 3%;
+    --foreground: 0 0% 90%;
 
-    --card: 0 0% 6.5%;
-    --card-foreground: 0 0% 93%;
+    --card: 0 0% 5.5%;
+    --card-foreground: 0 0% 90%;
 
-    --popover: 0 0% 8%;
-    --popover-foreground: 0 0% 93%;
+    --popover: 0 0% 6%;
+    --popover-foreground: 0 0% 90%;
 
-    --primary: 270 100% 68%;
+    --primary: 263 70% 58%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 0 0% 10%;
-    --secondary-foreground: 0 0% 70%;
+    --secondary: 0 0% 8%;
+    --secondary-foreground: 0 0% 65%;
 
-    --muted: 0 0% 9%;
-    --muted-foreground: 0 0% 45%;
+    --muted: 0 0% 8%;
+    --muted-foreground: 0 0% 42%;
 
-    --accent: 270 70% 55%;
+    --accent: 263 55% 50%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 0 0% 12%;
-    --input: 0 0% 12%;
-    --ring: 270 100% 68%;
+    --border: 0 0% 11%;
+    --input: 0 0% 11%;
+    --ring: 263 70% 58%;
 
-    --radius: 0.5rem;
+    --radius: 0.625rem;
 
     /* Severity */
-    --severity-p0: 0 84% 60%;
-    --severity-p1: 25 95% 53%;
-    --severity-p2: 45 93% 47%;
-    --severity-p3: 0 0% 45%;
+    --severity-p0: 0 80% 58%;
+    --severity-p1: 25 92% 52%;
+    --severity-p2: 43 90% 50%;
+    --severity-p3: 0 0% 42%;
 
     /* Status */
-    --status-detected: 0 84% 60%;
-    --status-investigating: 270 100% 68%;
-    --status-identified: 280 65% 60%;
-    --status-mitigating: 45 93% 47%;
-    --status-resolved: 152 69% 45%;
-    --status-postmortem: 0 0% 45%;
-    --status-closed: 0 0% 35%;
+    --status-detected: 0 80% 58%;
+    --status-investigating: 263 70% 58%;
+    --status-identified: 280 55% 58%;
+    --status-mitigating: 43 90% 50%;
+    --status-resolved: 150 60% 42%;
+    --status-postmortem: 0 0% 42%;
+    --status-closed: 0 0% 32%;
 
     /* Confidence */
-    --confidence-high: 152 69% 45%;
-    --confidence-probable: 270 100% 68%;
-    --confidence-candidate: 45 93% 47%;
-    --confidence-low: 0 0% 35%;
+    --confidence-high: 150 60% 42%;
+    --confidence-probable: 263 70% 58%;
+    --confidence-candidate: 43 90% 50%;
+    --confidence-low: 0 0% 32%;
 
     /* Surface */
-    --surface-raised: 0 0% 7%;
-    --surface-overlay: 0 0% 9%;
-    --surface-hover: 0 0% 11%;
-    --surface-active: 0 0% 13%;
+    --surface-raised: 0 0% 6%;
+    --surface-overlay: 0 0% 7%;
+    --surface-hover: 0 0% 9%;
+    --surface-active: 0 0% 11%;
 
-    /* Brand */
-    --brand-from: 270 100% 68%;
-    --brand-to: 280 80% 55%;
+    /* Brand gradient */
+    --brand-from: 263 70% 58%;
+    --brand-to: 280 65% 50%;
 
     /* Success */
-    --success: 152 69% 45%;
+    --success: 150 60% 42%;
     --success-foreground: 0 0% 4%;
 
     /* Warning */
-    --warning: 45 93% 47%;
+    --warning: 43 90% 50%;
     --warning-foreground: 0 0% 4%;
 
     /* Sidebar */
-    --sidebar-background: 0 0% 3.5%;
-    --sidebar-foreground: 0 0% 55%;
-    --sidebar-primary: 270 100% 68%;
+    --sidebar-background: 0 0% 2.5%;
+    --sidebar-foreground: 0 0% 50%;
+    --sidebar-primary: 263 70% 58%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 0 0% 8%;
-    --sidebar-accent-foreground: 0 0% 93%;
-    --sidebar-border: 0 0% 10%;
-    --sidebar-ring: 270 100% 68%;
+    --sidebar-accent: 0 0% 7%;
+    --sidebar-accent-foreground: 0 0% 90%;
+    --sidebar-border: 0 0% 9%;
+    --sidebar-ring: 263 70% 58%;
   }
 }
 
@@ -95,11 +95,17 @@
 
   body {
     @apply bg-background text-foreground antialiased;
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+    letter-spacing: -0.01em;
+    font-feature-settings: 'ss01' on, 'ss02' on;
   }
 
   code, .font-mono {
-    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-family: 'DM Mono', ui-monospace, 'SFMono-Regular', monospace;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    letter-spacing: -0.025em;
   }
 }
 
@@ -108,9 +114,9 @@
     scrollbar-width: thin;
     scrollbar-color: hsl(var(--border)) transparent;
   }
-  .scrollbar-thin::-webkit-scrollbar { width: 5px; height: 5px; }
+  .scrollbar-thin::-webkit-scrollbar { width: 4px; height: 4px; }
   .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
-  .scrollbar-thin::-webkit-scrollbar-thumb { background: hsl(var(--border)); border-radius: 3px; }
+  .scrollbar-thin::-webkit-scrollbar-thumb { background: hsl(var(--border)); border-radius: 2px; }
   .scrollbar-thin::-webkit-scrollbar-thumb:hover { background: hsl(var(--muted-foreground) / 0.3); }
 
   .gradient-brand {
@@ -125,17 +131,17 @@
   }
 
   .gradient-glow {
-    box-shadow: 0 0 40px hsl(var(--brand-from) / 0.15), 0 0 80px hsl(var(--brand-to) / 0.08);
+    box-shadow: 0 0 40px hsl(var(--brand-from) / 0.12), 0 0 80px hsl(var(--brand-to) / 0.06);
   }
 
   .glass {
-    background: hsl(var(--card) / 0.7);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
+    background: hsl(var(--card) / 0.6);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
   }
 
   .glass-border {
-    border: 1px solid hsl(var(--border) / 0.6);
+    border: 1px solid hsl(var(--border) / 0.5);
   }
 
   @keyframes pulse-dot {
@@ -173,13 +179,13 @@
   }
 
   @keyframes glow-pulse {
-    0%, 100% { box-shadow: 0 0 8px hsl(var(--brand-from) / 0.2); }
-    50% { box-shadow: 0 0 24px hsl(var(--brand-from) / 0.4); }
+    0%, 100% { box-shadow: 0 0 8px hsl(var(--brand-from) / 0.15); }
+    50% { box-shadow: 0 0 20px hsl(var(--brand-from) / 0.3); }
   }
   .animate-glow { animation: glow-pulse 2s ease-in-out infinite; }
 
   .progress-stripe {
-    background-image: linear-gradient(45deg, rgba(255,255,255,0.08) 25%, transparent 25%, transparent 50%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.08) 75%, transparent 75%);
+    background-image: linear-gradient(45deg, rgba(255,255,255,0.06) 25%, transparent 25%, transparent 50%, rgba(255,255,255,0.06) 50%, rgba(255,255,255,0.06) 75%, transparent 75%);
     background-size: 1rem 1rem;
     animation: progress-stripe 0.5s linear infinite;
   }

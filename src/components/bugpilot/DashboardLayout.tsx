@@ -14,10 +14,10 @@ export function DashboardLayout() {
       <CommandPalette />
       <div className={cn(
         'transition-all duration-200 ease-out',
-        sidebarCollapsed ? 'ml-16' : 'ml-56'
+        sidebarCollapsed ? 'ml-14' : 'ml-52'
       )}>
         <TopBar />
-        <main className="p-6">
+        <main className="p-5">
           <Outlet />
         </main>
       </div>

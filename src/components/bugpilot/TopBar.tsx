@@ -19,25 +19,25 @@ export function TopBar() {
   const title = Object.entries(routeTitles).find(([path]) => location.pathname.startsWith(path))?.[1] || 'BugPilot';
 
   return (
-    <header className="h-14 border-b border-border bg-background/80 backdrop-blur-xl sticky top-0 z-20 flex items-center justify-between px-6">
-      <h1 className="text-sm font-semibold text-foreground">{title}</h1>
+    <header className="h-12 border-b border-border bg-background/60 backdrop-blur-xl sticky top-0 z-20 flex items-center justify-between px-5">
+      <h1 className="text-[13px] font-semibold text-foreground">{title}</h1>
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1.5">
         <button onClick={() => setCommandPaletteOpen(true)}
-          className="flex items-center gap-2 h-8 px-3 rounded-lg bg-card border border-border text-muted-foreground hover:text-foreground hover:border-primary/20 transition-colors">
-          <Search className="h-3.5 w-3.5" />
-          <span className="text-xs">Search...</span>
-          <kbd className="text-[10px] font-mono bg-muted px-1.5 py-0.5 rounded border border-border">⌘K</kbd>
+          className="flex items-center gap-2 h-7 px-2.5 rounded-md bg-secondary/50 border border-border/50 text-muted-foreground hover:text-foreground hover:border-primary/20 transition-colors">
+          <Search className="h-3 w-3" />
+          <span className="text-[11px]">Search...</span>
+          <kbd className="text-[9px] font-mono bg-muted px-1 py-0.5 rounded border border-border ml-2">⌘K</kbd>
         </button>
 
-        <Button variant="ghost" size="icon" className="h-8 w-8 relative text-muted-foreground hover:text-foreground">
-          <Bell className="h-4 w-4" />
-          <span className="absolute -top-0.5 -right-0.5 h-4 w-4 rounded-full bg-destructive text-[9px] font-bold text-destructive-foreground flex items-center justify-center ring-2 ring-background">3</span>
+        <Button variant="ghost" size="icon" className="h-7 w-7 relative text-muted-foreground hover:text-foreground">
+          <Bell className="h-3.5 w-3.5" />
+          <span className="absolute -top-0.5 -right-0.5 h-3.5 w-3.5 rounded-full bg-destructive text-[8px] font-bold text-destructive-foreground flex items-center justify-center ring-2 ring-background">3</span>
         </Button>
 
-        <button className="flex items-center gap-2 h-8 pl-1.5 pr-2 rounded-lg hover:bg-card transition-colors">
-          <div className="h-6 w-6 rounded-full gradient-brand flex items-center justify-center">
-            <span className="text-[10px] font-bold text-primary-foreground">SC</span>
+        <button className="flex items-center gap-1.5 h-7 pl-1 pr-1.5 rounded-md hover:bg-secondary/50 transition-colors">
+          <div className="h-5 w-5 rounded-full gradient-brand flex items-center justify-center">
+            <span className="text-[9px] font-bold text-primary-foreground">SC</span>
           </div>
           <ChevronDown className="h-3 w-3 text-muted-foreground" />
         </button>
