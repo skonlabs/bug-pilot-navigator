@@ -250,7 +250,7 @@ export function FixProposalCard({ fix, onApprove, onReject, showContext = false 
               {/* Tier badge — prominently shown */}
               <span
                 className={cn(
-                  'inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider',
+                  'inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-xs font-bold uppercase tracking-wider',
                   tier.badgeClass,
                 )}
               >
