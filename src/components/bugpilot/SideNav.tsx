@@ -62,7 +62,7 @@ export function SideNav({ onMobileClose }: { onMobileClose?: () => void } = {}) 
           {/* System health dot */}
           <span className={cn(
             'absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full border border-sidebar-background',
-            systemHealthOk ? 'bg-emerald-400' : 'bg-red-500 animate-pulse'
+            systemHealthOk ? 'bg-success' : 'bg-destructive animate-pulse'
           )} />
         </div>
         {!sidebarCollapsed && (
@@ -117,8 +117,8 @@ export function SideNav({ onMobileClose }: { onMobileClose?: () => void } = {}) 
                         {item.badge !== undefined && item.badge > 0 && (
                           <span className={cn(
                             'min-w-[18px] h-4 rounded px-1 text-[9px] font-bold flex items-center justify-center tabular-nums',
-                            item.badgeVariant === 'danger' ? 'bg-red-500/15 text-red-400 border border-red-500/20' :
-                            item.badgeVariant === 'warning' ? 'bg-amber-500/15 text-amber-400 border border-amber-500/20' :
+                          item.badgeVariant === 'danger' ? 'bg-severity-p0/15 text-severity-p0 border border-severity-p0/20' :
+                            item.badgeVariant === 'warning' ? 'bg-severity-p1/15 text-severity-p1 border border-severity-p1/20' :
                             'bg-primary/[0.12] text-primary border border-primary/20'
                           )}>
                             {item.badge}
@@ -129,8 +129,8 @@ export function SideNav({ onMobileClose }: { onMobileClose?: () => void } = {}) 
                     {sidebarCollapsed && item.badge !== undefined && item.badge > 0 && (
                       <span className={cn(
                         'absolute top-0.5 right-0.5 h-3 w-3 rounded-full text-[7px] font-bold flex items-center justify-center',
-                        item.badgeVariant === 'danger' ? 'bg-red-500' :
-                        item.badgeVariant === 'warning' ? 'bg-amber-500' : 'bg-primary',
+                        item.badgeVariant === 'danger' ? 'bg-severity-p0' :
+                        item.badgeVariant === 'warning' ? 'bg-severity-p1' : 'bg-primary',
                         'text-white'
                       )}>
                         {item.badge}
@@ -169,11 +169,11 @@ export function SideNav({ onMobileClose }: { onMobileClose?: () => void } = {}) 
             <div className="flex items-center gap-1">
               <span className={cn(
                 'h-1.5 w-1.5 rounded-full',
-                systemHealthOk ? 'bg-emerald-400' : 'bg-red-500 animate-pulse'
+                systemHealthOk ? 'bg-success' : 'bg-destructive animate-pulse'
               )} />
               <span className={cn(
                 'text-[10px] font-medium',
-                systemHealthOk ? 'text-emerald-400' : 'text-red-400'
+                systemHealthOk ? 'text-success' : 'text-destructive'
               )}>
                 {systemHealthOk ? 'Nominal' : 'Alert'}
               </span>

@@ -8,23 +8,23 @@ import { motion } from 'framer-motion';
 import { format } from 'date-fns';
 
 const ACTION_COLORS: Record<string, string> = {
-  'fix.approve': 'text-emerald-400',
-  'fix.execute': 'text-emerald-400',
-  'investigation.start': 'text-blue-400',
-  'investigation.complete': 'text-blue-400',
+  'fix.approve': 'text-success',
+  'fix.execute': 'text-success',
+  'investigation.start': 'text-severity-p3',
+  'investigation.complete': 'text-severity-p3',
   'incident.status_change': 'text-primary',
-  'connector.auth': 'text-amber-400',
+  'connector.auth': 'text-warning',
   'connector.sync': 'text-muted-foreground',
   'packet.view': 'text-muted-foreground',
-  'postmortem.edit': 'text-purple-400',
-  'member.invite': 'text-amber-400',
-  'member.role_change': 'text-amber-400',
+  'postmortem.edit': 'text-status-identified',
+  'member.invite': 'text-warning',
+  'member.role_change': 'text-warning',
 };
 
 const ACTOR_BADGE: Record<string, string> = {
   user: 'bg-primary/10 text-primary',
   system: 'bg-secondary text-muted-foreground',
-  'bugpilot-auto': 'bg-purple-500/10 text-purple-400',
+  'bugpilot-auto': 'bg-accent/10 text-accent',
 };
 
 export default function AuditPage() {

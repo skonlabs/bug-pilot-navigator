@@ -57,9 +57,9 @@ function getMTTRLabel(secs: number): string {
 }
 
 function connectorDotClass(status: string): string {
-  if (status === 'connected') return 'bg-emerald-500';
+  if (status === 'connected') return 'bg-success';
   if (status === 'error') return 'bg-severity-p0';
-  if (status === 'stale') return 'bg-yellow-500';
+  if (status === 'stale') return 'bg-warning';
   return 'bg-muted-foreground/30';
 }
 
@@ -364,14 +364,14 @@ export default function IndexPage() {
       >
         <div>
           <div className="flex items-center gap-2.5 mb-0.5">
-            <h1 className="text-xl font-bold tracking-tight text-foreground">
+            <h1 className="text-lg font-bold tracking-tight text-foreground">
               <span className="gradient-brand-text">BugPilot</span>
               <span className="text-muted-foreground font-normal mx-1.5">·</span>
               <span>{mockOrg.name}</span>
             </h1>
             {activeIncidents.length === 0 && (
-              <span className="flex items-center gap-1.5 text-[11px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500 font-semibold border border-emerald-500/20">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+              <span className="flex items-center gap-1.5 text-[11px] px-2 py-0.5 rounded-full bg-success/10 text-success font-semibold border border-success/20">
+                <span className="h-1.5 w-1.5 rounded-full bg-success" />
                 All clear
               </span>
             )}
@@ -414,10 +414,10 @@ export default function IndexPage() {
           initial={{ opacity: 0, y: -4 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.06 }}
-          className="flex items-center gap-3 px-3 py-2.5 rounded-xl border border-yellow-500/25 bg-yellow-500/5"
+          className="flex items-center gap-3 px-3 py-2.5 rounded-xl border border-warning/25 bg-warning/5"
         >
-          <Users className="h-3.5 w-3.5 text-yellow-500 flex-shrink-0" />
-          <span className="text-xs font-medium text-yellow-500">On-call burnout risk</span>
+          <Users className="h-3.5 w-3.5 text-warning flex-shrink-0" />
+          <span className="text-xs font-medium text-warning">On-call burnout risk</span>
           <span className="text-xs text-muted-foreground">
             {burnoutEngineers.map(e => `${e.engineer} (${e.pages_this_week} pages/wk)`).join(', ')}
             {' — consider rotating on-call.'}

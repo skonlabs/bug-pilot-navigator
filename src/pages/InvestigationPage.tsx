@@ -42,10 +42,10 @@ const CHANGE_TYPE_ICONS: Record<string, React.ElementType> = {
 
 const CHANGE_TYPE_COLORS: Record<string, string> = {
   deploy: 'text-primary bg-primary/10',
-  config: 'text-amber-400 bg-amber-400/10',
-  flag: 'text-emerald-400 bg-emerald-400/10',
+  config: 'text-warning bg-warning/10',
+  flag: 'text-success bg-success/10',
   migration: 'text-severity-p1 bg-severity-p1/10',
-  infra: 'text-blue-400 bg-blue-400/10',
+  infra: 'text-severity-p3 bg-severity-p3/10',
   rollback: 'text-severity-p0 bg-severity-p0/10',
   manual: 'text-muted-foreground bg-secondary',
 };
@@ -360,7 +360,7 @@ export default function InvestigationPage() {
       <div className="px-6 py-2 border-b border-border bg-background/60 flex items-center gap-3">
         <div className="flex items-center gap-1.5 shrink-0">
           {isInvestigationComplete ? (
-            <CheckCircle className="h-3.5 w-3.5 text-emerald-400 shrink-0" />
+            <CheckCircle className="h-3.5 w-3.5 text-success shrink-0" />
           ) : (
             investigation.status === 'running'
               ? <Loader2 className="h-3.5 w-3.5 text-primary animate-spin shrink-0" />
@@ -368,7 +368,7 @@ export default function InvestigationPage() {
           )}
           <span className={cn(
             'text-[10px] font-bold uppercase tracking-[0.12em]',
-            isInvestigationComplete ? 'text-emerald-400' : 'text-primary',
+            isInvestigationComplete ? 'text-success' : 'text-primary',
           )}>
             {isInvestigationComplete ? 'Complete' : `Phase: ${PHASE_LABELS[investigation.phase || 'classify']}`}
           </span>
@@ -383,14 +383,14 @@ export default function InvestigationPage() {
               <div key={phase} className="flex items-center gap-0 shrink-0">
                 <div className={cn(
                   'px-2 py-1 text-[10px] font-semibold transition-all',
-                  isDone ? 'text-emerald-400' :
+                  isDone ? 'text-success' :
                   isCurrent ? 'text-primary border-b-2 border-primary' :
                   'text-muted-foreground/35',
                 )}>
                   {PHASE_LABELS[phase]}
                 </div>
                 {i < phases.length - 1 && (
-                  <div className={cn('h-px w-3 shrink-0', isDone ? 'bg-emerald-400/30' : 'bg-border/40')} />
+                  <div className={cn('h-px w-3 shrink-0', isDone ? 'bg-success/30' : 'bg-border/40')} />
                 )}
               </div>
             );
