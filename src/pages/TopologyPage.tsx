@@ -2,7 +2,7 @@ import { useState, useRef } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { mockServices, mockIncidents } from '@/data/mock-data';
 import { cn } from '@/lib/utils';
-import { Search, Maximize2, ZoomIn, ZoomOut } from 'lucide-react';
+import { Search, Maximize2, ZoomIn, ZoomOut, Activity, AlertTriangle } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
@@ -65,6 +65,11 @@ export default function TopologyPage() {
   const incident = incidentId ? mockIncidents.find(i => i.id === incidentId) : null;
   const causalPath = incident?.affected_services || [];
 
+  // Health summary counts
+  const healthyCnt  = mockServices.filter(s => s.health === 'healthy').length;
+  const degradedCnt = mockServices.filter(s => s.health === 'degraded').length;
+  const incidentCnt = mockServices.filter(s => s.health === 'incident').length;
+
   const filteredNames = new Set(
     mockServices
       .filter(s => {
@@ -96,37 +101,84 @@ export default function TopologyPage() {
     <div className="flex h-[calc(100vh-7rem)] -m-6 gap-0">
       {/* Graph Canvas */}
       <div className="flex-1 relative bg-background overflow-hidden">
-        {/* Toolbar */}
+        {/* ── Toolbar ─────────────────────────────────────────────────────── */}
         <div className="absolute top-4 left-4 right-4 z-10 flex items-center gap-2 flex-wrap">
-          <div className="relative flex-1 max-w-xs">
-            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
-            <Input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search services..." className="pl-8 h-8 text-xs bg-background/95 backdrop-blur-sm" />
+          {/* Health summary bar */}
+          <div className="flex items-center gap-3 px-3 py-2 bg-background/95 backdrop-blur-sm rounded-xl border border-border shadow-lg">
+            {incidentCnt > 0 && (
+              <div className="flex items-center gap-1.5">
+                <span className="h-2 w-2 rounded-full bg-severity-p0 animate-ping" />
+                <span className="text-[11px] font-medium text-severity-p0 tabular-nums">{incidentCnt} incident</span>
+              </div>
+            )}
+            {degradedCnt > 0 && (
+              <div className="flex items-center gap-1.5">
+                <span className="h-2 w-2 rounded-full bg-amber-400" />
+                <span className="text-[11px] font-medium text-amber-400 tabular-nums">{degradedCnt} degraded</span>
+              </div>
+            )}
+            <div className="flex items-center gap-1.5">
+              <span className="h-2 w-2 rounded-full bg-emerald-400" />
+              <span className="text-[11px] font-medium text-emerald-400 tabular-nums">{healthyCnt} healthy</span>
+            </div>
           </div>
-          <div className="flex items-center bg-background/95 backdrop-blur-sm rounded-lg border border-border/80 p-0.5 gap-0.5">
+
+          <div className="relative">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+            <Input
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder="Search services..."
+              className="pl-8 h-8 w-44 text-xs bg-background/95 backdrop-blur-sm border-border"
+            />
+          </div>
+
+          <div className="flex items-center bg-background/95 backdrop-blur-sm rounded-xl border border-border p-0.5 gap-0.5">
             {['all', 'healthy', 'degraded', 'incident', 'unknown'].map(h => (
               <button key={h} onClick={() => setHealthFilter(h)}
-                className={cn('px-2.5 py-1 rounded-md text-[11px] font-medium transition-all capitalize', healthFilter === h ? 'bg-primary text-white' : 'text-muted-foreground hover:text-foreground')}>
+                className={cn(
+                  'px-2.5 py-1 rounded-lg text-[11px] font-medium transition-all capitalize',
+                  healthFilter === h
+                    ? h === 'all'
+                      ? 'bg-primary/10 text-primary border border-primary/20'
+                      : h === 'incident'
+                        ? 'bg-severity-p0/10 text-severity-p0 border border-severity-p0/20'
+                        : h === 'degraded'
+                          ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
+                          : h === 'healthy'
+                            ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                            : 'bg-muted text-muted-foreground'
+                    : 'text-muted-foreground hover:text-foreground',
+                )}>
                 {h}
               </button>
             ))}
           </div>
-          <div className="flex items-center gap-1 bg-background/95 backdrop-blur-sm rounded-lg border border-border/80 p-1">
-            <button onClick={() => setZoom(z => Math.min(2.5, z * 1.2))} className="p-1 hover:text-foreground text-muted-foreground transition-colors"><ZoomIn className="h-3.5 w-3.5" /></button>
-            <span className="text-[10px] font-mono text-muted-foreground w-8 text-center">{Math.round(zoom * 100)}%</span>
-            <button onClick={() => setZoom(z => Math.max(0.3, z * 0.8))} className="p-1 hover:text-foreground text-muted-foreground transition-colors"><ZoomOut className="h-3.5 w-3.5" /></button>
+
+          <div className="flex items-center gap-1 bg-background/95 backdrop-blur-sm rounded-xl border border-border p-1">
+            <button onClick={() => setZoom(z => Math.min(2.5, z * 1.2))} className="p-1 hover:text-foreground text-muted-foreground transition-colors rounded-lg hover:bg-muted">
+              <ZoomIn className="h-3.5 w-3.5" />
+            </button>
+            <span className="text-[10px] font-mono text-muted-foreground w-8 text-center tabular-nums">{Math.round(zoom * 100)}%</span>
+            <button onClick={() => setZoom(z => Math.max(0.3, z * 0.8))} className="p-1 hover:text-foreground text-muted-foreground transition-colors rounded-lg hover:bg-muted">
+              <ZoomOut className="h-3.5 w-3.5" />
+            </button>
             <div className="w-px h-4 bg-border mx-1" />
-            <button onClick={resetView} className="p-1 hover:text-foreground text-muted-foreground transition-colors"><Maximize2 className="h-3.5 w-3.5" /></button>
+            <button onClick={resetView} className="p-1 hover:text-foreground text-muted-foreground transition-colors rounded-lg hover:bg-muted">
+              <Maximize2 className="h-3.5 w-3.5" />
+            </button>
           </div>
+
           {incident && (
-            <div className="flex items-center gap-2 px-3 py-1.5 bg-severity-p0/10 border border-severity-p0/30 rounded-lg text-xs text-severity-p0">
+            <div className="flex items-center gap-2 px-3 py-1.5 bg-severity-p0/10 border border-severity-p0/30 rounded-xl text-xs text-severity-p0">
               <div className="h-2 w-2 rounded-full bg-severity-p0 animate-pulse" />
               Causal path for {incident.short_id}
             </div>
           )}
         </div>
 
-        {/* Legend */}
-        <div className="absolute bottom-4 left-4 z-10 flex items-center gap-4 bg-background/95 backdrop-blur-sm border border-border rounded-lg px-3 py-2">
+        {/* ── Legend ──────────────────────────────────────────────────────── */}
+        <div className="absolute bottom-4 left-4 z-10 flex items-center gap-4 bg-background/95 backdrop-blur-sm border border-border rounded-xl px-4 py-2.5">
           {Object.entries(HEALTH_CONFIG).map(([status, cfg]) => (
             <div key={status} className="flex items-center gap-1.5">
               <div className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: cfg.color }} />
@@ -140,7 +192,7 @@ export default function TopologyPage() {
           </div>
         </div>
 
-        {/* SVG */}
+        {/* ── SVG Topology Canvas ──────────────────────────────────────────── */}
         <svg
           className="w-full h-full"
           style={{ cursor: isDragging.current ? 'grabbing' : 'grab' }}
@@ -246,21 +298,31 @@ export default function TopologyPage() {
         </svg>
       </div>
 
-      {/* Right Sidebar */}
-      <div className={cn('border-l border-border bg-background/95 transition-all duration-300 overflow-y-auto scrollbar-thin', selectedService ? 'w-68 shrink-0' : 'w-0 overflow-hidden')}>
+      {/* ── Right Sidebar ────────────────────────────────────────────────────── */}
+      <div className={cn(
+        'border-l border-border bg-background/95 transition-all duration-300 overflow-y-auto scrollbar-thin',
+        selectedService ? 'w-72 shrink-0' : 'w-0 overflow-hidden',
+      )}>
         {selectedService && (
-          <motion.div initial={{ opacity: 0, x: 16 }} animate={{ opacity: 1, x: 0 }} className="p-5 space-y-4 w-64">
+          <motion.div initial={{ opacity: 0, x: 16 }} animate={{ opacity: 1, x: 0 }} className="p-5 space-y-4 w-72">
+            {/* Header */}
             <div className="flex items-start justify-between">
-              <div>
-                <h3 className="text-sm font-bold font-mono text-foreground leading-tight">{selectedService.name}</h3>
+              <div className="flex-1 min-w-0">
+                <h3 className="text-sm font-bold font-mono text-foreground leading-tight truncate">{selectedService.name}</h3>
                 <p className="text-xs text-muted-foreground mt-0.5">{selectedService.team} Team</p>
               </div>
-              <button onClick={() => setSelectedService(null)} className="text-muted-foreground hover:text-foreground text-sm leading-none mt-0.5">✕</button>
+              <button
+                onClick={() => setSelectedService(null)}
+                className="ml-2 h-6 w-6 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors shrink-0"
+              >
+                <span className="text-sm leading-none">✕</span>
+              </button>
             </div>
 
+            {/* Health + Readiness */}
             <div className="grid grid-cols-2 gap-2">
-              <div className="p-2.5 rounded-lg bg-secondary/50 text-center">
-                <p className="text-[10px] text-muted-foreground mb-1">Health</p>
+              <div className="p-3 rounded-xl bg-secondary/50 border border-border/50 text-center">
+                <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-muted-foreground mb-1.5">Health</p>
                 <div className="flex items-center justify-center gap-1.5">
                   <div className={cn('h-2 w-2 rounded-full',
                     selectedService.health === 'healthy' ? 'bg-emerald-400' :
@@ -270,16 +332,17 @@ export default function TopologyPage() {
                   <span className="text-xs font-medium text-foreground capitalize">{selectedService.health}</span>
                 </div>
               </div>
-              <div className="p-2.5 rounded-lg bg-secondary/50 text-center">
-                <p className="text-[10px] text-muted-foreground mb-1">Readiness</p>
-                <p className={cn('text-sm font-bold font-mono',
+              <div className="p-3 rounded-xl bg-secondary/50 border border-border/50 text-center">
+                <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-muted-foreground mb-1.5">Readiness</p>
+                <p className={cn('text-sm font-bold font-mono tabular-nums',
                   selectedService.readiness_score >= 80 ? 'text-emerald-400' :
                   selectedService.readiness_score >= 50 ? 'text-amber-400' : 'text-severity-p0'
                 )}>{selectedService.readiness_score}%</p>
               </div>
             </div>
 
-            <div className="space-y-2.5">
+            {/* Service details */}
+            <div className="rounded-xl border border-border bg-card p-3 space-y-2.5">
               {[
                 { label: 'Criticality', value: selectedService.criticality },
                 { label: 'Language', value: selectedService.language || '—' },
@@ -287,33 +350,38 @@ export default function TopologyPage() {
               ].map(({ label, value }) => (
                 <div key={label} className="flex items-center justify-between text-xs">
                   <span className="text-muted-foreground">{label}</span>
-                  <span className="font-medium text-foreground capitalize">{value}</span>
+                  <span className="font-medium text-foreground capitalize px-2 py-0.5 rounded-md bg-secondary border border-border/50">{value}</span>
                 </div>
               ))}
             </div>
 
+            {/* Active incidents */}
             {selectedService.active_incidents > 0 && (
-              <div className="p-2.5 rounded-lg bg-severity-p0/5 border border-severity-p0/20">
-                <p className="text-[11px] text-severity-p0 font-medium mb-1">
-                  {selectedService.active_incidents} active incident{selectedService.active_incidents > 1 ? 's' : ''}
-                </p>
+              <div className="p-3 rounded-xl bg-severity-p0/5 border border-severity-p0/20">
+                <div className="flex items-center gap-1.5 mb-2">
+                  <AlertTriangle className="h-3.5 w-3.5 text-severity-p0" />
+                  <p className="text-[11px] text-severity-p0 font-semibold">
+                    {selectedService.active_incidents} active incident{selectedService.active_incidents > 1 ? 's' : ''}
+                  </p>
+                </div>
                 {mockIncidents
                   .filter(i => i.affected_services.includes(selectedService.name) && !['resolved', 'closed', 'postmortem'].includes(i.status))
                   .map(inc => (
                     <Link key={inc.id} to={`/incidents/${inc.id}`}
-                      className="text-[11px] text-primary hover:underline block truncate">
+                      className="text-[11px] text-primary hover:underline block truncate mt-1">
                       {inc.short_id}: {inc.title.substring(0, 28)}…
                     </Link>
                   ))}
               </div>
             )}
 
+            {/* Actions */}
             <div className="flex flex-col gap-2 pt-1">
               <Link to={`/readiness/${selectedService.id}`}>
-                <Button size="sm" variant="outline" className="w-full h-7 text-xs">View Readiness</Button>
+                <Button size="sm" variant="outline" className="w-full h-8 text-xs">View Readiness</Button>
               </Link>
               <Link to={`/topology?incident=${mockIncidents.find(i => i.affected_services.includes(selectedService.name))?.id || ''}`}>
-                <Button size="sm" variant="ghost" className="w-full h-7 text-xs">Highlight Causal Path</Button>
+                <Button size="sm" variant="ghost" className="w-full h-8 text-xs text-muted-foreground">Highlight Causal Path</Button>
               </Link>
             </div>
           </motion.div>
