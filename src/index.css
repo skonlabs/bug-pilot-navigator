@@ -6,84 +6,85 @@
 
 @layer base {
   :root {
-    --background: 225 25% 5%;
-    --foreground: 210 20% 92%;
+    /* Kiro-inspired deep black + violet theme */
+    --background: 0 0% 4%;
+    --foreground: 0 0% 93%;
 
-    --card: 225 25% 7%;
-    --card-foreground: 210 20% 92%;
+    --card: 0 0% 6.5%;
+    --card-foreground: 0 0% 93%;
 
-    --popover: 225 25% 9%;
-    --popover-foreground: 210 20% 92%;
+    --popover: 0 0% 8%;
+    --popover-foreground: 0 0% 93%;
 
-    --primary: 210 100% 56%;
-    --primary-foreground: 225 25% 5%;
+    --primary: 270 100% 68%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 225 20% 12%;
-    --secondary-foreground: 210 20% 78%;
+    --secondary: 0 0% 10%;
+    --secondary-foreground: 0 0% 70%;
 
-    --muted: 225 18% 10%;
-    --muted-foreground: 215 12% 48%;
+    --muted: 0 0% 9%;
+    --muted-foreground: 0 0% 45%;
 
-    --accent: 210 100% 56%;
-    --accent-foreground: 225 25% 5%;
+    --accent: 270 70% 55%;
+    --accent-foreground: 0 0% 100%;
 
     --destructive: 0 72% 51%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive-foreground: 0 0% 98%;
 
-    --border: 225 15% 14%;
-    --input: 225 15% 14%;
-    --ring: 210 100% 56%;
+    --border: 0 0% 12%;
+    --input: 0 0% 12%;
+    --ring: 270 100% 68%;
 
-    --radius: 0.625rem;
+    --radius: 0.5rem;
 
     /* Severity */
     --severity-p0: 0 84% 60%;
     --severity-p1: 25 95% 53%;
     --severity-p2: 45 93% 47%;
-    --severity-p3: 215 12% 48%;
+    --severity-p3: 0 0% 45%;
 
     /* Status */
     --status-detected: 0 84% 60%;
-    --status-investigating: 210 100% 56%;
-    --status-identified: 265 80% 60%;
+    --status-investigating: 270 100% 68%;
+    --status-identified: 280 65% 60%;
     --status-mitigating: 45 93% 47%;
     --status-resolved: 152 69% 45%;
-    --status-postmortem: 215 12% 48%;
-    --status-closed: 215 12% 38%;
+    --status-postmortem: 0 0% 45%;
+    --status-closed: 0 0% 35%;
 
     /* Confidence */
     --confidence-high: 152 69% 45%;
-    --confidence-probable: 210 100% 56%;
+    --confidence-probable: 270 100% 68%;
     --confidence-candidate: 45 93% 47%;
-    --confidence-low: 215 12% 38%;
+    --confidence-low: 0 0% 35%;
 
     /* Surface */
-    --surface-raised: 225 22% 8%;
-    --surface-overlay: 225 22% 10%;
-    --surface-hover: 225 18% 13%;
-    --surface-active: 225 18% 15%;
+    --surface-raised: 0 0% 7%;
+    --surface-overlay: 0 0% 9%;
+    --surface-hover: 0 0% 11%;
+    --surface-active: 0 0% 13%;
 
-    /* Brand gradient */
-    --brand-from: 210 100% 56%;
-    --brand-to: 265 80% 60%;
+    /* Brand */
+    --brand-from: 270 100% 68%;
+    --brand-to: 280 80% 55%;
 
     /* Success */
     --success: 152 69% 45%;
-    --success-foreground: 225 25% 5%;
+    --success-foreground: 0 0% 4%;
 
     /* Warning */
     --warning: 45 93% 47%;
-    --warning-foreground: 225 25% 5%;
+    --warning-foreground: 0 0% 4%;
 
     /* Sidebar */
-    --sidebar-background: 225 28% 4%;
-    --sidebar-foreground: 210 15% 65%;
-    --sidebar-primary: 210 100% 56%;
-    --sidebar-primary-foreground: 225 25% 5%;
-    --sidebar-accent: 225 20% 10%;
-    --sidebar-accent-foreground: 210 20% 92%;
-    --sidebar-border: 225 15% 12%;
-    --sidebar-ring: 210 100% 56%;
+    --sidebar-background: 0 0% 3.5%;
+    --sidebar-foreground: 0 0% 55%;
+    --sidebar-primary: 270 100% 68%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 0 0% 8%;
+    --sidebar-accent-foreground: 0 0% 93%;
+    --sidebar-border: 0 0% 10%;
+    --sidebar-ring: 270 100% 68%;
   }
 }
 
@@ -107,24 +108,10 @@
     scrollbar-width: thin;
     scrollbar-color: hsl(var(--border)) transparent;
   }
-
-  .scrollbar-thin::-webkit-scrollbar {
-    width: 5px;
-    height: 5px;
-  }
-
-  .scrollbar-thin::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  .scrollbar-thin::-webkit-scrollbar-thumb {
-    background: hsl(var(--border));
-    border-radius: 3px;
-  }
-
-  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-    background: hsl(var(--muted-foreground) / 0.3);
-  }
+  .scrollbar-thin::-webkit-scrollbar { width: 5px; height: 5px; }
+  .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+  .scrollbar-thin::-webkit-scrollbar-thumb { background: hsl(var(--border)); border-radius: 3px; }
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover { background: hsl(var(--muted-foreground) / 0.3); }
 
   .gradient-brand {
     background: linear-gradient(135deg, hsl(var(--brand-from)), hsl(var(--brand-to)));
@@ -155,83 +142,49 @@
     0%, 100% { opacity: 1; }
     50% { opacity: 0.3; }
   }
-
-  .animate-pulse-dot {
-    animation: pulse-dot 1.5s ease-in-out infinite;
-  }
+  .animate-pulse-dot { animation: pulse-dot 1.5s ease-in-out infinite; }
 
   @keyframes slide-up {
     from { opacity: 0; transform: translateY(12px); }
     to { opacity: 1; transform: translateY(0); }
   }
-
-  .animate-slide-up {
-    animation: slide-up 0.4s ease-out;
-  }
+  .animate-slide-up { animation: slide-up 0.4s ease-out; }
 
   @keyframes slide-in {
     from { opacity: 0; transform: translateY(-8px); }
     to { opacity: 1; transform: translateY(0); }
   }
-
-  .animate-slide-in {
-    animation: slide-in 0.3s ease-out;
-  }
+  .animate-slide-in { animation: slide-in 0.3s ease-out; }
 
   @keyframes fade-in {
     from { opacity: 0; }
     to { opacity: 1; }
   }
-
-  .animate-fade-in {
-    animation: fade-in 0.5s ease-out;
-  }
+  .animate-fade-in { animation: fade-in 0.5s ease-out; }
 
   @keyframes shimmer {
     0% { background-position: -200% 0; }
     100% { background-position: 200% 0; }
   }
-
   .animate-shimmer {
     background: linear-gradient(90deg, hsl(var(--muted)) 25%, hsl(var(--surface-hover)) 50%, hsl(var(--muted)) 75%);
     background-size: 200% 100%;
     animation: shimmer 1.5s infinite;
   }
 
-  @keyframes float {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-6px); }
-  }
-
-  .animate-float {
-    animation: float 3s ease-in-out infinite;
-  }
-
   @keyframes glow-pulse {
     0%, 100% { box-shadow: 0 0 8px hsl(var(--brand-from) / 0.2); }
     50% { box-shadow: 0 0 24px hsl(var(--brand-from) / 0.4); }
   }
+  .animate-glow { animation: glow-pulse 2s ease-in-out infinite; }
 
-  .animate-glow {
-    animation: glow-pulse 2s ease-in-out infinite;
+  .progress-stripe {
+    background-image: linear-gradient(45deg, rgba(255,255,255,0.08) 25%, transparent 25%, transparent 50%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.08) 75%, transparent 75%);
+    background-size: 1rem 1rem;
+    animation: progress-stripe 0.5s linear infinite;
   }
-
   @keyframes progress-stripe {
     0% { background-position: 1rem 0; }
     100% { background-position: 0 0; }
-  }
-
-  .progress-stripe {
-    background-image: linear-gradient(
-      45deg,
-      rgba(255, 255, 255, 0.1) 25%,
-      transparent 25%,
-      transparent 50%,
-      rgba(255, 255, 255, 0.1) 50%,
-      rgba(255, 255, 255, 0.1) 75%,
-      transparent 75%
-    );
-    background-size: 1rem 1rem;
-    animation: progress-stripe 0.5s linear infinite;
   }
 }

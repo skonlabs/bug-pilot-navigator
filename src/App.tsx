@@ -6,7 +6,6 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useAppStore } from "@/store/app-store";
 import { OnboardingWizard } from "@/components/bugpilot/OnboardingWizard";
 import { DashboardLayout } from "@/components/bugpilot/DashboardLayout";
-import GettingStartedPage from "@/pages/GettingStartedPage";
 import IncidentsPage from "@/pages/IncidentsPage";
 import InvestigationPage from "@/pages/InvestigationPage";
 import TopologyPage from "@/pages/TopologyPage";
@@ -29,9 +28,9 @@ function AppContent() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        {/* Per spec: / redirects to /incidents */}
+        <Route path="/" element={<Navigate to="/incidents" replace />} />
         <Route element={<DashboardLayout />}>
-          <Route path="/dashboard" element={<GettingStartedPage />} />
           <Route path="/incidents" element={<IncidentsPage />} />
           <Route path="/incidents/:id" element={<InvestigationPage />} />
           <Route path="/topology" element={<TopologyPage />} />
