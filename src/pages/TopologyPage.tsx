@@ -98,7 +98,7 @@ export default function TopologyPage() {
   const resetView = () => { setZoom(1); setPan({ x: 20, y: 20 }); };
 
   return (
-    <div className="flex h-[calc(100vh-7rem)] -m-6 gap-0">
+    <div className="flex h-[calc(100vh-3rem)] -m-4 md:-m-5 xl:-m-6 gap-0">
       {/* Graph Canvas */}
       <div className="flex-1 relative bg-background overflow-hidden">
         {/* ── Toolbar ─────────────────────────────────────────────────────── */}

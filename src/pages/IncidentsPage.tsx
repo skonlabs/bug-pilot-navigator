@@ -470,15 +470,15 @@ export default function IncidentsPage() {
       {/* Table */}
       <div className="rounded-xl border border-border overflow-hidden bg-card">
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[900px]">
+          <table className="w-full min-w-[740px] xl:min-w-[900px]">
             <thead>
               <tr className="border-b border-border bg-secondary/20">
                 <th className="text-left text-[10px] font-bold text-muted-foreground px-3 py-2.5 uppercase tracking-[0.12em]">Sev</th>
                 <th className="text-left text-[10px] font-bold text-muted-foreground px-3 py-2.5 uppercase tracking-[0.12em]">Incident</th>
                 <th className="text-left text-[10px] font-bold text-muted-foreground px-3 py-2.5 uppercase tracking-[0.12em]">Status</th>
-                <th className="text-left text-[10px] font-bold text-muted-foreground px-3 py-2.5 uppercase tracking-[0.12em]">Env</th>
+                <th className="text-left text-[10px] font-bold text-muted-foreground px-3 py-2.5 uppercase tracking-[0.12em] hidden xl:table-cell">Env</th>
                 <th className="text-left text-[10px] font-bold text-muted-foreground px-3 py-2.5 uppercase tracking-[0.12em]">Services</th>
-                <th className="text-left text-[10px] font-bold text-muted-foreground px-3 py-2.5 uppercase tracking-[0.12em]">IC</th>
+                <th className="text-left text-[10px] font-bold text-muted-foreground px-3 py-2.5 uppercase tracking-[0.12em] hidden xl:table-cell">IC</th>
                 <th className="text-left text-[10px] font-bold text-muted-foreground px-3 py-2.5 uppercase tracking-[0.12em]">Detected</th>
                 <th className="text-left text-[10px] font-bold text-muted-foreground px-3 py-2.5 uppercase tracking-[0.12em]">Duration</th>
               </tr>
@@ -552,7 +552,7 @@ export default function IncidentsPage() {
                     </td>
 
                     {/* Environment */}
-                    <td className="px-3 py-2.5">
+                    <td className="px-3 py-2.5 hidden xl:table-cell">
                       <span
                         className={cn(
                           'text-[10px] px-1.5 py-0.5 rounded border font-medium',
@@ -578,7 +578,7 @@ export default function IncidentsPage() {
                     </td>
 
                     {/* IC: avatar initial + first name */}
-                    <td className="px-3 py-2.5">
+                    <td className="px-3 py-2.5 hidden xl:table-cell">
                       {inc.ic ? (
                         <div className="flex items-center gap-2">
                           <div className="h-6 w-6 rounded-full bg-primary/15 border border-primary/20 flex items-center justify-center shrink-0">
