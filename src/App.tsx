@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useAppStore } from "@/store/app-store";
 import { OnboardingWizard } from "@/components/bugpilot/OnboardingWizard";
 import { DashboardLayout } from "@/components/bugpilot/DashboardLayout";
@@ -19,6 +19,8 @@ import IntegrationsPage from "@/pages/IntegrationsPage";
 import ConnectorDetailPage from "@/pages/ConnectorDetailPage";
 import SettingsPage from "@/pages/SettingsPage";
 import AuditPage from "@/pages/AuditPage";
+import GettingStartedPage from "@/pages/GettingStartedPage";
+import IndexPage from "@/pages/Index";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient({
@@ -37,8 +39,10 @@ function AppContent() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Navigate to="/incidents" replace />} />
         <Route element={<DashboardLayout />}>
+          {/* Home Dashboard */}
+          <Route path="/" element={<IndexPage />} />
+
           {/* Incidents */}
           <Route path="/incidents" element={<IncidentsPage />} />
           <Route path="/incidents/:id" element={<InvestigationPage />} />
@@ -61,6 +65,9 @@ function AppContent() {
           {/* Integrations */}
           <Route path="/integrations" element={<IntegrationsPage />} />
           <Route path="/integrations/:name" element={<ConnectorDetailPage />} />
+
+          {/* Getting Started */}
+          <Route path="/getting-started" element={<GettingStartedPage />} />
 
           {/* Settings */}
           <Route path="/settings" element={<SettingsPage />} />

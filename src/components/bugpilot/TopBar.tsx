@@ -1,6 +1,6 @@
 import { useAppStore } from '@/store/app-store';
 import { useLocation, Link } from 'react-router-dom';
-import { Search, Bell, ChevronDown, CheckCircle2, AlertTriangle, Zap, Plug, X } from 'lucide-react';
+import { Search, Bell, ChevronDown, CheckCircle2, AlertTriangle, Zap, Plug, X, Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { mockNotifications, mockUser } from '@/data/mock-data';
@@ -35,7 +35,7 @@ const NotifColors = {
 };
 
 export function TopBar() {
-  const { setCommandPaletteOpen } = useAppStore();
+  const { setCommandPaletteOpen, toggleMobileSidebar } = useAppStore();
   const location = useLocation();
   const title = Object.entries(routeTitles).find(([path]) => location.pathname.startsWith(path))?.[1] || 'BugPilot';
   const [notifications, setNotifications] = useState(mockNotifications);
@@ -53,8 +53,16 @@ export function TopBar() {
   };
 
   return (
-    <header className="h-12 border-b border-border bg-background/60 backdrop-blur-xl sticky top-0 z-20 flex items-center justify-between px-5">
-      <h1 className="text-[13px] font-semibold text-foreground">{title}</h1>
+    <header className="h-12 border-b border-border bg-background/60 backdrop-blur-xl sticky top-0 z-20 flex items-center justify-between px-4 md:px-5">
+      <div className="flex items-center gap-2">
+        <button
+          onClick={toggleMobileSidebar}
+          className="md:hidden h-7 w-7 flex items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors"
+        >
+          <Menu className="h-4 w-4" />
+        </button>
+        <h1 className="text-[13px] font-semibold text-foreground">{title}</h1>
+      </div>
 
       <div className="flex items-center gap-1.5">
         <button

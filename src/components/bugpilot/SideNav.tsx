@@ -40,7 +40,7 @@ const navSections = [
   },
 ];
 
-export function SideNav() {
+export function SideNav({ onMobileClose }: { onMobileClose?: () => void } = {}) {
   const { sidebarCollapsed, toggleSidebar } = useAppStore();
   const location = useLocation();
   const navigate = useNavigate();
@@ -122,7 +122,7 @@ export function SideNav() {
                   return (
                     <Tooltip key={item.path} delayDuration={0}>
                       <TooltipTrigger asChild>
-                        <div className="relative">{button}</div>
+                        <div className="relative" onClick={onMobileClose}>{button}</div>
                       </TooltipTrigger>
                       <TooltipContent side="right" className="text-xs">
                         {item.label}
@@ -131,7 +131,7 @@ export function SideNav() {
                     </Tooltip>
                   );
                 }
-                return <div key={item.path}>{button}</div>;
+                return <div key={item.path} onClick={onMobileClose}>{button}</div>;
               })}
             </div>
           </div>
