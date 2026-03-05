@@ -7,8 +7,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
-import { AlertTriangle, Loader2 } from 'lucide-react';
+import { AlertTriangle, Loader2, X, ChevronDown, Check } from 'lucide-react';
 import type { Severity } from '@/types/bugpilot';
+import { mockServices } from '@/data/mock-data';
+import { format } from 'date-fns';
 
 const severityOptions: { value: Severity; label: string; desc: string; color: string }[] = [
   { value: 'P0', label: 'P0 — Critical', desc: 'Complete outage, revenue impact, data loss risk', color: 'border-severity-p0 bg-severity-p0/10 text-severity-p0' },
@@ -16,6 +18,8 @@ const severityOptions: { value: Severity; label: string; desc: string; color: st
   { value: 'P2', label: 'P2 — Medium', desc: 'Partial degradation, subset of users affected', color: 'border-severity-p2 bg-severity-p2/10 text-severity-p2' },
   { value: 'P3', label: 'P3 — Low', desc: 'Minor issue, informational, no SLO impact', color: 'border-border bg-muted text-muted-foreground' },
 ];
+
+const allServiceNames = mockServices.map(s => s.name);
 
 interface Props {
   open: boolean;
@@ -31,6 +35,28 @@ export function DeclareIncidentDialog({ open, onOpenChange }: Props) {
   const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
+  // Affected services multi-select
+  const [selectedServices, setSelectedServices] = useState<string[]>([]);
+  const [serviceSearch, setServiceSearch] = useState('');
+  const [serviceDropdownOpen, setServiceDropdownOpen] = useState(false);
+
+  // Time window
+  const now = new Date();
+  const defaultStart = new Date(now.getTime() - 30 * 60 * 1000); // 30 min ago
+  const [startTime, setStartTime] = useState(format(defaultStart, "yyyy-MM-dd'T'HH:mm"));
+  const [endTime, setEndTime] = useState('');
+  const [ongoingIncident, setOngoingIncident] = useState(true);
+
+  const filteredServices = allServiceNames.filter(s =>
+    s.toLowerCase().includes(serviceSearch.toLowerCase()) && !selectedServices.includes(s)
+  );
+
+  const toggleService = (name: string) => {
+    setSelectedServices(prev =>
+      prev.includes(name) ? prev.filter(s => s !== name) : [...prev, name]
+    );
+  };
+
   const validate = () => {
     const errs: Record<string, string> = {};
     if (!title.trim() || title.length < 5) errs.title = 'Title must be at least 5 characters';
@@ -42,19 +68,19 @@ export function DeclareIncidentDialog({ open, onOpenChange }: Props) {
   const handleSubmit = async () => {
     if (!validate()) return;
     setSubmitting(true);
-    // Simulate submission
     await new Promise(r => setTimeout(r, 1500));
     setSubmitting(false);
     onOpenChange(false);
-    // Reset form
     setTitle('');
     setSeverity(null);
     setDescription('');
+    setSelectedServices([]);
+    setServiceSearch('');
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg bg-card border-border">
+      <DialogContent className="sm:max-w-lg bg-card border-border max-h-[90vh] overflow-y-auto scrollbar-thin">
         <DialogHeader>
           <DialogTitle className="text-lg font-semibold text-foreground flex items-center gap-2">
             <AlertTriangle className="h-5 w-5 text-severity-p1" />
@@ -123,6 +149,120 @@ export function DeclareIncidentDialog({ open, onOpenChange }: Props) {
                   {env}
                 </button>
               ))}
+            </div>
+          </div>
+
+          {/* Affected Services */}
+          <div>
+            <Label className="text-sm font-medium text-foreground">Affected Services</Label>
+            <div className="relative mt-1.5">
+              <button
+                type="button"
+                onClick={() => setServiceDropdownOpen(o => !o)}
+                className="w-full h-10 px-3 rounded-md border border-border bg-secondary/50 flex items-center justify-between text-left text-sm text-muted-foreground hover:border-primary/30 transition-colors"
+              >
+                <span className={selectedServices.length > 0 ? 'text-foreground text-xs' : 'text-muted-foreground'}>
+                  {selectedServices.length > 0 ? `${selectedServices.length} service${selectedServices.length > 1 ? 's' : ''} selected` : 'Select affected services...'}
+                </span>
+                <ChevronDown className="h-4 w-4 shrink-0" />
+              </button>
+
+              {/* Selected chips */}
+              {selectedServices.length > 0 && (
+                <div className="flex flex-wrap gap-1.5 mt-2">
+                  {selectedServices.map(s => (
+                    <span key={s} className="flex items-center gap-1 text-[11px] bg-primary/10 text-primary border border-primary/20 px-2 py-0.5 rounded-full font-medium">
+                      {s}
+                      <button onClick={() => toggleService(s)} className="text-primary/60 hover:text-primary">
+                        <X className="h-3 w-3" />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              )}
+
+              {serviceDropdownOpen && (
+                <div className="absolute z-50 w-full mt-1 bg-card border border-border rounded-lg shadow-xl overflow-hidden">
+                  <div className="p-2 border-b border-border">
+                    <Input
+                      autoFocus
+                      value={serviceSearch}
+                      onChange={e => setServiceSearch(e.target.value)}
+                      placeholder="Search services..."
+                      className="h-7 text-xs bg-secondary/50 border-border"
+                    />
+                  </div>
+                  <div className="max-h-48 overflow-y-auto scrollbar-thin">
+                    {filteredServices.length === 0 ? (
+                      <p className="text-xs text-muted-foreground text-center py-3">No services match</p>
+                    ) : (
+                      filteredServices.map(s => (
+                        <button
+                          key={s}
+                          onClick={() => { toggleService(s); setServiceSearch(''); }}
+                          className="w-full flex items-center justify-between px-3 py-2 text-xs text-foreground hover:bg-secondary/50 transition-colors"
+                        >
+                          {s}
+                          {selectedServices.includes(s) && <Check className="h-3.5 w-3.5 text-primary" />}
+                        </button>
+                      ))
+                    )}
+                    {/* Also show selected services to allow deselect */}
+                    {selectedServices.filter(s => s.toLowerCase().includes(serviceSearch.toLowerCase())).map(s => (
+                      <button
+                        key={`sel-${s}`}
+                        onClick={() => toggleService(s)}
+                        className="w-full flex items-center justify-between px-3 py-2 text-xs text-primary bg-primary/5 hover:bg-primary/10 transition-colors"
+                      >
+                        {s}
+                        <Check className="h-3.5 w-3.5 text-primary" />
+                      </button>
+                    ))}
+                  </div>
+                  <div className="p-2 border-t border-border">
+                    <button onClick={() => setServiceDropdownOpen(false)} className="w-full text-center text-xs text-primary hover:underline">
+                      Done
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Time Window */}
+          <div>
+            <Label className="text-sm font-medium text-foreground">Incident Time Window</Label>
+            <div className="mt-1.5 space-y-2">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={ongoingIncident}
+                  onChange={e => setOngoingIncident(e.target.checked)}
+                  className="h-3.5 w-3.5 rounded border-border text-primary focus:ring-primary"
+                />
+                <span className="text-xs text-muted-foreground">Incident is ongoing (no end time)</span>
+              </label>
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <p className="text-[11px] text-muted-foreground mb-1">Started at</p>
+                  <input
+                    type="datetime-local"
+                    value={startTime}
+                    onChange={e => setStartTime(e.target.value)}
+                    className="w-full h-8 px-2 text-xs bg-secondary/50 border border-border rounded-md text-foreground focus:outline-none focus:ring-1 focus:ring-primary/30"
+                  />
+                </div>
+                <div>
+                  <p className="text-[11px] text-muted-foreground mb-1">Ended at</p>
+                  <input
+                    type="datetime-local"
+                    value={endTime}
+                    onChange={e => setEndTime(e.target.value)}
+                    disabled={ongoingIncident}
+                    className="w-full h-8 px-2 text-xs bg-secondary/50 border border-border rounded-md text-foreground focus:outline-none focus:ring-1 focus:ring-primary/30 disabled:opacity-40 disabled:cursor-not-allowed"
+                  />
+                </div>
+              </div>
             </div>
           </div>
 

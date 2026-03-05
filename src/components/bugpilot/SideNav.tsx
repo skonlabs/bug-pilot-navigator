@@ -6,13 +6,21 @@ import {
   Link2, Gauge, Settings, Shield, Bug, HelpCircle
 } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { mockIncidents, mockConnectors } from '@/data/mock-data';
+
+// Dynamic counts from mock data
+const activeIncidentCount = mockIncidents.filter(
+  i => i.status === 'investigating' || i.status === 'detected' || i.status === 'identified' || i.status === 'mitigating'
+).length;
+
+const connectorErrorCount = mockConnectors.filter(c => c.status === 'error').length;
 
 const navSections = [
   {
     label: 'Investigate',
     items: [
-      { path: '/incidents', label: 'Incidents', icon: AlertTriangle, badge: 2 },
-      { path: '/fixes', label: 'Fix Approvals', icon: Shield, badge: 3 },
+      { path: '/incidents', label: 'Incidents', icon: AlertTriangle, badge: activeIncidentCount, badgeVariant: 'danger' as const },
+      { path: '/fixes', label: 'Fix Approvals', icon: Shield, badge: 3, badgeVariant: 'primary' as const },
     ],
   },
   {
@@ -26,7 +34,7 @@ const navSections = [
   {
     label: 'Configure',
     items: [
-      { path: '/integrations', label: 'Integrations', icon: Link2 },
+      { path: '/integrations', label: 'Integrations', icon: Link2, badge: connectorErrorCount > 0 ? connectorErrorCount : undefined, badgeVariant: 'warning' as const },
       { path: '/settings', label: 'Settings', icon: Settings },
     ],
   },
@@ -67,6 +75,17 @@ export function SideNav() {
                   (item.path !== '/incidents' && location.pathname.startsWith(item.path)) ||
                   (item.path === '/incidents' && location.pathname.startsWith('/incidents'));
 
+                const badgeEl = item.badge && item.badge > 0 ? (
+                  <span className={cn(
+                    'min-w-[16px] h-4 rounded-full text-[9px] font-bold flex items-center justify-center px-1',
+                    item.badgeVariant === 'danger' ? 'bg-destructive/15 text-destructive' :
+                    item.badgeVariant === 'warning' ? 'bg-severity-p1/15 text-severity-p1' :
+                    'bg-primary/10 text-primary'
+                  )}>
+                    {item.badge}
+                  </span>
+                ) : null;
+
                 const button = (
                   <button
                     key={item.path}
@@ -83,17 +102,18 @@ export function SideNav() {
                     {!sidebarCollapsed && (
                       <>
                         <span className="flex-1 text-left">{item.label}</span>
-                        {item.badge && item.badge > 0 && (
-                          <span className={cn(
-                            'min-w-[16px] h-4 rounded-full text-[9px] font-bold flex items-center justify-center px-1',
-                            item.path === '/incidents'
-                              ? 'bg-destructive/15 text-destructive'
-                              : 'bg-primary/10 text-primary'
-                          )}>
-                            {item.badge}
-                          </span>
-                        )}
+                        {badgeEl}
                       </>
+                    )}
+                    {sidebarCollapsed && item.badge && item.badge > 0 && (
+                      <span className={cn(
+                        'absolute top-0 right-0 h-3 w-3 rounded-full text-[7px] font-bold flex items-center justify-center',
+                        item.badgeVariant === 'danger' ? 'bg-destructive text-white' :
+                        item.badgeVariant === 'warning' ? 'bg-severity-p1 text-white' :
+                        'bg-primary text-primary-foreground'
+                      )}>
+                        {item.badge}
+                      </span>
                     )}
                   </button>
                 );
@@ -101,8 +121,13 @@ export function SideNav() {
                 if (sidebarCollapsed) {
                   return (
                     <Tooltip key={item.path} delayDuration={0}>
-                      <TooltipTrigger asChild>{button}</TooltipTrigger>
-                      <TooltipContent side="right" className="text-xs">{item.label}</TooltipContent>
+                      <TooltipTrigger asChild>
+                        <div className="relative">{button}</div>
+                      </TooltipTrigger>
+                      <TooltipContent side="right" className="text-xs">
+                        {item.label}
+                        {item.badge && item.badge > 0 ? ` (${item.badge})` : ''}
+                      </TooltipContent>
                     </Tooltip>
                   );
                 }
