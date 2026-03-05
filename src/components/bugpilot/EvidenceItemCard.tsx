@@ -45,7 +45,7 @@ export function EvidenceItemCard({ item, onPin }: EvidenceItemCardProps) {
               {item.inference_method === 'llm_inference' ? 'LLM' : 'Parsed'}
             </span>
           </div>
-          <p className="text-sm text-foreground line-clamp-2">{item.summary}</p>
+          <p className="text-ui-2xs text-foreground line-clamp-2">{item.summary}</p>
         </div>
         {onPin && (
           <button
