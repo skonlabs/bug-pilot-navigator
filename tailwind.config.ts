@@ -86,6 +86,15 @@ export default {
           raised: "hsl(var(--surface-raised))",
           overlay: "hsl(var(--surface-overlay))",
           hover: "hsl(var(--surface-hover))",
+          active: "hsl(var(--surface-active))",
+        },
+        success: {
+          DEFAULT: "hsl(var(--success))",
+          foreground: "hsl(var(--success-foreground))",
+        },
+        warning: {
+          DEFAULT: "hsl(var(--warning))",
+          foreground: "hsl(var(--warning-foreground))",
         },
       },
       borderRadius: {

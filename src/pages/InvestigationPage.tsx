@@ -7,8 +7,9 @@ import { EvidenceItemCard } from '@/components/bugpilot/EvidenceItemCard';
 import { HypothesisCard } from '@/components/bugpilot/HypothesisCard';
 import { FixProposalCard } from '@/components/bugpilot/FixProposalCard';
 import { cn } from '@/lib/utils';
-import { ArrowLeft, AlertTriangle, Users, Clock, CheckCircle, Loader2 } from 'lucide-react';
+import { ArrowLeft, AlertTriangle, Users, CheckCircle, Loader2, FileText, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { motion } from 'framer-motion';
 import type { InvestigationPhase } from '@/types/bugpilot';
 
 const phases: InvestigationPhase[] = ['classify', 'scope', 'evidence', 'topology', 'hypothesize', 'test', 'fix', 'packet'];
@@ -25,143 +26,171 @@ export default function InvestigationPage() {
   const currentPhaseIdx = phases.indexOf(investigation.phase || 'classify');
 
   return (
-    <div className="space-y-4 -m-6">
-      {/* Incident Header Bar */}
-      <div className="px-6 py-3 border-b border-border bg-surface-raised flex items-center gap-3 flex-wrap">
-        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => navigate('/incidents')}>
+    <div className="space-y-0 -m-6">
+      {/* Incident Header */}
+      <motion.div
+        initial={{ opacity: 0, y: -4 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="px-6 py-3 border-b border-border bg-surface-raised/50 backdrop-blur-sm flex items-center gap-3 flex-wrap sticky top-14 z-10"
+      >
+        <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground" onClick={() => navigate('/incidents')}>
           <ArrowLeft className="h-4 w-4" />
         </Button>
-        <span className="font-mono text-sm font-bold text-foreground">{incident.short_id}</span>
+        <span className="font-mono text-xs font-bold text-foreground bg-secondary px-2 py-0.5 rounded">{incident.short_id}</span>
         <SeverityBadge severity={incident.severity} />
         <StatusBadge status={incident.status} />
         {incident.slo_violated && (
-          <span className="text-xs px-2 py-0.5 rounded bg-severity-p0/15 text-severity-p0 font-bold font-mono">
-            SLO: {incident.error_budget_consumed}% burned ↗
+          <span className="text-[11px] px-2 py-0.5 rounded-md bg-severity-p0/10 text-severity-p0 font-bold font-mono border border-severity-p0/20">
+            SLO: {incident.error_budget_consumed}% burned
           </span>
         )}
-        <span className="text-sm text-foreground ml-2">{incident.title}</span>
-      </div>
+        <div className="h-4 w-px bg-border mx-1" />
+        <span className="text-sm text-foreground font-medium">{incident.title}</span>
+        <div className="ml-auto flex gap-2">
+          <Button size="sm" variant="outline" className="h-7 text-xs gap-1.5">
+            <FileText className="h-3 w-3" /> View Packet
+          </Button>
+        </div>
+      </motion.div>
 
       {/* 3-Panel Layout */}
-      <div className="flex gap-0 min-h-[calc(100vh-8rem)]">
+      <div className="flex min-h-[calc(100vh-8rem)]">
         {/* Left Panel - Scope */}
-        <div className="w-72 shrink-0 border-r border-border p-4 space-y-4 overflow-y-auto scrollbar-thin">
-          <div>
-            <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Incident Scope</h3>
+        <div className="w-[260px] shrink-0 border-r border-border p-4 space-y-5 overflow-y-auto scrollbar-thin">
+          <motion.div initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1 }}>
+            <h3 className="text-[10px] font-semibold text-muted-foreground/60 uppercase tracking-[0.12em] mb-2">Scope</h3>
             <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <SeverityBadge severity={incident.severity} />
                 <StatusBadge status={incident.status} />
               </div>
-              <p className="text-xs text-muted-foreground">{incident.environment}</p>
+              <div className="flex items-center gap-2">
+                <span className="text-[11px] px-2 py-0.5 rounded-md bg-secondary text-secondary-foreground capitalize">{incident.environment}</span>
+                <span className="text-[11px] text-muted-foreground">• {incident.source}</span>
+              </div>
             </div>
-          </div>
+          </motion.div>
 
           {incident.slo_violated && (
-            <div>
-              <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">SLO Impact</h3>
-              <div className="space-y-1">
+            <motion.div initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.15 }}>
+              <h3 className="text-[10px] font-semibold text-muted-foreground/60 uppercase tracking-[0.12em] mb-2">SLO Impact</h3>
+              <div className="p-3 rounded-lg bg-severity-p0/5 border border-severity-p0/10 space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs text-muted-foreground">Burn rate</span>
+                  <span className="text-[11px] text-muted-foreground">Burn rate</span>
                   <span className={cn('text-sm font-mono font-bold', (incident.burn_rate || 0) > 5 ? 'text-severity-p0' : 'text-severity-p2')}>
                     {incident.burn_rate}x
                   </span>
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-muted-foreground">Budget consumed</span>
-                  <span className="text-sm font-mono text-severity-p0">{incident.error_budget_consumed}%</span>
-                </div>
-                <div className="h-2 rounded-full bg-muted overflow-hidden">
-                  <div className="h-full rounded-full bg-severity-p0 transition-all" style={{ width: `${incident.error_budget_consumed}%` }} />
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-[11px] text-muted-foreground">Budget consumed</span>
+                    <span className="text-[11px] font-mono text-severity-p0 font-bold">{incident.error_budget_consumed}%</span>
+                  </div>
+                  <div className="h-1.5 rounded-full bg-muted overflow-hidden">
+                    <div className="h-full rounded-full bg-severity-p0 progress-stripe" style={{ width: `${incident.error_budget_consumed}%` }} />
+                  </div>
                 </div>
               </div>
-            </div>
+            </motion.div>
           )}
 
-          <div>
-            <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Affected Services</h3>
+          <motion.div initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2 }}>
+            <h3 className="text-[10px] font-semibold text-muted-foreground/60 uppercase tracking-[0.12em] mb-2">Affected Services</h3>
             <div className="space-y-1">
               {incident.affected_services.map(s => (
-                <button key={s} className="block w-full text-left text-xs px-2 py-1.5 rounded bg-secondary text-secondary-foreground hover:bg-surface-hover transition-colors">
+                <div key={s} className="flex items-center gap-2 text-xs p-2 rounded-md bg-secondary/50 text-secondary-foreground hover:bg-surface-hover transition-colors cursor-pointer">
+                  <div className="h-1.5 w-1.5 rounded-full bg-severity-p0" />
                   {s}
-                </button>
+                </div>
               ))}
             </div>
-          </div>
+          </motion.div>
 
-          <div>
-            <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">On-Call</h3>
+          <motion.div initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.25 }}>
+            <h3 className="text-[10px] font-semibold text-muted-foreground/60 uppercase tracking-[0.12em] mb-2">On-Call</h3>
             <div className="space-y-2">
-              {incident.ic && (
-                <div className="flex items-center gap-2">
-                  <Users className="h-3.5 w-3.5 text-muted-foreground" />
+              {[
+                { user: incident.ic, role: 'Incident Commander' },
+                { user: incident.tl, role: 'Tech Lead' },
+              ].filter(item => item.user).map(item => (
+                <div key={item.role} className="flex items-center gap-2.5 p-2 rounded-md bg-secondary/30">
+                  <div className="h-7 w-7 rounded-full bg-primary/15 flex items-center justify-center">
+                    <span className="text-[9px] font-bold text-primary">{item.user!.name.split(' ').map(n => n[0]).join('')}</span>
+                  </div>
                   <div>
-                    <p className="text-xs text-foreground font-medium">{incident.ic.name}</p>
-                    <p className="text-[10px] text-muted-foreground">Incident Commander</p>
+                    <p className="text-xs text-foreground font-medium leading-tight">{item.user!.name}</p>
+                    <p className="text-[10px] text-muted-foreground leading-tight">{item.role}</p>
                   </div>
                 </div>
-              )}
-              {incident.tl && (
-                <div className="flex items-center gap-2">
-                  <Users className="h-3.5 w-3.5 text-muted-foreground" />
-                  <div>
-                    <p className="text-xs text-foreground font-medium">{incident.tl.name}</p>
-                    <p className="text-[10px] text-muted-foreground">Tech Lead</p>
-                  </div>
-                </div>
-              )}
+              ))}
             </div>
-          </div>
+          </motion.div>
 
           {investigation.missing_signals.length > 0 && investigation.completeness_score < 0.85 && (
-            <div className="rounded-lg border border-severity-p2/30 bg-severity-p2/5 p-3">
-              <div className="flex items-center gap-1.5 mb-2">
-                <AlertTriangle className="h-3.5 w-3.5 text-severity-p2" />
-                <p className="text-xs font-medium text-severity-p2">Missing Signals</p>
+            <motion.div initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.3 }}>
+              <div className="rounded-lg border border-severity-p2/20 bg-severity-p2/5 p-3">
+                <div className="flex items-center gap-1.5 mb-2">
+                  <AlertTriangle className="h-3.5 w-3.5 text-severity-p2" />
+                  <p className="text-[11px] font-medium text-severity-p2">
+                    {investigation.missing_signals.length} missing signals
+                  </p>
+                </div>
+                <ul className="space-y-1">
+                  {investigation.missing_signals.map((s, i) => (
+                    <li key={i} className="text-[10px] text-muted-foreground pl-2 border-l-2 border-severity-p2/20">{s}</li>
+                  ))}
+                </ul>
+                <Button size="sm" variant="ghost" className="h-6 text-[10px] mt-2 text-severity-p2 hover:text-severity-p2 p-0" onClick={() => navigate('/integrations')}>
+                  Fix in Integrations →
+                </Button>
               </div>
-              <ul className="space-y-1">
-                {investigation.missing_signals.map((s, i) => (
-                  <li key={i} className="text-[11px] text-muted-foreground">• {s}</li>
-                ))}
-              </ul>
-            </div>
+            </motion.div>
           )}
         </div>
 
-        {/* Center Panel - Timeline & Evidence */}
+        {/* Center Panel - Evidence Timeline */}
         <div className="flex-1 p-4 overflow-y-auto scrollbar-thin">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Evidence Timeline</h3>
-            <div className="flex items-center gap-1">
-              {['All', 'Logs', 'Metrics', 'Traces', 'Deploys', 'Alerts'].map(tab => (
-                <button key={tab} className={cn(
-                  'px-2.5 py-1 text-xs rounded-md transition-colors',
-                  tab === 'All' ? 'bg-primary text-primary-foreground' : 'bg-secondary text-secondary-foreground hover:bg-surface-hover'
-                )}>
-                  {tab}
-                </button>
+          <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-[10px] font-semibold text-muted-foreground/60 uppercase tracking-[0.12em]">
+                Evidence Timeline
+                <span className="ml-2 text-muted-foreground font-normal normal-case tracking-normal">
+                  {evidence.length} items
+                </span>
+              </h3>
+              <div className="flex items-center bg-secondary/50 rounded-lg p-0.5 border border-border/50">
+                {['All', 'Logs', 'Metrics', 'Traces', 'Deploys', 'Alerts'].map(tab => (
+                  <button key={tab} className={cn(
+                    'px-2 py-1 text-[11px] rounded-md transition-all font-medium',
+                    tab === 'All' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-secondary-foreground'
+                  )}>
+                    {tab}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              {evidence.sort((a, b) => new Date(b.event_timestamp).getTime() - new Date(a.event_timestamp).getTime()).map((item, i) => (
+                <motion.div key={item.id} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 + i * 0.04 }}>
+                  <EvidenceItemCard item={item} onPin={() => {}} />
+                </motion.div>
               ))}
             </div>
-          </div>
-
-          <div className="space-y-2">
-            {evidence.sort((a, b) => new Date(b.event_timestamp).getTime() - new Date(a.event_timestamp).getTime()).map(item => (
-              <EvidenceItemCard key={item.id} item={item} onPin={() => {}} />
-            ))}
-          </div>
+          </motion.div>
         </div>
 
         {/* Right Panel - Hypotheses & Fixes */}
-        <div className="w-80 shrink-0 border-l border-border p-4 space-y-4 overflow-y-auto scrollbar-thin">
+        <div className="w-[300px] shrink-0 border-l border-border p-4 space-y-5 overflow-y-auto scrollbar-thin">
           {/* Investigation Progress */}
           {investigation.status === 'running' && (
-            <div>
-              <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Investigation Progress</h3>
-              <div className="space-y-1">
+            <motion.div initial={{ opacity: 0, x: 8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1 }}>
+              <h3 className="text-[10px] font-semibold text-muted-foreground/60 uppercase tracking-[0.12em] mb-3">Investigation</h3>
+              <div className="space-y-0">
                 {phases.map((phase, i) => (
-                  <div key={phase} className="flex items-center gap-2">
+                  <div key={phase} className="flex items-center gap-2.5 py-1.5">
                     {i < currentPhaseIdx ? (
-                      <CheckCircle className="h-3.5 w-3.5 text-confidence-high shrink-0" />
+                      <CheckCircle className="h-3.5 w-3.5 text-success shrink-0" />
                     ) : i === currentPhaseIdx ? (
                       <Loader2 className="h-3.5 w-3.5 text-primary animate-spin shrink-0" />
                     ) : (
@@ -169,39 +198,57 @@ export default function InvestigationPage() {
                     )}
                     <span className={cn(
                       'text-xs capitalize',
-                      i < currentPhaseIdx ? 'text-confidence-high' :
+                      i < currentPhaseIdx ? 'text-success' :
                       i === currentPhaseIdx ? 'text-primary font-medium' :
-                      'text-muted-foreground'
+                      'text-muted-foreground/50'
                     )}>
                       {phase}
                     </span>
+                    {i === currentPhaseIdx && (
+                      <span className="text-[10px] text-primary/60 ml-auto">Running...</span>
+                    )}
                   </div>
                 ))}
               </div>
-            </div>
+              <div className="mt-3 flex items-center gap-2">
+                <ConfidenceBar confidence={investigation.overall_confidence} className="flex-1" />
+                <span className="text-[10px] text-muted-foreground">overall</span>
+              </div>
+            </motion.div>
           )}
 
           {/* Hypotheses */}
-          <div>
-            <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Hypotheses</h3>
+          <motion.div initial={{ opacity: 0, x: 8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2 }}>
+            <h3 className="text-[10px] font-semibold text-muted-foreground/60 uppercase tracking-[0.12em] mb-2">
+              Hypotheses
+              <span className="ml-1 text-muted-foreground font-normal">({hypotheses.length})</span>
+            </h3>
             <div className="space-y-2">
               {hypotheses.map(h => <HypothesisCard key={h.id} hypothesis={h} />)}
             </div>
-          </div>
+          </motion.div>
 
-          {/* Fix Gating */}
-          {hypotheses[0] && hypotheses[0].confidence < 0.65 ? (
-            <div className="rounded-lg border border-severity-p2/30 bg-severity-p2/5 p-3">
-              <p className="text-xs text-severity-p2 font-medium">Fix generation locked — confidence {Math.round(hypotheses[0].confidence * 100)}%. Need 65% minimum.</p>
-            </div>
-          ) : (
-            <div>
-              <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Proposed Fixes</h3>
-              <div className="space-y-2">
-                {fixes.map(f => <FixProposalCard key={f.id} fix={f} />)}
+          {/* Fixes */}
+          <motion.div initial={{ opacity: 0, x: 8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.3 }}>
+            {hypotheses[0] && hypotheses[0].confidence < 0.65 ? (
+              <div className="rounded-lg border border-severity-p2/20 bg-severity-p2/5 p-3">
+                <p className="text-xs text-severity-p2 font-medium mb-1">Fix generation locked</p>
+                <p className="text-[11px] text-muted-foreground">
+                  Confidence {Math.round(hypotheses[0].confidence * 100)}% — need ≥65% to generate fixes.
+                </p>
               </div>
-            </div>
-          )}
+            ) : (
+              <>
+                <h3 className="text-[10px] font-semibold text-muted-foreground/60 uppercase tracking-[0.12em] mb-2">
+                  Proposed Fixes
+                  <span className="ml-1 text-muted-foreground font-normal">({fixes.length})</span>
+                </h3>
+                <div className="space-y-2">
+                  {fixes.map(f => <FixProposalCard key={f.id} fix={f} />)}
+                </div>
+              </>
+            )}
+          </motion.div>
         </div>
       </div>
     </div>
