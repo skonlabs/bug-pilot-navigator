@@ -322,7 +322,7 @@ export default function TopologyPage() {
             {/* Health + Readiness */}
             <div className="grid grid-cols-2 gap-2">
               <div className="p-3 rounded-xl bg-secondary/50 border border-border/50 text-center">
-                <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-muted-foreground mb-1.5">Health</p>
+                <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground mb-1.5">Health</p>
                 <div className="flex items-center justify-center gap-1.5">
                   <div className={cn('h-2 w-2 rounded-full',
                     selectedService.health === 'healthy' ? 'bg-emerald-400' :
@@ -333,7 +333,7 @@ export default function TopologyPage() {
                 </div>
               </div>
               <div className="p-3 rounded-xl bg-secondary/50 border border-border/50 text-center">
-                <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-muted-foreground mb-1.5">Readiness</p>
+                <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground mb-1.5">Readiness</p>
                 <p className={cn('text-sm font-bold font-mono tabular-nums',
                   selectedService.readiness_score >= 80 ? 'text-emerald-400' :
                   selectedService.readiness_score >= 50 ? 'text-amber-400' : 'text-severity-p0'

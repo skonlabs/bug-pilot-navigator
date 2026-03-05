@@ -147,7 +147,7 @@ export default function ReadinessPage() {
       {/* ── Page Header ────────────────────────────────────────────────────── */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h1 className="text-lg font-bold text-foreground">Service Readiness</h1>
+          <h1 className="text-xl font-bold text-foreground tracking-tight">Service Readiness</h1>
           <p className="text-xs text-muted-foreground mt-0.5">Observability, documentation, and incident preparedness scores</p>
         </div>
         <div className="flex items-center gap-3 text-[12px]">
@@ -305,7 +305,7 @@ export default function ReadinessPage() {
                   <th key={d.key} className="text-left px-4 py-3">
                     <span className="flex items-center gap-1">
                       <span className={cn('h-1.5 w-1.5 rounded-full', d.color)} />
-                      <span className="text-[10px] font-bold uppercase tracking-[0.1em] text-muted-foreground">{d.label}</span>
+                      <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">{d.label}</span>
                     </span>
                   </th>
                 ))}

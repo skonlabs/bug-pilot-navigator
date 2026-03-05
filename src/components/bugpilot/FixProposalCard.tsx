@@ -399,7 +399,7 @@ export function FixProposalCard({ fix, onApprove, onReject, showContext = false 
         {/* Tier 2 proposed: Approve + Reject */}
         {isProposedTier2 && (
           <>
-            <Button size="sm" onClick={onApprove} className="h-7 text-xs px-3">
+            <Button size="sm" onClick={onApprove} className="h-8 text-xs px-3">
               Approve
             </Button>
             <Button
@@ -415,7 +415,7 @@ export function FixProposalCard({ fix, onApprove, onReject, showContext = false 
 
         {/* Tier 1: View Execution Log */}
         {fix.tier === 1 && (
-          <Button size="sm" variant="outline" className="h-7 text-xs px-3">
+          <Button size="sm" variant="outline" className="h-8 text-xs px-3">
             <Terminal className="h-3 w-3 mr-1" />
             View Execution Log
           </Button>
@@ -426,7 +426,7 @@ export function FixProposalCard({ fix, onApprove, onReject, showContext = false 
           <Button
             size="sm"
             variant="outline"
-            className="h-7 text-xs px-3"
+            className="h-8 text-xs px-3"
             onClick={() => setExpanded(true)}
           >
             <BookOpen className="h-3 w-3 mr-1" />

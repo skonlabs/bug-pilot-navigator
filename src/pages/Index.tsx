@@ -119,7 +119,7 @@ function MetricCard({ label, value, sub, trend, goodWhenDown, accentColor, bgAcc
             className={cn(
               'flex items-center gap-0.5 text-[11px] font-semibold tabular-nums',
               trendGood === true
-                ? 'text-emerald-500'
+                ? 'text-success'
                 : trendGood === false
                 ? 'text-severity-p0'
                 : 'text-muted-foreground',
@@ -466,8 +466,8 @@ export default function IndexPage() {
             label="Fix Approvals"
             value={pendingFixes}
             sub="awaiting review"
-            accentColor={pendingFixes > 0 ? 'border-yellow-500/30' : 'border-border'}
-            bgAccent={pendingFixes > 0 ? 'bg-yellow-500' : undefined}
+            accentColor={pendingFixes > 0 ? 'border-warning/30' : 'border-border'}
+            bgAccent={pendingFixes > 0 ? 'bg-warning' : undefined}
           />
         </motion.div>
 
@@ -503,7 +503,7 @@ export default function IndexPage() {
                       <span className="relative inline-flex rounded-full h-2 w-2 bg-severity-p0" />
                     </>
                   ) : (
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-success" />
                   )}
                 </span>
                 <SectionHeader>Live Incidents</SectionHeader>
@@ -523,7 +523,7 @@ export default function IndexPage() {
 
             {activeIncidents.length === 0 ? (
               <div className="rounded-xl border border-border bg-card p-10 text-center">
-                <CheckCircle2 className="h-9 w-9 text-emerald-500 mx-auto mb-3 opacity-80" />
+                <CheckCircle2 className="h-9 w-9 text-success mx-auto mb-3 opacity-80" />
                 <p className="text-sm font-semibold text-foreground mb-1">All systems operational</p>
                 <p className="text-xs text-muted-foreground">No active incidents. Nice work.</p>
               </div>
@@ -547,7 +547,7 @@ export default function IndexPage() {
           <div>
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
-                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
+                <CheckCircle2 className="h-3.5 w-3.5 text-success" />
                 <SectionHeader>Resolved Recently</SectionHeader>
               </div>
               <button
@@ -599,7 +599,7 @@ export default function IndexPage() {
                         </td>
                         <td className="px-4 py-2.5">
                           <div className="flex items-center gap-2">
-                            <span className="flex h-1.5 w-1.5 rounded-full bg-emerald-500 flex-shrink-0" />
+                            <span className="flex h-1.5 w-1.5 rounded-full bg-success flex-shrink-0" />
                             <span className="font-mono text-[10px] text-muted-foreground tabular-nums flex-shrink-0">
                               {inc.short_id}
                             </span>
@@ -659,8 +659,8 @@ export default function IndexPage() {
 
             {/* Counts */}
             <div className="flex items-center gap-3 mb-3">
-              <span className="flex items-center gap-1.5 text-[11px] text-emerald-500 font-medium">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+              <span className="flex items-center gap-1.5 text-[11px] text-success font-medium">
+                <span className="h-1.5 w-1.5 rounded-full bg-success" />
                 {connectedConnectors} online
               </span>
               {errorConnectors > 0 && (
@@ -670,8 +670,8 @@ export default function IndexPage() {
                 </span>
               )}
               {staleConnectors > 0 && (
-                <span className="flex items-center gap-1.5 text-[11px] text-yellow-500 font-medium">
-                  <span className="h-1.5 w-1.5 rounded-full bg-yellow-500" />
+                <span className="flex items-center gap-1.5 text-[11px] text-warning font-medium">
+                  <span className="h-1.5 w-1.5 rounded-full bg-warning" />
                   {staleConnectors} stale
                 </span>
               )}
@@ -681,9 +681,9 @@ export default function IndexPage() {
                   className={cn(
                     'font-semibold font-mono tabular-nums',
                     avgReadiness >= 80
-                      ? 'text-emerald-500'
+                      ? 'text-success'
                       : avgReadiness >= 60
-                      ? 'text-yellow-500'
+                      ? 'text-warning'
                       : 'text-severity-p0',
                   )}
                 >
@@ -726,9 +726,9 @@ export default function IndexPage() {
                       className={cn(
                         'h-1.5 w-1.5 rounded-full flex-shrink-0',
                         r.overall_score >= 80
-                          ? 'bg-emerald-500'
+                          ? 'bg-success'
                           : r.overall_score >= 60
-                          ? 'bg-yellow-500'
+                          ? 'bg-warning'
                           : 'bg-severity-p0',
                       )}
                     />
@@ -803,7 +803,7 @@ export default function IndexPage() {
                       <span
                         className={cn(
                           'flex items-center gap-0.5 text-[10px] font-semibold mb-0.5',
-                          isGood ? 'text-emerald-500' : 'text-severity-p0',
+                          isGood ? 'text-success' : 'text-severity-p0',
                         )}
                       >
                         <Icon className="h-3 w-3" />
@@ -843,13 +843,13 @@ export default function IndexPage() {
                           <span className="text-[9px] font-bold text-primary">{initials}</span>
                         </div>
                         <span className="text-xs text-foreground">{m.engineer.split(' ')[0]}</span>
-                        {isBurnt && <Flame className="h-3 w-3 text-yellow-500" />}
+                        {isBurnt && <Flame className="h-3 w-3 text-warning" />}
                       </div>
                       <div className="flex items-center gap-3">
                         <span
                           className={cn(
                             'font-mono text-[11px] font-medium tabular-nums',
-                            isBurnt ? 'text-yellow-500' : 'text-foreground',
+                            isBurnt ? 'text-warning' : 'text-foreground',
                           )}
                         >
                           {m.pages_this_week} pg
@@ -863,7 +863,7 @@ export default function IndexPage() {
                       <div
                         className={cn(
                           'h-full rounded-full transition-all',
-                          isBurnt ? 'bg-yellow-500' : 'bg-primary/50',
+                          isBurnt ? 'bg-warning' : 'bg-primary/50',
                         )}
                         style={{ width: `${barPct}%` }}
                       />

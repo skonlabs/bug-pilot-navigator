@@ -672,7 +672,7 @@ export default function IntegrationsPage() {
       {/* ── Page Header ─────────────────────────────────────────────────────── */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h1 className="text-lg font-bold text-foreground">Integrations</h1>
+          <h1 className="text-xl font-bold text-foreground tracking-tight">Integrations</h1>
           <p className="text-xs text-muted-foreground mt-0.5">Manage data source connections for incident investigations</p>
         </div>
         <div className="flex items-center gap-3">

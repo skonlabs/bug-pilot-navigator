@@ -81,7 +81,7 @@ export default function ReportsPage() {
       {/* ── Page Header ─────────────────────────────────────────────────────── */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h1 className="text-lg font-bold text-foreground">Analytics & Reports</h1>
+          <h1 className="text-xl font-bold text-foreground tracking-tight">Analytics & Reports</h1>
           <p className="text-xs text-muted-foreground mt-0.5">DORA metrics, incident trends, and operational health</p>
         </div>
         {/* Date range selector */}
@@ -543,7 +543,7 @@ export default function ReportsPage() {
               ].map(({ label, count, pct, color, bg, accent }) => (
                 <div key={label} className={cn('p-4 rounded-xl border border-l-2 text-center', bg, accent)}>
                   <p className={cn('text-2xl font-bold font-mono tabular-nums', color)}>{pct}%</p>
-                  <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-muted-foreground mt-2">{label}</p>
+                  <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground mt-2">{label}</p>
                   <p className="text-[10px] text-muted-foreground/60 mt-0.5 tabular-nums">{count} fixes</p>
                 </div>
               ))}

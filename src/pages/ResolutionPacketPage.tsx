@@ -487,7 +487,7 @@ export default function ResolutionPacketPage() {
                     </div>
                   </div>
                   {gap.content && (
-                    <Button size="sm" variant="outline" className="h-7 text-xs shrink-0">
+                    <Button size="sm" variant="outline" className="h-8 text-xs shrink-0">
                       Create PR
                     </Button>
                   )}

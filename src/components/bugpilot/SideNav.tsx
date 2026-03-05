@@ -117,6 +117,8 @@ export function SideNav({ onMobileClose }: { onMobileClose?: () => void } = {}) 
                         {item.badge !== undefined && item.badge > 0 && (
                           <span className={cn(
                             'min-w-[18px] h-4 rounded px-1 text-[9px] font-bold flex items-center justify-center tabular-nums',
+                            item.badgeVariant === 'danger' ? 'bg-severity-p0/15 text-severity-p0 border border-severity-p0/20' :
+                            item.badgeVariant === 'warning' ? 'bg-warning/15 text-warning border border-warning/20' :
                           item.badgeVariant === 'danger' ? 'bg-severity-p0/15 text-severity-p0 border border-severity-p0/20' :
                             item.badgeVariant === 'warning' ? 'bg-severity-p1/15 text-severity-p1 border border-severity-p1/20' :
                             'bg-primary/[0.12] text-primary border border-primary/20'
