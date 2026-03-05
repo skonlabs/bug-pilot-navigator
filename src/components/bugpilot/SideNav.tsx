@@ -62,13 +62,13 @@ export function SideNav({ onMobileClose }: { onMobileClose?: () => void } = {}) 
           {/* System health dot */}
           <span className={cn(
             'absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full border border-sidebar-background',
-            systemHealthOk ? 'bg-success' : 'bg-severity-p0 animate-pulse'
+            systemHealthOk ? 'bg-success' : 'bg-destructive animate-pulse'
           )} />
         </div>
         {!sidebarCollapsed && (
           <div className="flex flex-col -space-y-0.5">
-            <span className="text-[13px] font-bold text-sidebar-accent-foreground tracking-tight leading-none">BugPilot</span>
-            <span className="text-[9px] text-sidebar-foreground font-medium uppercase tracking-widest leading-none">Navigator</span>
+            <span className="text-sm font-bold text-sidebar-accent-foreground tracking-tight leading-none">BugPilot</span>
+            <span className="text-ui-2xs text-sidebar-foreground font-medium uppercase tracking-widest leading-none">Navigator</span>
           </div>
         )}
       </div>
@@ -78,7 +78,7 @@ export function SideNav({ onMobileClose }: { onMobileClose?: () => void } = {}) 
         {navSections.map((section, sectionIdx) => (
           <div key={section.label} className={cn(sectionIdx > 0 && 'mt-5')}>
             {!sidebarCollapsed && (
-              <p className="text-[9px] font-bold text-sidebar-foreground/50 uppercase tracking-[0.18em] px-2.5 mb-1">
+              <p className="text-ui-2xs font-bold text-sidebar-foreground/50 uppercase tracking-[0.18em] px-2.5 mb-1">
                 {section.label}
               </p>
             )}
@@ -95,7 +95,7 @@ export function SideNav({ onMobileClose }: { onMobileClose?: () => void } = {}) 
                   <button
                     onClick={() => { navigate(item.path); onMobileClose?.(); }}
                     className={cn(
-                      'group relative w-full flex items-center gap-2.5 h-8 rounded-md text-[12.5px] font-medium transition-all duration-150',
+                      'group relative w-full flex items-center gap-2.5 h-8 rounded-md text-xs font-medium transition-all duration-150',
                       sidebarCollapsed ? 'justify-center px-0' : 'px-2.5',
                       isActive
                         ? 'bg-sidebar-primary/[0.12] text-sidebar-primary'
@@ -119,6 +119,8 @@ export function SideNav({ onMobileClose }: { onMobileClose?: () => void } = {}) 
                             'min-w-[18px] h-4 rounded px-1 text-[9px] font-bold flex items-center justify-center tabular-nums',
                             item.badgeVariant === 'danger' ? 'bg-severity-p0/15 text-severity-p0 border border-severity-p0/20' :
                             item.badgeVariant === 'warning' ? 'bg-warning/15 text-warning border border-warning/20' :
+                          item.badgeVariant === 'danger' ? 'bg-severity-p0/15 text-severity-p0 border border-severity-p0/20' :
+                            item.badgeVariant === 'warning' ? 'bg-severity-p1/15 text-severity-p1 border border-severity-p1/20' :
                             'bg-primary/[0.12] text-primary border border-primary/20'
                           )}>
                             {item.badge}
@@ -130,7 +132,7 @@ export function SideNav({ onMobileClose }: { onMobileClose?: () => void } = {}) 
                       <span className={cn(
                         'absolute top-0.5 right-0.5 h-3 w-3 rounded-full text-[7px] font-bold flex items-center justify-center',
                         item.badgeVariant === 'danger' ? 'bg-severity-p0' :
-                        item.badgeVariant === 'warning' ? 'bg-warning' : 'bg-primary',
+                        item.badgeVariant === 'warning' ? 'bg-severity-p1' : 'bg-primary',
                         'text-white'
                       )}>
                         {item.badge}
@@ -165,15 +167,15 @@ export function SideNav({ onMobileClose }: { onMobileClose?: () => void } = {}) 
         {!sidebarCollapsed && (
           <div className="flex items-center gap-2 px-2.5 h-7 rounded-md">
             <Activity className="h-3 w-3 text-sidebar-foreground/50" />
-            <span className="text-[10px] text-sidebar-foreground/50 flex-1">System</span>
+            <span className="text-ui-2xs text-sidebar-foreground/50 flex-1">System</span>
             <div className="flex items-center gap-1">
               <span className={cn(
                 'h-1.5 w-1.5 rounded-full',
-                systemHealthOk ? 'bg-success' : 'bg-severity-p0 animate-pulse'
+                systemHealthOk ? 'bg-success' : 'bg-destructive animate-pulse'
               )} />
               <span className={cn(
-                'text-[10px] font-medium',
-                systemHealthOk ? 'text-success' : 'text-severity-p0'
+                'text-ui-2xs font-medium',
+                systemHealthOk ? 'text-success' : 'text-destructive'
               )}>
                 {systemHealthOk ? 'Nominal' : 'Alert'}
               </span>
@@ -182,7 +184,7 @@ export function SideNav({ onMobileClose }: { onMobileClose?: () => void } = {}) 
         )}
         {/* Help */}
         {!sidebarCollapsed && (
-          <button className="w-full flex items-center gap-2.5 h-8 px-2.5 rounded-md text-[12.5px] text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors">
+          <button className="w-full flex items-center gap-2.5 h-8 px-2.5 rounded-md text-xs text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors">
             <HelpCircle className="h-[14px] w-[14px]" />
             <span>Help & Docs</span>
           </button>
@@ -202,7 +204,7 @@ export function SideNav({ onMobileClose }: { onMobileClose?: () => void } = {}) 
               ) : (
                 <>
                   <ChevronLeft className="h-3.5 w-3.5" />
-                  <span className="text-[12.5px]">Collapse</span>
+                  <span className="text-xs">Collapse</span>
                 </>
               )}
             </button>

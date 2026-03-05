@@ -11,8 +11,8 @@ const statusStyles: Record<string, string> = {
   eliminated: 'bg-muted text-muted-foreground line-through',
 };
 
-export function HypothesisCard({ hypothesis }: { hypothesis: Hypothesis }) {
-  const [expanded, setExpanded] = useState(false);
+export function HypothesisCard({ hypothesis, defaultExpanded = false }: { hypothesis: Hypothesis; defaultExpanded?: boolean }) {
+  const [expanded, setExpanded] = useState(defaultExpanded);
 
   return (
     <div className="rounded-lg border border-border bg-card p-3 transition-colors">
@@ -22,7 +22,7 @@ export function HypothesisCard({ hypothesis }: { hypothesis: Hypothesis }) {
             {hypothesis.rank}
           </span>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-foreground line-clamp-1">{hypothesis.title}</p>
+            <p className="text-xs font-medium text-foreground line-clamp-1">{hypothesis.title}</p>
             <div className="flex items-center gap-2 mt-1">
               <ConfidenceBar confidence={hypothesis.confidence} className="flex-1 max-w-[120px]" />
               <span className={cn('text-xs px-1.5 py-0.5 rounded font-medium', statusStyles[hypothesis.status])}>

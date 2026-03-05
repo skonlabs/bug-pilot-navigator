@@ -16,7 +16,7 @@ const ROLE_CONFIG: Record<string, { label: string; className: string }> = {
   admin: { label: 'Admin', className: 'bg-primary/10 text-primary' },
   responder: { label: 'Responder', className: 'bg-success/10 text-success' },
   viewer: { label: 'Viewer', className: 'bg-muted text-muted-foreground' },
-  security_admin: { label: 'Security Admin', className: 'bg-amber-500/10 text-amber-400' },
+  security_admin: { label: 'Security Admin', className: 'bg-warning/10 text-warning' },
 };
 
 export default function SettingsPage() {

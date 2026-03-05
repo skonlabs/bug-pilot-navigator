@@ -364,7 +364,7 @@ export default function IndexPage() {
       >
         <div>
           <div className="flex items-center gap-2.5 mb-0.5">
-            <h1 className="text-xl font-bold tracking-tight text-foreground">
+            <h1 className="text-lg font-bold tracking-tight text-foreground">
               <span className="gradient-brand-text">BugPilot</span>
               <span className="text-muted-foreground font-normal mx-1.5">·</span>
               <span>{mockOrg.name}</span>

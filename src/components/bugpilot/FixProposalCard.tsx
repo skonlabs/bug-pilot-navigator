@@ -242,7 +242,7 @@ export function FixProposalCard({ fix, onApprove, onReject, showContext = false 
           {/* Title + badges */}
           <div className="flex-1 min-w-0">
             <div className="flex flex-wrap items-start gap-1.5 mb-1.5">
-              <p className="text-sm font-semibold text-foreground leading-snug flex-1 min-w-0">{fix.title}</p>
+              <p className="text-xs font-medium text-foreground leading-snug flex-1 min-w-0">{fix.title}</p>
             </div>
 
             {/* Tier + Risk + Meta row */}
@@ -250,7 +250,7 @@ export function FixProposalCard({ fix, onApprove, onReject, showContext = false 
               {/* Tier badge — prominently shown */}
               <span
                 className={cn(
-                  'inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider',
+                  'inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-xs font-bold uppercase tracking-wider',
                   tier.badgeClass,
                 )}
               >

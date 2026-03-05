@@ -50,7 +50,7 @@ const statusConfig: Record<IncidentStatus, StatusConfig> = {
   },
   closed: {
     label: 'Closed',
-    classes: 'bg-status-closed/20 text-status-closed border-status-closed/30',
+    classes: 'bg-status-closed/10 text-status-closed border-status-closed/20',
     dot: 'bg-status-closed',
     dotVariant: 'static',
   },

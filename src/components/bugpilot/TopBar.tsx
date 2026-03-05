@@ -27,7 +27,7 @@ const notifConfig: Record<NotifType, { icon: React.ElementType; color: string; b
   fix_approval_needed: { icon: Zap, color: 'text-severity-p1', bg: 'bg-severity-p1/10' },
   investigation_complete: { icon: CheckCircle2, color: 'text-success', bg: 'bg-success/10' },
   connector_error: { icon: Plug, color: 'text-warning', bg: 'bg-warning/10' },
-  postmortem_overdue: { icon: FileText, color: 'text-severity-p1', bg: 'bg-severity-p1/10' },
+  postmortem_overdue: { icon: FileText, color: 'text-warning', bg: 'bg-warning/10' },
 };
 
 const activeP0Count = mockIncidents.filter(
@@ -68,11 +68,11 @@ export function TopBar() {
         <div className="flex items-center gap-1.5 min-w-0">
           {routeInfo.parent && (
             <>
-              <span className="text-[12px] text-muted-foreground hidden sm:block">{routeInfo.parent}</span>
-              <span className="text-muted-foreground/40 hidden sm:block text-[12px]">/</span>
+              <span className="text-xs text-muted-foreground hidden sm:block">{routeInfo.parent}</span>
+              <span className="text-muted-foreground/40 hidden sm:block text-xs">/</span>
             </>
           )}
-          <h1 className="text-[13px] font-semibold text-foreground truncate">{routeInfo.title}</h1>
+          <h1 className="text-sm font-semibold text-foreground truncate">{routeInfo.title}</h1>
         </div>
         {/* P0 active badge */}
         {activeP0Count > 0 && (
@@ -91,10 +91,10 @@ export function TopBar() {
           className="hidden sm:flex items-center gap-2 h-7 px-2.5 rounded-md bg-secondary/60 border border-border/60 text-muted-foreground hover:text-foreground hover:border-primary/30 hover:bg-secondary/80 transition-all"
         >
           <Search className="h-3 w-3" />
-          <span className="text-[11px]">Quick search</span>
+          <span className="text-xs">Quick search</span>
           <div className="flex items-center gap-0.5 ml-1">
-            <kbd className="text-[9px] font-mono bg-muted/80 px-1 py-0.5 rounded border border-border/50">⌘</kbd>
-            <kbd className="text-[9px] font-mono bg-muted/80 px-1 py-0.5 rounded border border-border/50">K</kbd>
+            <kbd className="text-ui-2xs font-mono bg-muted/80 px-1 py-0.5 rounded border border-border/50">⌘</kbd>
+            <kbd className="text-ui-2xs font-mono bg-muted/80 px-1 py-0.5 rounded border border-border/50">K</kbd>
           </div>
         </button>
 
@@ -114,7 +114,7 @@ export function TopBar() {
             <Button variant="ghost" size="icon" className="h-7 w-7 relative text-muted-foreground hover:text-foreground">
               <Bell className="h-3.5 w-3.5" />
               {unreadCount > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 h-3.5 w-3.5 rounded-full bg-severity-p0 text-[8px] font-bold text-white flex items-center justify-center ring-2 ring-background">
+                <span className="absolute -top-0.5 -right-0.5 h-3.5 w-3.5 rounded-full bg-destructive text-[8px] font-bold text-destructive-foreground flex items-center justify-center ring-2 ring-background">
                   {unreadCount}
                 </span>
               )}
