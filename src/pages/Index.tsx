@@ -487,10 +487,10 @@ export default function IndexPage() {
       </div>
 
       {/* ── Main 3-Column Grid ────────────────────────────────────────────────── */}
-      <div className="grid grid-cols-1 xl:grid-cols-5 gap-5">
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">
 
         {/* ── Left column — ~60% (3/5) ─────────────────────────────────────── */}
-        <div className="xl:col-span-3 space-y-5">
+        <div className="lg:col-span-3 space-y-5">
 
           {/* Live Incidents */}
           <div>
@@ -635,7 +635,7 @@ export default function IndexPage() {
         </div>
 
         {/* ── Right column — ~40% (2/5) ─────────────────────────────────────── */}
-        <div className="xl:col-span-2 space-y-4">
+        <div className="lg:col-span-2 space-y-4">
 
           {/* System Health Card */}
           <motion.div

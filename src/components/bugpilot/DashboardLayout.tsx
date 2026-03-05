@@ -40,7 +40,7 @@ export function DashboardLayout() {
         'ml-0'
       )}>
         <TopBar />
-        <main className="p-4 md:p-5">
+        <main className="p-4 md:p-5 xl:p-6">
           <Outlet />
         </main>
       </div>

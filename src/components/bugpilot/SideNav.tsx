@@ -49,7 +49,7 @@ export function SideNav({ onMobileClose }: { onMobileClose?: () => void } = {}) 
     <aside className={cn(
       'fixed left-0 top-0 h-screen flex flex-col z-30 transition-all duration-200 ease-out',
       'bg-sidebar border-r border-sidebar-border',
-      sidebarCollapsed ? 'w-14' : 'w-56'
+      sidebarCollapsed ? 'w-14' : 'w-52'
     )}>
       {/* Logo Header */}
       <div className={cn(
