@@ -123,7 +123,7 @@ export default function ResolutionPacketPage() {
     packet.overall_confidence >= 0.40 ? 'text-amber-400' : 'text-muted-foreground';
 
   return (
-    <div className="space-y-0 -m-6">
+    <div className="space-y-0 -m-4 md:-m-5 xl:-m-6">
       {/* Sticky Header */}
       <motion.div
         initial={{ opacity: 0, y: -4 }}

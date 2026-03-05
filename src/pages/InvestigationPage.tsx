@@ -261,7 +261,7 @@ export default function InvestigationPage() {
   const phaseProgress = isInvestigationComplete ? 100 : Math.round(((currentPhaseIdx + 1) / phases.length) * 100);
 
   return (
-    <div className="space-y-0 -m-6 flex flex-col">
+    <div className="space-y-0 -m-4 md:-m-5 xl:-m-6 flex flex-col">
       {/* ── Incident Header ─────────────────────────────────────────────────── */}
       <motion.div
         initial={{ opacity: 0, y: -4 }}
@@ -375,22 +375,22 @@ export default function InvestigationPage() {
         </div>
 
         {/* Phase stepper */}
-        <div className="flex items-center gap-0.5 flex-1 overflow-x-auto scrollbar-thin">
+        <div className="flex items-center gap-0 flex-1 overflow-x-auto scrollbar-thin">
           {phases.map((phase, i) => {
             const isDone = isInvestigationComplete || i < currentPhaseIdx;
             const isCurrent = !isInvestigationComplete && i === currentPhaseIdx;
             return (
-              <div key={phase} className="flex items-center gap-0.5 shrink-0">
+              <div key={phase} className="flex items-center gap-0 shrink-0">
                 <div className={cn(
-                  'px-2 py-0.5 rounded text-[10px] font-medium transition-colors',
-                  isDone ? 'text-emerald-400 bg-emerald-400/10' :
-                  isCurrent ? 'text-primary bg-primary/10 border border-primary/20' :
-                  'text-muted-foreground/40 bg-transparent',
+                  'px-2 py-1 text-[10px] font-semibold transition-all',
+                  isDone ? 'text-emerald-400' :
+                  isCurrent ? 'text-primary border-b-2 border-primary' :
+                  'text-muted-foreground/35',
                 )}>
                   {PHASE_LABELS[phase]}
                 </div>
                 {i < phases.length - 1 && (
-                  <div className={cn('h-px w-2', isDone ? 'bg-emerald-400/40' : 'bg-border/50')} />
+                  <div className={cn('h-px w-3 shrink-0', isDone ? 'bg-emerald-400/30' : 'bg-border/40')} />
                 )}
               </div>
             );
@@ -429,7 +429,7 @@ export default function InvestigationPage() {
       {/* ── 3-Panel Layout ──────────────────────────────────────────────────── */}
       <div className="flex flex-1 min-h-[calc(100vh-10rem)]">
         {/* ── Left Panel ────────────────────────────────────────────────────── */}
-        <div className="w-[260px] shrink-0 border-r border-border p-4 space-y-5 overflow-y-auto scrollbar-thin">
+        <div className="w-[240px] shrink-0 border-r border-border p-4 space-y-5 overflow-y-auto scrollbar-thin bg-muted/20">
           <motion.div initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1 }}>
             <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground mb-2">Scope</p>
             <div className="space-y-2">
