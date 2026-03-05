@@ -4,23 +4,23 @@ import type { Severity } from '@/types/bugpilot';
 const config: Record<Severity, { label: string; classes: string; dot: string }> = {
   P0: {
     label: 'P0',
-    classes: 'bg-red-500/10 text-red-400 border-red-500/30',
-    dot: 'bg-red-500',
+    classes: 'bg-severity-p0/10 text-severity-p0 border-severity-p0/30',
+    dot: 'bg-severity-p0',
   },
   P1: {
     label: 'P1',
-    classes: 'bg-amber-500/10 text-amber-400 border-amber-500/30',
-    dot: 'bg-amber-500',
+    classes: 'bg-severity-p1/10 text-severity-p1 border-severity-p1/30',
+    dot: 'bg-severity-p1',
   },
   P2: {
     label: 'P2',
-    classes: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/30',
-    dot: 'bg-yellow-400',
+    classes: 'bg-severity-p2/10 text-severity-p2 border-severity-p2/30',
+    dot: 'bg-severity-p2',
   },
   P3: {
     label: 'P3',
-    classes: 'bg-blue-500/10 text-blue-400 border-blue-500/30',
-    dot: 'bg-blue-400',
+    classes: 'bg-severity-p3/10 text-severity-p3 border-severity-p3/30',
+    dot: 'bg-severity-p3',
   },
 };
 

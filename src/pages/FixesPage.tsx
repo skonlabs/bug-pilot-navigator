@@ -468,7 +468,7 @@ export default function FixesPage() {
       {/* ── Page Header ────────────────────────────────────────────────────── */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-lg font-bold text-foreground">Fix Proposals</h1>
+          <h1 className="text-xl font-bold text-foreground tracking-tight">Fix Proposals</h1>
           <p className="text-xs text-muted-foreground mt-0.5">Review and approve AI-generated fixes for active incidents</p>
         </div>
         {tier2Pending.length > 1 && tab === 'proposed' && (

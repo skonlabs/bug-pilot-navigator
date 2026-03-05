@@ -23,11 +23,11 @@ const routeTitles: Record<string, { title: string; parent?: string }> = {
 type NotifType = 'incident_declared' | 'fix_approval_needed' | 'investigation_complete' | 'connector_error' | 'postmortem_overdue';
 
 const notifConfig: Record<NotifType, { icon: React.ElementType; color: string; bg: string }> = {
-  incident_declared: { icon: AlertTriangle, color: 'text-red-400', bg: 'bg-red-500/10' },
-  fix_approval_needed: { icon: Zap, color: 'text-amber-400', bg: 'bg-amber-400/10' },
-  investigation_complete: { icon: CheckCircle2, color: 'text-emerald-400', bg: 'bg-emerald-400/10' },
-  connector_error: { icon: Plug, color: 'text-amber-500', bg: 'bg-amber-500/10' },
-  postmortem_overdue: { icon: FileText, color: 'text-amber-400', bg: 'bg-amber-400/10' },
+  incident_declared: { icon: AlertTriangle, color: 'text-severity-p0', bg: 'bg-severity-p0/10' },
+  fix_approval_needed: { icon: Zap, color: 'text-severity-p1', bg: 'bg-severity-p1/10' },
+  investigation_complete: { icon: CheckCircle2, color: 'text-success', bg: 'bg-success/10' },
+  connector_error: { icon: Plug, color: 'text-warning', bg: 'bg-warning/10' },
+  postmortem_overdue: { icon: FileText, color: 'text-severity-p1', bg: 'bg-severity-p1/10' },
 };
 
 const activeP0Count = mockIncidents.filter(
@@ -55,7 +55,7 @@ export function TopBar() {
     <header className={cn(
       'h-12 border-b border-border sticky top-0 z-20 flex items-center justify-between px-4 md:px-5',
       'bg-background/80 backdrop-blur-xl',
-      activeP0Count > 0 && 'border-t-2 border-t-red-500'
+      activeP0Count > 0 && 'border-t-2 border-t-severity-p0'
     )}>
       {/* Left: mobile menu + title */}
       <div className="flex items-center gap-2.5 min-w-0">
@@ -76,9 +76,9 @@ export function TopBar() {
         </div>
         {/* P0 active badge */}
         {activeP0Count > 0 && (
-          <div className="hidden sm:flex items-center gap-1.5 px-2 h-5 rounded bg-red-500/10 border border-red-500/20">
-            <span className="h-1.5 w-1.5 rounded-full bg-red-500 animate-pulse" />
-            <span className="text-[10px] font-bold text-red-400 uppercase tracking-wider">{activeP0Count} P0 Active</span>
+          <div className="hidden sm:flex items-center gap-1.5 px-2 h-5 rounded bg-severity-p0/10 border border-severity-p0/20">
+            <span className="h-1.5 w-1.5 rounded-full bg-severity-p0 animate-pulse" />
+            <span className="text-[10px] font-bold text-severity-p0 uppercase tracking-wider">{activeP0Count} P0 Active</span>
           </div>
         )}
       </div>
@@ -114,7 +114,7 @@ export function TopBar() {
             <Button variant="ghost" size="icon" className="h-7 w-7 relative text-muted-foreground hover:text-foreground">
               <Bell className="h-3.5 w-3.5" />
               {unreadCount > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 h-3.5 w-3.5 rounded-full bg-red-500 text-[8px] font-bold text-white flex items-center justify-center ring-2 ring-background">
+                <span className="absolute -top-0.5 -right-0.5 h-3.5 w-3.5 rounded-full bg-severity-p0 text-[8px] font-bold text-white flex items-center justify-center ring-2 ring-background">
                   {unreadCount}
                 </span>
               )}
@@ -228,7 +228,7 @@ export function TopBar() {
               ))}
             </div>
             <div className="border-t border-border p-1">
-              <button className="w-full flex items-center gap-2.5 px-2.5 py-2 text-xs text-red-400 hover:bg-red-500/[0.08] rounded-md transition-colors">
+              <button className="w-full flex items-center gap-2.5 px-2.5 py-2 text-xs text-destructive hover:bg-destructive/[0.08] rounded-md transition-colors">
                 <LogOut className="h-3.5 w-3.5" />
                 Sign Out
               </button>

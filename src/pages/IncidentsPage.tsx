@@ -209,7 +209,7 @@ export default function IncidentsPage() {
               <div className="h-3 w-3 rounded-full bg-severity-p0" />
               <div className="absolute inset-0 rounded-full bg-severity-p0 animate-ping opacity-60" />
             </div>
-            <span className="text-[11px] font-bold uppercase tracking-[0.1em] text-severity-p0">P0 Active</span>
+            <span className="text-[11px] font-bold uppercase tracking-[0.12em] text-severity-p0">P0 Active</span>
           </div>
           <div className="h-4 w-px bg-severity-p0/30" />
           <div className="flex-1 min-w-0">
