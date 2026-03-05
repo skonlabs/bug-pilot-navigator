@@ -647,7 +647,7 @@ export default function InvestigationPage() {
               <div className="flex items-center bg-secondary/50 rounded-lg p-0.5 border border-border/50">
                 {EVIDENCE_TABS.map(tab => (
                   <button key={tab.label} onClick={() => setActiveTab(tab.label)} className={cn(
-                    'px-2 py-1 text-ui-2xs rounded-md transition-all font-medium',
+                    'px-2 py-1 label-overline rounded-md transition-all',
                     activeTab === tab.label ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-secondary-foreground'
                   )}>
                     {tab.label}
