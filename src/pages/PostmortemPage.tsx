@@ -38,6 +38,12 @@ const PriorityColors = {
   low: 'text-muted-foreground',
 };
 
+const PriorityDotColors = {
+  high: 'bg-severity-p0',
+  medium: 'bg-amber-400',
+  low: 'bg-muted-foreground/40',
+};
+
 function EditableText({ value, onChange, multiline = false, className = '', placeholder = '' }: {
   value: string; onChange: (v: string) => void; multiline?: boolean; className?: string; placeholder?: string;
 }) {
@@ -117,12 +123,12 @@ function EditableList({ items, onChange, placeholder, blameless = false }: {
   return (
     <div className="space-y-2">
       {items.map((item, i) => (
-        <div key={i} className="flex items-start gap-2 group">
+        <div key={i} className="flex items-start gap-2.5 group p-2 rounded-md hover:bg-secondary/30 transition-colors">
           <div className="h-1.5 w-1.5 rounded-full bg-primary/60 mt-2 shrink-0" />
-          <span className="text-sm text-foreground flex-1">{item}</span>
+          <span className="text-sm text-foreground flex-1 leading-relaxed">{item}</span>
           <button
             onClick={() => onChange(items.filter((_, idx) => idx !== i))}
-            className="opacity-0 group-hover:opacity-100 text-muted-foreground/40 hover:text-severity-p0 transition-all"
+            className="opacity-0 group-hover:opacity-100 text-muted-foreground/40 hover:text-severity-p0 transition-all shrink-0 mt-0.5"
           >
             <Trash2 className="h-3 w-3" />
           </button>
@@ -152,7 +158,7 @@ function EditableList({ items, onChange, placeholder, blameless = false }: {
       ) : (
         <button
           onClick={() => setAdding(true)}
-          className="flex items-center gap-1.5 text-[11px] text-muted-foreground/60 hover:text-primary transition-colors"
+          className="flex items-center gap-1.5 text-[11px] text-muted-foreground/60 hover:text-primary transition-colors px-2 py-1"
         >
           <Plus className="h-3 w-3" /> Add item
         </button>
@@ -167,32 +173,35 @@ function ActionItemRow({ item, onChange, onDelete }: {
   onDelete: () => void;
 }) {
   const statusColors = {
-    open: 'bg-secondary text-muted-foreground',
-    in_progress: 'bg-blue-500/10 text-blue-400',
-    done: 'bg-emerald-500/10 text-emerald-400',
+    open: 'bg-secondary text-muted-foreground border-border',
+    in_progress: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
+    done: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
   };
 
   return (
-    <tr className="border-b border-border/50 hover:bg-secondary/20 group">
+    <tr className="border-b border-border/40 last:border-0 hover:bg-secondary/20 group transition-colors">
       <td className="px-4 py-3 align-top">
-        <div className="text-xs text-foreground leading-relaxed max-w-xs">{item.description}</div>
+        <div className="flex items-start gap-2">
+          <div className={cn('h-1.5 w-1.5 rounded-full mt-1.5 shrink-0', PriorityDotColors[item.priority])} />
+          <div className="text-xs text-foreground leading-relaxed max-w-xs">{item.description}</div>
+        </div>
       </td>
       <td className="px-4 py-3 align-middle">
         <span className="text-xs text-muted-foreground">{item.owner_role}</span>
       </td>
       <td className="px-4 py-3 align-middle">
-        <span className="text-xs text-muted-foreground">
+        <span className="text-xs text-muted-foreground font-mono">
           {item.due_date ? format(new Date(item.due_date), 'MMM d') : '—'}
         </span>
       </td>
       <td className="px-4 py-3 align-middle">
-        <span className={cn('text-[10px] px-1.5 py-0.5 rounded font-medium capitalize', PriorityColors[item.priority])}>
+        <span className={cn('text-[10px] font-semibold capitalize', PriorityColors[item.priority])}>
           {item.priority}
         </span>
       </td>
       <td className="px-4 py-3 align-middle">
         <Select value={item.status} onValueChange={v => onChange({ ...item, status: v as PostmortemActionItem['status'] })}>
-          <SelectTrigger className="h-6 text-[11px] w-28 border-0 bg-secondary/50">
+          <SelectTrigger className={cn('h-6 text-[11px] w-28 border', statusColors[item.status])}>
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -217,6 +226,32 @@ function ActionItemRow({ item, onChange, onDelete }: {
         </div>
       </td>
     </tr>
+  );
+}
+
+// ── Section wrapper with header ───────────────────────────────────────────────
+function PostmortemSection({
+  icon: Icon,
+  title,
+  iconColor = 'text-muted-foreground',
+  children,
+  extra,
+}: {
+  icon: React.ElementType;
+  title: string;
+  iconColor?: string;
+  children: React.ReactNode;
+  extra?: React.ReactNode;
+}) {
+  return (
+    <motion.section initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
+      <div className="flex items-center gap-2 mb-4">
+        <Icon className={cn('h-4 w-4', iconColor)} />
+        <h3 className="text-sm font-semibold text-foreground">{title}</h3>
+        {extra}
+      </div>
+      {children}
+    </motion.section>
   );
 }
 
@@ -270,6 +305,11 @@ export default function PostmortemPage() {
 
   const isReadOnly = status === 'final';
 
+  // Action item stats
+  const openCount = postmortem.content.action_items.filter(i => i.status === 'open').length;
+  const doneCount = postmortem.content.action_items.filter(i => i.status === 'done').length;
+  const highPriorityCount = postmortem.content.action_items.filter(i => i.priority === 'high').length;
+
   return (
     <div className="space-y-0 -m-6">
       {/* Sticky Header */}
@@ -285,18 +325,29 @@ export default function PostmortemPage() {
           <FileText className="h-4 w-4 text-primary" />
           <span className="text-sm font-semibold">Postmortem</span>
           <span className="text-muted-foreground">·</span>
-          <span className="font-mono text-xs bg-secondary px-2 py-0.5 rounded">{incident.short_id}</span>
+          <span className="font-mono text-xs bg-secondary px-2 py-0.5 rounded border border-border/50">{incident.short_id}</span>
           <SeverityBadge severity={incident.severity} />
-          <span className={cn('text-[10px] px-2 py-0.5 rounded border font-medium capitalize', StatusColors[status])}>
+          {/* Status badge — prominent */}
+          <span className={cn('text-[10px] px-2.5 py-0.5 rounded-full border font-semibold capitalize', StatusColors[status])}>
+            {status === 'draft' && '● '}
             {status}
           </span>
         </div>
         <div className="ml-auto flex items-center gap-2">
           {!isReadOnly && (
             <>
-              <span className={cn('text-[10px] text-muted-foreground transition-opacity', saved ? 'opacity-100' : 'opacity-0')}>
-                ✓ Saved
-              </span>
+              <AnimatePresence>
+                {saved && (
+                  <motion.span
+                    initial={{ opacity: 0, x: 4 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0 }}
+                    className="text-[11px] text-emerald-400 flex items-center gap-1"
+                  >
+                    <CheckCircle2 className="h-3 w-3" /> Saved
+                  </motion.span>
+                )}
+              </AnimatePresence>
               <Button size="sm" variant="outline" className="h-7 text-xs gap-1.5" onClick={handleSave}>
                 <Save className="h-3 w-3" /> Save Draft
               </Button>
@@ -321,334 +372,384 @@ export default function PostmortemPage() {
       {/* Draft banner */}
       {status === 'draft' && (
         <div className="px-6 py-2 bg-amber-500/5 border-b border-amber-500/20 flex items-center gap-2">
-          <AlertTriangle className="h-3.5 w-3.5 text-amber-400" />
+          <AlertTriangle className="h-3.5 w-3.5 text-amber-400 shrink-0" />
           <p className="text-xs text-amber-400">
-            This postmortem is in <strong>draft</strong>. Share with your team for review before finalizing.
+            <strong>Draft</strong> — Share with your team for review before finalizing.
             Blameless language is enforced — BugPilot will warn you about individual-blaming phrases.
           </p>
         </div>
       )}
 
-      {/* Content */}
-      <div className="max-w-3xl mx-auto px-6 py-8 space-y-10">
+      {/* Content — document-like layout */}
+      <div className="max-w-3xl mx-auto px-6 py-8 space-y-0">
 
-        {/* Incident Summary */}
-        <motion.section initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}>
-          <h2 className="text-lg font-bold text-foreground mb-1">{incident.title}</h2>
-          <div className="flex items-center gap-3 text-xs text-muted-foreground mb-6">
-            <span>Severity: <strong className="text-foreground">{incident.severity}</strong></span>
-            <span>·</span>
-            <span>Duration: <strong className="text-foreground">{postmortem.content.incident_summary.duration_mins} minutes</strong></span>
-            <span>·</span>
+        {/* Document Header */}
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="mb-10">
+          <div className="flex items-start gap-3 mb-2">
+            <SeverityBadge severity={incident.severity} />
+            <span className={cn('text-[10px] px-2.5 py-0.5 rounded-full border font-semibold capitalize mt-0.5', StatusColors[status])}>
+              {status}
+            </span>
+          </div>
+          <h1 className="text-2xl font-bold text-foreground tracking-tight leading-snug mb-3">
+            {incident.title}
+          </h1>
+          <div className="flex items-center gap-4 text-xs text-muted-foreground flex-wrap">
+            <span className="flex items-center gap-1.5">
+              <Clock className="h-3 w-3" />
+              Duration: <strong className="text-foreground font-mono">{postmortem.content.incident_summary.duration_mins}m</strong>
+            </span>
+            <span className="text-border">·</span>
             <span>Environment: <strong className="text-foreground">{incident.environment}</strong></span>
+            <span className="text-border">·</span>
+            <span className="font-mono text-muted-foreground/60">{incident.short_id}</span>
           </div>
+        </motion.div>
 
-          <div className="space-y-4">
-            <div>
-              <label className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider block mb-1.5">What Happened</label>
-              {isReadOnly ? (
-                <p className="text-sm text-foreground leading-relaxed">{postmortem.content.incident_summary.what_happened}</p>
-              ) : (
-                <EditableText
-                  value={postmortem.content.incident_summary.what_happened}
-                  onChange={v => updateContent('incident_summary', { ...postmortem.content.incident_summary, what_happened: v })}
-                  multiline
-                />
-              )}
+        {/* Incident Summary section */}
+        <div className="space-y-10">
+          <motion.section initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}>
+            <div className="flex items-center gap-2 mb-4">
+              <div className="h-px flex-1 bg-border/60" />
+              <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground px-3">What Happened</span>
+              <div className="h-px flex-1 bg-border/60" />
             </div>
-            <div>
-              <label className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider block mb-1.5">Customer Impact</label>
-              {isReadOnly ? (
-                <p className="text-sm text-foreground leading-relaxed">{postmortem.content.incident_summary.customer_impact}</p>
-              ) : (
-                <EditableText
-                  value={postmortem.content.incident_summary.customer_impact}
-                  onChange={v => updateContent('incident_summary', { ...postmortem.content.incident_summary, customer_impact: v })}
-                  multiline
-                />
-              )}
+            <div className="space-y-4 pl-1">
+              <div>
+                <label className="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground block mb-2">Summary</label>
+                {isReadOnly ? (
+                  <p className="text-sm text-foreground leading-relaxed">{postmortem.content.incident_summary.what_happened}</p>
+                ) : (
+                  <EditableText
+                    value={postmortem.content.incident_summary.what_happened}
+                    onChange={v => updateContent('incident_summary', { ...postmortem.content.incident_summary, what_happened: v })}
+                    multiline
+                  />
+                )}
+              </div>
+              <div>
+                <label className="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground block mb-2">Customer Impact</label>
+                {isReadOnly ? (
+                  <p className="text-sm text-foreground leading-relaxed">{postmortem.content.incident_summary.customer_impact}</p>
+                ) : (
+                  <EditableText
+                    value={postmortem.content.incident_summary.customer_impact}
+                    onChange={v => updateContent('incident_summary', { ...postmortem.content.incident_summary, customer_impact: v })}
+                    multiline
+                  />
+                )}
+              </div>
             </div>
-          </div>
-        </motion.section>
+          </motion.section>
 
-        <div className="h-px bg-border" />
+          <div className="h-px bg-border/50" />
 
-        {/* Timeline (read-only from packet) */}
-        <motion.section initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-          <div className="flex items-center gap-2 mb-4">
-            <Clock className="h-4 w-4 text-muted-foreground" />
-            <h3 className="text-sm font-semibold text-foreground">Timeline</h3>
-            <span className="text-xs text-muted-foreground ml-1">(from Resolution Packet — read-only)</span>
-            <Link to={`/incidents/${id || '6'}/packet`} className="ml-auto text-[11px] text-primary flex items-center gap-1 hover:underline">
-              View full packet <ExternalLink className="h-2.5 w-2.5" />
-            </Link>
-          </div>
-          <div className="relative pl-4 border-l border-border space-y-0">
-            {postmortem.content.timeline.slice(0, 6).map(event => (
-              <div key={event.id} className="relative pb-4 last:pb-0">
-                <div className="absolute -left-5 top-1 h-2.5 w-2.5 rounded-full border-2 border-border bg-background" />
-                <div className="flex items-start gap-2.5">
-                  <div className="flex-1">
-                    <span className="text-xs font-medium text-foreground">{event.title}</span>
-                    {event.description && <span className="text-xs text-muted-foreground ml-2">— {event.description}</span>}
-                    <span className="text-[10px] text-muted-foreground/50 ml-2 font-mono">
+          {/* Timeline */}
+          <motion.section initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+            <div className="flex items-center gap-2 mb-4">
+              <Clock className="h-4 w-4 text-muted-foreground" />
+              <h3 className="text-sm font-semibold text-foreground">Timeline</h3>
+              <span className="text-xs text-muted-foreground/60 italic">(from Resolution Packet — read-only)</span>
+              <Link to={`/incidents/${id || '6'}/packet`} className="ml-auto text-[11px] text-primary flex items-center gap-1 hover:underline shrink-0">
+                View full packet <ExternalLink className="h-2.5 w-2.5" />
+              </Link>
+            </div>
+            {/* Compact vertical timeline */}
+            <div className="relative pl-5 border-l-2 border-border/40 space-y-0">
+              {postmortem.content.timeline.slice(0, 6).map(event => (
+                <div key={event.id} className="relative pb-4 last:pb-0 group">
+                  <div className="absolute -left-[21px] top-1 h-2.5 w-2.5 rounded-full border-2 border-border bg-background group-hover:border-primary/50 transition-colors" />
+                  <div className="flex items-start gap-2 hover:bg-secondary/20 -ml-2 pl-2 pr-2 py-1 rounded-md transition-colors">
+                    <div className="flex-1 min-w-0">
+                      <span className="text-xs font-medium text-foreground">{event.title}</span>
+                      {event.description && (
+                        <span className="text-xs text-muted-foreground ml-2">— {event.description}</span>
+                      )}
+                    </div>
+                    <span className="text-[10px] text-muted-foreground/50 font-mono tabular-nums shrink-0">
                       {format(new Date(event.timestamp), 'HH:mm')} UTC
                     </span>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        </motion.section>
-
-        <div className="h-px bg-border" />
-
-        {/* Root Causes */}
-        <motion.section initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
-          <div className="flex items-center gap-2 mb-4">
-            <Target className="h-4 w-4 text-muted-foreground" />
-            <h3 className="text-sm font-semibold text-foreground">Root Causes</h3>
-          </div>
-          {isReadOnly ? (
-            <ul className="space-y-2">
-              {postmortem.content.root_causes.map((rc, i) => (
-                <li key={i} className="flex items-start gap-2 text-sm text-foreground">
-                  <div className="h-1.5 w-1.5 rounded-full bg-severity-p0 mt-2 shrink-0" />
-                  {rc}
-                </li>
               ))}
-            </ul>
-          ) : (
-            <EditableList
-              items={postmortem.content.root_causes}
-              onChange={v => updateContent('root_causes', v)}
-              placeholder="Describe the root cause of this incident..."
-            />
-          )}
-        </motion.section>
-
-        <div className="h-px bg-border" />
-
-        {/* Contributing Factors */}
-        <motion.section initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.18 }}>
-          <div className="flex items-center gap-2 mb-4">
-            <AlertTriangle className="h-4 w-4 text-muted-foreground" />
-            <h3 className="text-sm font-semibold text-foreground">Contributing Factors</h3>
-          </div>
-          {isReadOnly ? (
-            <ul className="space-y-2">
-              {postmortem.content.contributing_factors.map((cf, i) => (
-                <li key={i} className="flex items-start gap-2 text-sm text-foreground">
-                  <div className="h-1.5 w-1.5 rounded-full bg-amber-400 mt-2 shrink-0" />
-                  {cf}
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <EditableList
-              items={postmortem.content.contributing_factors}
-              onChange={v => updateContent('contributing_factors', v)}
-              placeholder="What made the impact worse or detection slower?"
-            />
-          )}
-        </motion.section>
-
-        <div className="h-px bg-border" />
-
-        {/* What Went Well */}
-        <motion.section initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-          <div className="flex items-center gap-2 mb-4">
-            <CheckCircle2 className="h-4 w-4 text-emerald-400" />
-            <h3 className="text-sm font-semibold text-foreground">What Went Well</h3>
-          </div>
-          {isReadOnly ? (
-            <ul className="space-y-2">
-              {postmortem.content.what_went_well.map((item, i) => (
-                <li key={i} className="flex items-start gap-2 text-sm text-foreground">
-                  <div className="h-1.5 w-1.5 rounded-full bg-emerald-400 mt-2 shrink-0" />
-                  {item}
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <EditableList
-              items={postmortem.content.what_went_well}
-              onChange={v => updateContent('what_went_well', v)}
-              placeholder="Actions that limited blast radius or accelerated resolution..."
-            />
-          )}
-        </motion.section>
-
-        <div className="h-px bg-border" />
-
-        {/* What Went Poorly */}
-        <motion.section initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.22 }}>
-          <div className="flex items-center gap-2 mb-3">
-            <AlertTriangle className="h-4 w-4 text-amber-400" />
-            <h3 className="text-sm font-semibold text-foreground">What Went Poorly</h3>
-          </div>
-          {!isReadOnly && (
-            <div className="mb-3 flex items-start gap-1.5 p-2.5 rounded-lg bg-amber-500/5 border border-amber-500/20 text-xs text-amber-400">
-              <AlertTriangle className="h-3 w-3 shrink-0 mt-0.5" />
-              BugPilot enforces blameless framing. Avoid "X forgot to" or "X failed to" — describe system conditions instead.
             </div>
-          )}
-          {isReadOnly ? (
-            <ul className="space-y-2">
-              {postmortem.content.what_went_poorly.map((item, i) => (
-                <li key={i} className="flex items-start gap-2 text-sm text-foreground">
-                  <div className="h-1.5 w-1.5 rounded-full bg-amber-400 mt-2 shrink-0" />
-                  {item}
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <EditableList
-              items={postmortem.content.what_went_poorly}
-              onChange={v => updateContent('what_went_poorly', v)}
-              placeholder="What process or system conditions slowed detection or resolution?"
-              blameless
-            />
-          )}
-        </motion.section>
+          </motion.section>
 
-        <div className="h-px bg-border" />
+          <div className="h-px bg-border/50" />
 
-        {/* Lessons Learned */}
-        <motion.section initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
-          <div className="flex items-center gap-2 mb-4">
-            <FileText className="h-4 w-4 text-primary" />
-            <h3 className="text-sm font-semibold text-foreground">Lessons Learned</h3>
-          </div>
-          {isReadOnly ? (
-            <ul className="space-y-2">
-              {postmortem.content.lessons_learned.map((item, i) => (
-                <li key={i} className="flex items-start gap-2 text-sm text-foreground">
-                  <div className="h-1.5 w-1.5 rounded-full bg-primary/60 mt-2 shrink-0" />
-                  {item}
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <EditableList
-              items={postmortem.content.lessons_learned}
-              onChange={v => updateContent('lessons_learned', v)}
-              placeholder="Key insights for the team going forward..."
-            />
-          )}
-        </motion.section>
-
-        <div className="h-px bg-border" />
-
-        {/* Action Items */}
-        <motion.section initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
-          <div className="flex items-center gap-2 mb-4">
-            <Users className="h-4 w-4 text-muted-foreground" />
-            <h3 className="text-sm font-semibold text-foreground">Action Items</h3>
-            <span className="text-xs text-muted-foreground">({postmortem.content.action_items.length} total)</span>
-            {!isReadOnly && (
-              <Button size="sm" variant="outline" className="h-6 text-xs ml-auto gap-1" onClick={addActionItem}>
-                <Plus className="h-3 w-3" /> Add Action Item
-              </Button>
-            )}
-          </div>
-          <div className="rounded-xl border border-border overflow-hidden">
-            <table className="w-full text-xs">
-              <thead className="border-b border-border bg-secondary/30">
-                <tr>
-                  <th className="text-left px-4 py-2.5 text-[10px] text-muted-foreground font-medium uppercase tracking-wider">Description</th>
-                  <th className="text-left px-4 py-2.5 text-[10px] text-muted-foreground font-medium uppercase tracking-wider">Owner</th>
-                  <th className="text-left px-4 py-2.5 text-[10px] text-muted-foreground font-medium uppercase tracking-wider">Due</th>
-                  <th className="text-left px-4 py-2.5 text-[10px] text-muted-foreground font-medium uppercase tracking-wider">Priority</th>
-                  <th className="text-left px-4 py-2.5 text-[10px] text-muted-foreground font-medium uppercase tracking-wider">Status</th>
-                  <th className="text-left px-4 py-2.5 text-[10px] text-muted-foreground font-medium uppercase tracking-wider">Issue</th>
-                </tr>
-              </thead>
-              <tbody>
-                {postmortem.content.action_items.map((item, i) => (
-                  <ActionItemRow
-                    key={item.id}
-                    item={item}
-                    onChange={updated => updateActionItem(i, updated)}
-                    onDelete={() => deleteActionItem(i)}
-                  />
+          {/* Root Causes */}
+          <PostmortemSection
+            icon={Target}
+            title="Root Causes"
+            iconColor="text-severity-p0"
+          >
+            {isReadOnly ? (
+              <ul className="space-y-2 pl-1">
+                {postmortem.content.root_causes.map((rc, i) => (
+                  <li key={i} className="flex items-start gap-2.5 text-sm text-foreground">
+                    <div className="h-1.5 w-1.5 rounded-full bg-severity-p0 mt-2 shrink-0" />
+                    {rc}
+                  </li>
                 ))}
-              </tbody>
-            </table>
-            {postmortem.content.action_items.length === 0 && (
-              <div className="text-center py-6 text-muted-foreground text-sm">
-                No action items yet. Add items to track follow-up work.
+              </ul>
+            ) : (
+              <EditableList
+                items={postmortem.content.root_causes}
+                onChange={v => updateContent('root_causes', v)}
+                placeholder="Describe the root cause of this incident..."
+              />
+            )}
+          </PostmortemSection>
+
+          <div className="h-px bg-border/50" />
+
+          {/* Contributing Factors */}
+          <PostmortemSection
+            icon={AlertTriangle}
+            title="Contributing Factors"
+            iconColor="text-amber-400"
+          >
+            {isReadOnly ? (
+              <ul className="space-y-2 pl-1">
+                {postmortem.content.contributing_factors.map((cf, i) => (
+                  <li key={i} className="flex items-start gap-2.5 text-sm text-foreground">
+                    <div className="h-1.5 w-1.5 rounded-full bg-amber-400 mt-2 shrink-0" />
+                    {cf}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <EditableList
+                items={postmortem.content.contributing_factors}
+                onChange={v => updateContent('contributing_factors', v)}
+                placeholder="What made the impact worse or detection slower?"
+              />
+            )}
+          </PostmortemSection>
+
+          <div className="h-px bg-border/50" />
+
+          {/* What Went Well */}
+          <PostmortemSection
+            icon={CheckCircle2}
+            title="What Went Well"
+            iconColor="text-emerald-400"
+          >
+            {isReadOnly ? (
+              <ul className="space-y-2 pl-1">
+                {postmortem.content.what_went_well.map((item, i) => (
+                  <li key={i} className="flex items-start gap-2.5 text-sm text-foreground">
+                    <div className="h-1.5 w-1.5 rounded-full bg-emerald-400 mt-2 shrink-0" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <EditableList
+                items={postmortem.content.what_went_well}
+                onChange={v => updateContent('what_went_well', v)}
+                placeholder="Actions that limited blast radius or accelerated resolution..."
+              />
+            )}
+          </PostmortemSection>
+
+          <div className="h-px bg-border/50" />
+
+          {/* What Went Poorly */}
+          <PostmortemSection
+            icon={AlertTriangle}
+            title="What Went Poorly"
+            iconColor="text-amber-400"
+          >
+            {!isReadOnly && (
+              <div className="mb-3 flex items-start gap-1.5 p-2.5 rounded-lg bg-amber-500/5 border border-amber-500/20 text-xs text-amber-400">
+                <AlertTriangle className="h-3 w-3 shrink-0 mt-0.5" />
+                BugPilot enforces blameless framing. Avoid "X forgot to" or "X failed to" — describe system conditions instead.
               </div>
             )}
-          </div>
-          {!isReadOnly && (
-            <div className="mt-3 flex items-center gap-2">
-              <Button size="sm" variant="outline" className="h-7 text-xs gap-1.5">
-                <ExternalLink className="h-3 w-3" /> Push all to Jira
-              </Button>
-              <Button size="sm" variant="outline" className="h-7 text-xs gap-1.5">
-                <ExternalLink className="h-3 w-3" /> Create GitHub Issues
-              </Button>
+            {isReadOnly ? (
+              <ul className="space-y-2 pl-1">
+                {postmortem.content.what_went_poorly.map((item, i) => (
+                  <li key={i} className="flex items-start gap-2.5 text-sm text-foreground">
+                    <div className="h-1.5 w-1.5 rounded-full bg-amber-400 mt-2 shrink-0" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <EditableList
+                items={postmortem.content.what_went_poorly}
+                onChange={v => updateContent('what_went_poorly', v)}
+                placeholder="What process or system conditions slowed detection or resolution?"
+                blameless
+              />
+            )}
+          </PostmortemSection>
+
+          <div className="h-px bg-border/50" />
+
+          {/* Lessons Learned */}
+          <PostmortemSection
+            icon={FileText}
+            title="Lessons Learned"
+            iconColor="text-primary"
+          >
+            {isReadOnly ? (
+              <ul className="space-y-2 pl-1">
+                {postmortem.content.lessons_learned.map((item, i) => (
+                  <li key={i} className="flex items-start gap-2.5 text-sm text-foreground">
+                    <div className="h-1.5 w-1.5 rounded-full bg-primary/60 mt-2 shrink-0" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <EditableList
+                items={postmortem.content.lessons_learned}
+                onChange={v => updateContent('lessons_learned', v)}
+                placeholder="Key insights for the team going forward..."
+              />
+            )}
+          </PostmortemSection>
+
+          <div className="h-px bg-border/50" />
+
+          {/* Action Items */}
+          <motion.section initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
+            <div className="flex items-center gap-2 mb-4">
+              <Users className="h-4 w-4 text-muted-foreground" />
+              <h3 className="text-sm font-semibold text-foreground">Action Items</h3>
+              {/* Summary stats */}
+              <div className="flex items-center gap-1.5 ml-1">
+                <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-secondary text-muted-foreground font-mono border border-border/40">
+                  {postmortem.content.action_items.length} total
+                </span>
+                {openCount > 0 && (
+                  <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-amber-500/10 text-amber-400 font-mono border border-amber-500/20">
+                    {openCount} open
+                  </span>
+                )}
+                {doneCount > 0 && (
+                  <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400 font-mono border border-emerald-500/20">
+                    {doneCount} done
+                  </span>
+                )}
+                {highPriorityCount > 0 && (
+                  <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-severity-p0/10 text-severity-p0 font-mono border border-severity-p0/20">
+                    {highPriorityCount} high priority
+                  </span>
+                )}
+              </div>
+              {!isReadOnly && (
+                <Button size="sm" variant="outline" className="h-6 text-xs ml-auto gap-1" onClick={addActionItem}>
+                  <Plus className="h-3 w-3" /> Add
+                </Button>
+              )}
             </div>
-          )}
-        </motion.section>
-
-        {/* SLO Impact */}
-        {postmortem.content.slo_impact && (
-          <>
-            <div className="h-px bg-border" />
-            <motion.section initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}>
-              <div className="flex items-center gap-2 mb-4">
-                <Target className="h-4 w-4 text-severity-p0" />
-                <h3 className="text-sm font-semibold text-foreground">SLO Impact</h3>
+            <div className="rounded-xl border border-border overflow-hidden bg-card">
+              <table className="w-full text-xs">
+                <thead className="border-b border-border bg-secondary/20">
+                  <tr>
+                    <th className="text-left px-4 py-2.5 text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">Description</th>
+                    <th className="text-left px-4 py-2.5 text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">Owner</th>
+                    <th className="text-left px-4 py-2.5 text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">Due</th>
+                    <th className="text-left px-4 py-2.5 text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">Priority</th>
+                    <th className="text-left px-4 py-2.5 text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">Status</th>
+                    <th className="text-left px-4 py-2.5 text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">Issue</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {postmortem.content.action_items.map((item, i) => (
+                    <ActionItemRow
+                      key={item.id}
+                      item={item}
+                      onChange={updated => updateActionItem(i, updated)}
+                      onDelete={() => deleteActionItem(i)}
+                    />
+                  ))}
+                </tbody>
+              </table>
+              {postmortem.content.action_items.length === 0 && (
+                <div className="flex flex-col items-center justify-center py-10 text-center">
+                  <Users className="h-8 w-8 text-muted-foreground/20 mb-2" />
+                  <p className="text-sm text-muted-foreground">No action items yet</p>
+                  <p className="text-xs text-muted-foreground/60">Add items to track follow-up work</p>
+                </div>
+              )}
+            </div>
+            {!isReadOnly && postmortem.content.action_items.length > 0 && (
+              <div className="mt-3 flex items-center gap-2">
+                <Button size="sm" variant="outline" className="h-7 text-xs gap-1.5">
+                  <ExternalLink className="h-3 w-3" /> Push all to Jira
+                </Button>
+                <Button size="sm" variant="outline" className="h-7 text-xs gap-1.5">
+                  <ExternalLink className="h-3 w-3" /> Create GitHub Issues
+                </Button>
               </div>
-              <div className="flex items-center gap-6 p-4 rounded-xl border border-severity-p0/20 bg-severity-p0/5">
-                <div>
-                  <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">SLO</p>
-                  <p className="text-sm font-medium text-foreground">{postmortem.content.slo_impact.slo_name}</p>
-                </div>
-                <div>
-                  <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">Violated</p>
-                  <p className="text-sm font-bold text-severity-p0">{postmortem.content.slo_impact.violated ? 'Yes' : 'No'}</p>
-                </div>
-                <div>
-                  <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">Budget Consumed</p>
-                  <p className="text-sm font-mono font-bold text-severity-p0">{postmortem.content.slo_impact.budget_consumed_pct}%</p>
-                </div>
-              </div>
-            </motion.section>
-          </>
-        )}
+            )}
+          </motion.section>
 
-        {/* Bottom Actions */}
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }}
-          className="border-t border-border pt-6 flex items-center gap-3">
-          {!isReadOnly && (
+          {/* SLO Impact */}
+          {postmortem.content.slo_impact && (
             <>
-              <Button variant="default" size="sm" onClick={handleFinalize}>
-                <CheckCircle2 className="h-3.5 w-3.5 mr-1.5" /> Finalize Postmortem
-              </Button>
-              <Button variant="outline" size="sm" onClick={handleSave}>
-                <Save className="h-3.5 w-3.5 mr-1.5" /> Save Draft
-              </Button>
+              <div className="h-px bg-border/50" />
+              <motion.section initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}>
+                <div className="flex items-center gap-2 mb-4">
+                  <Target className="h-4 w-4 text-severity-p0" />
+                  <h3 className="text-sm font-semibold text-foreground">SLO Impact</h3>
+                </div>
+                <div className="grid grid-cols-3 gap-3 p-4 rounded-xl border border-severity-p0/20 bg-severity-p0/5">
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground mb-1">SLO</p>
+                    <p className="text-sm font-medium text-foreground">{postmortem.content.slo_impact.slo_name}</p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground mb-1">Violated</p>
+                    <p className={cn('text-sm font-bold', postmortem.content.slo_impact.violated ? 'text-severity-p0' : 'text-emerald-400')}>
+                      {postmortem.content.slo_impact.violated ? 'Yes' : 'No'}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground mb-1">Budget Consumed</p>
+                    <p className="text-xl font-mono font-bold text-severity-p0 tabular-nums">
+                      {postmortem.content.slo_impact.budget_consumed_pct}%
+                    </p>
+                  </div>
+                </div>
+              </motion.section>
             </>
           )}
-          {isReadOnly && (
-            <Badge className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20">
-              <CheckCircle2 className="h-3 w-3 mr-1" /> Finalized
-            </Badge>
-          )}
-          <Button variant="ghost" size="sm" asChild>
-            <Link to={`/incidents/${id || '6'}/packet`}>
-              <ChevronRight className="h-3.5 w-3.5 mr-1.5" /> View Resolution Packet
-            </Link>
-          </Button>
-          <Button variant="ghost" size="sm" asChild>
-            <Link to={`/incidents/${id || '6'}`}>
-              <ArrowLeft className="h-3.5 w-3.5 mr-1.5" /> Back to Investigation
-            </Link>
-          </Button>
-        </motion.div>
+
+          {/* Bottom Actions */}
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }}
+            className="border-t border-border pt-6 flex items-center gap-3">
+            {!isReadOnly && (
+              <>
+                <Button variant="default" size="sm" onClick={handleFinalize}>
+                  <CheckCircle2 className="h-3.5 w-3.5 mr-1.5" /> Finalize Postmortem
+                </Button>
+                <Button variant="outline" size="sm" onClick={handleSave}>
+                  <Save className="h-3.5 w-3.5 mr-1.5" /> Save Draft
+                </Button>
+              </>
+            )}
+            {isReadOnly && (
+              <Badge className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20 border">
+                <CheckCircle2 className="h-3 w-3 mr-1" /> Finalized
+              </Badge>
+            )}
+            <Button variant="ghost" size="sm" asChild>
+              <Link to={`/incidents/${id || '6'}/packet`}>
+                <ChevronRight className="h-3.5 w-3.5 mr-1.5" /> View Resolution Packet
+              </Link>
+            </Button>
+            <Button variant="ghost" size="sm" asChild>
+              <Link to={`/incidents/${id || '6'}`}>
+                <ArrowLeft className="h-3.5 w-3.5 mr-1.5" /> Back to Investigation
+              </Link>
+            </Button>
+          </motion.div>
+        </div>
       </div>
     </div>
   );
