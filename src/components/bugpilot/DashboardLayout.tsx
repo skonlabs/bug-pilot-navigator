@@ -13,8 +13,8 @@ export function DashboardLayout() {
       <SideNav />
       <CommandPalette />
       <div className={cn(
-        'transition-all duration-200',
-        sidebarCollapsed ? 'ml-16' : 'ml-60'
+        'transition-all duration-200 ease-out',
+        sidebarCollapsed ? 'ml-[60px]' : 'ml-[220px]'
       )}>
         <TopBar />
         <main className="p-6">
