@@ -22,9 +22,9 @@ export default function ReadinessPage() {
           <div className="flex items-end gap-3">
             <div className="relative h-16 w-16">
               <svg className="h-16 w-16 -rotate-90" viewBox="0 0 100 100">
-                <circle cx="50" cy="50" r="38" fill="none" stroke="hsl(var(--muted))" strokeWidth="7" />
+                <circle cx="50" cy="50" r="38" fill="none" stroke="hsl(0 0% 9%)" strokeWidth="7" />
                 <circle cx="50" cy="50" r="38" fill="none" 
-                  stroke={avgScore >= 80 ? 'hsl(var(--success))' : avgScore >= 50 ? 'hsl(var(--severity-p2))' : 'hsl(var(--severity-p0))'}
+                  stroke={avgScore >= 80 ? 'hsl(152 69% 45%)' : avgScore >= 50 ? 'hsl(45 93% 47%)' : 'hsl(0 84% 60%)'}
                   strokeWidth="7" strokeLinecap="round" strokeDasharray={`${avgScore * 2.39} 239`} />
               </svg>
               <div className="absolute inset-0 flex items-center justify-center">

@@ -80,11 +80,11 @@ export default function ReportsPage() {
           <h3 className="text-sm font-semibold text-foreground mb-4">MTTR Trend</h3>
           <ResponsiveContainer width="100%" height={220}>
             <LineChart data={mttrData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(225 15% 14%)" />
-              <XAxis dataKey="date" tick={{ fill: 'hsl(215 12% 48%)', fontSize: 10 }} tickLine={false} axisLine={false} />
-              <YAxis tick={{ fill: 'hsl(215 12% 48%)', fontSize: 10 }} tickLine={false} axisLine={false} />
-              <Tooltip contentStyle={{ background: 'hsl(225 25% 9%)', border: '1px solid hsl(225 15% 14%)', borderRadius: 10, color: 'hsl(210 20% 92%)' }} />
-              <Line type="monotone" dataKey="mttr" stroke="hsl(210 100% 56%)" strokeWidth={2} dot={false} />
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(0 0% 12%)" />
+              <XAxis dataKey="date" tick={{ fill: 'hsl(0 0% 45%)', fontSize: 10 }} tickLine={false} axisLine={false} />
+              <YAxis tick={{ fill: 'hsl(0 0% 45%)', fontSize: 10 }} tickLine={false} axisLine={false} />
+              <Tooltip contentStyle={{ background: 'hsl(0 0% 8%)', border: '1px solid hsl(0 0% 12%)', borderRadius: 10, color: 'hsl(0 0% 93%)' }} />
+              <Line type="monotone" dataKey="mttr" stroke="hsl(270 100% 68%)" strokeWidth={2} dot={false} />
             </LineChart>
           </ResponsiveContainer>
         </motion.div>
@@ -94,10 +94,10 @@ export default function ReportsPage() {
           <h3 className="text-sm font-semibold text-foreground mb-4">Incidents by Severity</h3>
           <ResponsiveContainer width="100%" height={220}>
             <BarChart data={incidentsByDay}>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(225 15% 14%)" />
-              <XAxis dataKey="date" tick={{ fill: 'hsl(215 12% 48%)', fontSize: 10 }} tickLine={false} axisLine={false} />
-              <YAxis tick={{ fill: 'hsl(215 12% 48%)', fontSize: 10 }} tickLine={false} axisLine={false} />
-              <Tooltip contentStyle={{ background: 'hsl(225 25% 9%)', border: '1px solid hsl(225 15% 14%)', borderRadius: 10, color: 'hsl(210 20% 92%)' }} />
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(0 0% 12%)" />
+              <XAxis dataKey="date" tick={{ fill: 'hsl(0 0% 45%)', fontSize: 10 }} tickLine={false} axisLine={false} />
+              <YAxis tick={{ fill: 'hsl(0 0% 45%)', fontSize: 10 }} tickLine={false} axisLine={false} />
+              <Tooltip contentStyle={{ background: 'hsl(0 0% 8%)', border: '1px solid hsl(0 0% 12%)', borderRadius: 10, color: 'hsl(0 0% 93%)' }} />
               <Bar dataKey="p0" stackId="a" fill="hsl(0 84% 60%)" />
               <Bar dataKey="p1" stackId="a" fill="hsl(25 95% 53%)" />
               <Bar dataKey="p2" stackId="a" fill="hsl(45 93% 47%)" />
